@@ -1,3 +1,7 @@
 pytz
 dropbox
 protobuf
+tqdm
+git+https://github.com/bobuk/defaultenv@master#egg=defaultenv
+pandas[full]
+seaborn[full]

@@ -1,13 +1,17 @@
+import logging
 import math
 import os
 import sys
 import time
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-import seaborn as sns
-from pandas import Timestamp, Timedelta
+try:
+    import numpy as np
+    import pandas as pd
+    from pandas import Timestamp, Timedelta
+    import seaborn as sns
+except:
+    logging.warning("Failed to import numpy/pandas/seaborn, please pip install calmlib[full] for extra dependencies")
 
 
 # dir_root = location of this file / .. / ..
