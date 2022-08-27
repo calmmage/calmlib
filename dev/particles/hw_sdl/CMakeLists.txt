@@ -8,17 +8,14 @@ find_package(SDL2 REQUIRED)
 include_directories(particles ${SDL2_INCLUDE_DIRS})
 
 add_executable(hw_sdl
-        main.cpp)
-#add_executable(hw_sdl_refactor
-#        main_refactor.cpp ../base/sdl_canvas.cpp ../base/sdl_canvas.h sdl_interactive_canvas_square.cpp sdl_interactive_canvas_square.h)
+        main.cpp ../base/sdl_canvas.cpp ../base/sdl_canvas.h sdl_interactive_canvas_square.cpp sdl_interactive_canvas_square.h)
 
 INCLUDE(FindPkgConfig)
 
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
-#
+
 INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(hw_sdl ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
-#TARGET_LINK_LIBRARIES(hw_sdl_refactor ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
 
 
