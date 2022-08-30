@@ -71,7 +71,7 @@ void SdlInteractiveCanvasSquare::handle_events() {
         }
     }
 
-    run_logic()
+    run_logic();
 }
 
 void SdlInteractiveCanvasSquare::render_image() {
