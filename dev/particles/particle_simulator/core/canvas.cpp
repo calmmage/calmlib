@@ -40,6 +40,30 @@ SDL_Color mix_colors(const SDL_Color &color_1, const SDL_Color &color_2, double 
   return result;
 }
 
+SDL_Color define_color(const KineticPolarParticle &particle, SpriteColorScheme color_scheme) {
+  double alpha;
+
+  switch (color_scheme) { // todo: config per-particle
+    case PLAIN_COLOR_SCHEME: // trail_color = SPRITE_COLOR
+      return SPRITE_COLOR;
+      break;
+    case SPEED_COLOR_SCHEME: //
+      // todo: change tracked particle back to SimpleKineticParticle
+      alpha = std::abs(particle.speed / FAST_SPEED);
+      return mix_colors(SLOW_SPEED_COLOR, FAST_SPEED_COLOR, alpha);
+
+      // todo: make particle types interchangeable,
+      //  considering vx,vy vs speed, direction
+      break;
+    case DIRECTION_COLOR_SCHEME: //
+      break;
+    case RANDOM_COLOR_SCHEME: // Fixed Random trail_color per particle, but fixed?
+      break;
+    case RAINBOW_COLOR_SCHEME: // Changing random trail_color for each
+      break;
+  }
+};
+
 void Canvas::DisplayAssets(const AssetManager &asset_manager, int frame_count) {
   // clears the screen
   if (frame_count % SCREEN_REFRESH_FREQUENCY == 0) {
@@ -50,17 +74,18 @@ void Canvas::DisplayAssets(const AssetManager &asset_manager, int frame_count) {
 
   ////////////////////////////////////
 
-
+  SDL_Color sprite_color;
   auto &cc = canvas_config_;
   for (const auto &particle : asset_manager.kinetic_polar_particles_) {
-    display_sprite(particle, cc.sprite_type, cc.sprite_color, cc.sprite_size, cc.sprite_size);
+    sprite_color = define_color(particle, SPRITE_COLOR_SCHEME);
+    display_sprite(particle, cc.sprite_type, sprite_color, cc.sprite_size, cc.sprite_size);
   }
 
 
   ////////////////////////////////////
 
   int trail_count, width, height, size, sprite_opacity;
-  SDL_Color color;
+  SDL_Color trail_color;
   // todo: export to separate method
   for (auto &trail : asset_manager.trails_) {
     trail_count = 0;
@@ -116,36 +141,18 @@ void Canvas::DisplayAssets(const AssetManager &asset_manager, int frame_count) {
           height = cc.sprite_size;
           break;
       }
-      double alpha;
-      switch (SPRITE_COLOR_SCHEME) { // todo: config per-particle
-        case PLAIN_COLOR_SCHEME: // color = SPRITE_COLOR
-          color = SPRITE_COLOR;
-          break;
-        case SPEED_COLOR_SCHEME: //
-          // todo: change tracked particle back to SimpleKineticParticle
-          alpha = std::abs(trail.tracked_particle->speed / FAST_SPEED);
-          color = mix_colors(SLOW_SPEED_COLOR, FAST_SPEED_COLOR, alpha);
+      trail_color = define_color(*trail.tracked_particle, TRAIL_COLOR_SCHEME);
 
-          // todo: make particle types interchangeable,
-          //  considering vx,vy vs speed, direction
-          break;
-        case DIRECTION_COLOR_SCHEME: //
-          break;
-        case RANDOM_COLOR_SCHEME: // Fixed Random color per particle, but fixed?
-          break;
-        case RAINBOW_COLOR_SCHEME: // Changing random color for each
-          break;
-      }
       if (TRAIL_FADE) {
-        sprite_opacity = color.a;
+        sprite_opacity = trail_color.a;
         sprite_opacity -= trail_count * TRAIL_FADE_AMOUNT;
-        color.a = std::max(sprite_opacity, (int) TRAIL_FADE_MIN);
+        trail_color.a = std::max(sprite_opacity, (int) TRAIL_FADE_MIN);
       }
 
       display_sprite(
           trail_particle,
           cc.sprite_type, // todo: custom sprite type per particle? config: use custom sprite type, then decide here.
-          color,
+          trail_color,
           width,
           height
       );

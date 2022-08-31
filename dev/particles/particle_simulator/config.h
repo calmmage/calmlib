@@ -75,6 +75,7 @@ static const SDL_Color CANVAS_COLOR = {0, 0, 0, 255}; // black
 
 //static const SpriteColorScheme SPRITE_COLOR_SCHEME = PLAIN_COLOR_SCHEME;
 static const SpriteColorScheme SPRITE_COLOR_SCHEME = SPEED_COLOR_SCHEME;
+static const SpriteColorScheme TRAIL_COLOR_SCHEME = SPEED_COLOR_SCHEME;
 
 //////////////////////////////////////////////
 // New configs

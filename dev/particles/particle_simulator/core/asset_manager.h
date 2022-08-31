@@ -16,10 +16,6 @@ namespace particle_simulator {
 //  Version 1: x,y, vx, vy, ax, ay
 //  Version 2: x,y, vx, vy,  m / q (optional?)
 
-// todo: Trails
-//  Version 1: Add a Trail to Particle class.
-//  Version 2: Create a class-agnostic
-
 // todo: Connected Particles
 //  ignore for now.
 //  Version 1: Just do 1 type for now.. e.g. KineticCartesian.
