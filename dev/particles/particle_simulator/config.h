@@ -70,8 +70,8 @@ static const SDL_Color SPRITE_COLOR = {255, 255, 255, 255};
 //SDL_Color SPRITE_COLOR = {216, 216, 216, 255};
 static const SpriteType SPRITE_TYPE = HOLLOW_SQUARE;
 
-static const SDL_Color CANVAS_COLOR = {0, 0, 0, 255}; // black
-//SDL_Color CANVAS_COLOR = {255, 255, 255, 255}; // white
+//static const SDL_Color CANVAS_COLOR = {0, 0, 0, 255}; // black
+static const SDL_Color CANVAS_COLOR = {255, 255, 255, 255}; // white
 
 //static const SpriteColorScheme SPRITE_COLOR_SCHEME = PLAIN_COLOR_SCHEME;
 static const SpriteColorScheme SPRITE_COLOR_SCHEME = SPEED_COLOR_SCHEME;
@@ -102,14 +102,14 @@ static const double FAST_SPEED = 1000;
 
 
 // preset 5 - worms
-static const int SPRITE_SIZE = 2;
-static const int NUM_PARTICLES = 3; // todo: make constructor parameter and config
-static const int TRAIL_DEPTH = 200;
-static const int TRAIL_VARIATION_LIMIT = TRAIL_DEPTH; // coordinate with trail depth and mult
-static const int TRAIL_UPDATE_FREQUENCY = 1;
-static const TrailType TRAIL_TYPE = PERIODIC_SQUARE_TRAIL;
-//static const double TRAIL_VARIATION_MULT = 0.5; // trail size diff multiplier. Consider negative values!
-static const double TRAIL_VARIATION_MULT = -1; // trail size diff multiplier. Consider negative values!
+//static const int SPRITE_SIZE = 2;
+//static const int NUM_PARTICLES = 3; // todo: make constructor parameter and config
+//static const int TRAIL_DEPTH = 200;
+//static const int TRAIL_VARIATION_LIMIT = TRAIL_DEPTH; // coordinate with trail depth and mult
+//static const int TRAIL_UPDATE_FREQUENCY = 1;
+//static const TrailType TRAIL_TYPE = PERIODIC_SQUARE_TRAIL;
+////static const double TRAIL_VARIATION_MULT = 0.5; // trail size diff multiplier. Consider negative values!
+//static const double TRAIL_VARIATION_MULT = -1; // trail size diff multiplier. Consider negative values!
 
 static const int TRAIL_MAX_SIZE = 50; // min size of trail sprite.
 
@@ -146,13 +146,13 @@ static const int TRAIL_MAX_SIZE = 50; // min size of trail sprite.
 ////static const double TRAIL_VARIATION_MULT = 0.5; // trail size diff multiplier. Consider negative values!
 
 // preset 2 - stars
-//static const int SPRITE_SIZE = 10;
-//static const int NUM_PARTICLES = 20; // todo: make constructor parameter and config
-//static const int TRAIL_DEPTH = 6;
-//static const int TRAIL_VARIATION_LIMIT = 450; // coordinate with trail depth and mult
-//static const int TRAIL_UPDATE_FREQUENCY = 20;
-//static const TrailType TRAIL_TYPE = LINEAR_SQUARE_TRAIL;
-//static const double TRAIL_VARIATION_MULT = 2; // trail size diff multiplier. Consider negative values!
+static const int SPRITE_SIZE = 10;
+static const int NUM_PARTICLES = 100; // todo: make constructor parameter and config
+static const int TRAIL_DEPTH = 6;
+static const int TRAIL_VARIATION_LIMIT = 450; // coordinate with trail depth and mult
+static const int TRAIL_UPDATE_FREQUENCY = 20;
+static const TrailType TRAIL_TYPE = LINEAR_SQUARE_TRAIL;
+static const double TRAIL_VARIATION_MULT = 2; // trail size diff multiplier. Consider negative values!
 
 
 
