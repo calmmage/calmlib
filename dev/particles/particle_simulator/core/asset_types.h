@@ -41,12 +41,13 @@ struct DynamicParticle : KineticCartesianParticle {
   float m; // mass
 };
 struct Trail {
-  explicit Trail(const unsigned short trail_depth, SimpleCartesianParticle *particle) : tracked_particle(particle) {
+  explicit Trail(const unsigned short trail_depth, KineticPolarParticle *particle) : tracked_particle(particle) {
 //    positions.resize(trail_depth);
   };
   // todo
   std::deque<SimpleCartesianParticle> positions; // how to specify depth?
-  SimpleCartesianParticle *tracked_particle;
+//  SimpleCartesianParticle *tracked_particle;
+  KineticPolarParticle *tracked_particle;
 };
 
 

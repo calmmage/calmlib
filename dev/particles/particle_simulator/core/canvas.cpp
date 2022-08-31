@@ -29,6 +29,17 @@ int periodic_variation(int trail_count) {
 
 };
 
+SDL_Color mix_colors(const SDL_Color &color_1, const SDL_Color &color_2, double alpha) {
+  // todo: assert 0 < alpha < 1;
+  alpha = std::max(std::min(alpha, 1.), 0.);
+  SDL_Color result;
+  result.r = (Uint8) ((1 - alpha) * color_1.r + alpha * color_2.r);
+  result.g = (Uint8) ((1 - alpha) * color_1.g + alpha * color_2.g);
+  result.b = (Uint8) ((1 - alpha) * color_1.b + alpha * color_2.b);
+  result.a = (Uint8) ((1 - alpha) * color_1.a + alpha * color_2.a);
+  return result;
+}
+
 void Canvas::DisplayAssets(const AssetManager &asset_manager, int frame_count) {
   // clears the screen
   if (frame_count % SCREEN_REFRESH_FREQUENCY == 0) {
@@ -105,13 +116,18 @@ void Canvas::DisplayAssets(const AssetManager &asset_manager, int frame_count) {
           height = cc.sprite_size;
           break;
       }
+      double alpha;
       switch (SPRITE_COLOR_SCHEME) { // todo: config per-particle
         case PLAIN_COLOR_SCHEME: // color = SPRITE_COLOR
           color = SPRITE_COLOR;
           break;
         case SPEED_COLOR_SCHEME: //
-          // todo: simple color mix, gradient - color_1, color_2
-          //  color = color_1 * val + color_2 * (1-val)
+          // todo: change tracked particle back to SimpleKineticParticle
+          alpha = std::abs(trail.tracked_particle->speed / FAST_SPEED);
+          color = mix_colors(SLOW_SPEED_COLOR, FAST_SPEED_COLOR, alpha);
+
+          // todo: make particle types interchangeable,
+          //  considering vx,vy vs speed, direction
           break;
         case DIRECTION_COLOR_SCHEME: //
           break;

@@ -73,7 +73,8 @@ static const SpriteType SPRITE_TYPE = HOLLOW_SQUARE;
 static const SDL_Color CANVAS_COLOR = {0, 0, 0, 255}; // black
 //SDL_Color CANVAS_COLOR = {255, 255, 255, 255}; // white
 
-static const SpriteColorScheme SPRITE_COLOR_SCHEME = PLAIN_COLOR_SCHEME;
+//static const SpriteColorScheme SPRITE_COLOR_SCHEME = PLAIN_COLOR_SCHEME;
+static const SpriteColorScheme SPRITE_COLOR_SCHEME = SPEED_COLOR_SCHEME;
 
 //////////////////////////////////////////////
 // New configs
@@ -89,6 +90,10 @@ static const double FRICTION_RATE = 1e-3;
 enum FrictionType { LINEAR_FRICTION, QUADRATIC_FRICTION };
 static const FrictionType FRICTION_TYPE = LINEAR_FRICTION; // linear or quadratic
 
+// Speed colors
+static const SDL_Color SLOW_SPEED_COLOR = {0, 0, 255, 255};// (blue?)
+static const SDL_Color FAST_SPEED_COLOR = {255, 0, 0, 255};// (red?)
+static const double FAST_SPEED = 1000;
 
 //////////////////////////////////////////////
 // preset 6 - white background
