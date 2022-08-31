@@ -6,30 +6,12 @@
 #define PARTICLES_ENGINE_CANVAS_H
 
 #include "asset_manager.h"
+#include "asset_types.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
 
 namespace particle_simulator {
-
-enum SpriteType {
-  HOLLOW_SQUARE,
-  HOLLOW_CIRCLE
-};
-
-struct SpriteColor {
-  u_short r = 0;
-  u_short g = 0;
-  u_short b = 0;
-  u_short opacity = 255;
-};
-
-// todo: make a proper config. How are configs done in C++?
-struct CanvasConfig {
-  SpriteType sprite_type = HOLLOW_SQUARE;
-  int sprite_size = 1;
-  SpriteColor sprite_color = {255, 255, 255, 255};
-};
 
 
 ////////////////////////////////////
@@ -43,7 +25,12 @@ class Canvas {
 
   SDL_Renderer *rend;
 
-  void displayAssets(const AssetManager &assetManager);
+  void DisplayAssets(const AssetManager &asset_manager, int frame_count);
+  void display_sprite(const SimpleCartesianParticle &particle,
+                      SpriteType type,
+                      SDL_Color color,
+                      int height,
+                      int width) const;
   bool poll_event(SDL_Event &event);
 
   // controls animation loop

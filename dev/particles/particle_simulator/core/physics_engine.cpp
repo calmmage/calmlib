@@ -4,12 +4,9 @@
 
 #include "physics_engine.h"
 #include <cmath>
+#include "../config.h"
 
 namespace particle_simulator {
-
-const float ENGINE_TIME_STEP = 0.01; // todo: make a proper config - Engine constructor / config file?
-const float ACCELERATION_COEFFICIENT = 10;
-const float ANGULAR_ACCELERATION_COEFFICIENT = 0.1;
 
 PhysicsEngine::PhysicsEngine(PhysicsEngineConfig config) :
     config_(config), mt(rd()),
@@ -43,13 +40,12 @@ void PhysicsEngine::simulateFrame(AssetManager &asset_manager) {
 
   // todo: process trails
   asset_manager.trail_update_frame++;
-  asset_manager.trail_update_frame %= asset_manager.trail_update_frequency_;
-  if (!asset_manager.trail_update_frame) {
+  if (asset_manager.trail_update_frame % asset_manager.trail_update_frequency_ == 0) {
     for (auto &trail : asset_manager.trails_) {
       // todo: support updating trails not every frame
       // todo: support storing trail frame state and passing it to Canvas for interpolation
       //  canvas.trail_update_frame
-//      trail.positions.push_front(trail.tracked_particle); // need to cast the tracked particle to a simple location herer
+      trail.positions.push_front(*trail.tracked_particle); // need to cast the tracked particle to a simple location herer
       if (trail.positions.size() > asset_manager.trail_depth) {
         trail.positions.pop_back();
       }

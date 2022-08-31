@@ -1,14 +1,23 @@
 cmake_minimum_required(VERSION 3.23)
-project(particles_engine)
+project(particle_simulator)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -L/opt/homebrew/lib")
 
 find_package(SDL2 REQUIRED)
-include_directories(particles ${SDL2_INCLUDE_DIRS})
+include_directories(particle_simulator ${SDL2_INCLUDE_DIRS})
 
-add_executable(particles_engine
-        main.cpp asset_manager.cpp asset_manager.h physics_engine.cpp physics_engine.h canvas.cpp canvas.h)
+add_executable(particle_simulator
+        main.cpp
+        config.h
+
+        core/asset_types.h
+        core/asset_manager.cpp core/asset_manager.h
+
+        core/canvas.cpp core/canvas.h
+
+        core/physics_engine.cpp core/physics_engine.h
+        ../config_menu/main.cpp)
 
 INCLUDE(FindPkgConfig)
 
