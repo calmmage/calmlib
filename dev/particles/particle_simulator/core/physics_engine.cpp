@@ -15,9 +15,10 @@ PhysicsEngine::PhysicsEngine(PhysicsEngineConfig config) :
 void PhysicsEngine::simulateFrame(AssetManager &asset_manager) {
   // todo: support all particle types. How? Can I do cross-type particle interaction?
   //  export to a function, templated. Then call for types 1 by 1.
-  switch (config_.engine_type) {
-    case KINEMATIC_1:
-      for (auto &particle : asset_manager.kinetic_polar_particles_) {
+  for (auto &particle : asset_manager.kinetic_polar_particles_) {
+    switch (config_.engine_type) {
+      case KINEMATIC_1:
+
 
         // todo: support different physics
         //  Need a config for that. How exacly? Per-
@@ -27,10 +28,21 @@ void PhysicsEngine::simulateFrame(AssetManager &asset_manager) {
         // todo: smooth over the movement somehow.
         particle.speed += dist(mt) * ACCELERATION_COEFFICIENT;
         particle.direction += dist(mt) * ANGULAR_ACCELERATION_COEFFICIENT;
+
+        break;
+      case DYNAMIC_1:break;
+      case DYNAMIC_2:break;
+    }
+
+    if (FRICTION) {
+      switch (FRICTION_TYPE) {
+        case LINEAR_FRICTION:particle.speed -= FRICTION_RATE * particle.speed;
+          break;
+        case QUADRATIC_FRICTION:
+          particle.speed -= std::copysign(FRICTION_RATE * particle.speed * particle.speed, particle.speed);
+          break;
       }
-      break;
-    case DYNAMIC_1:break;
-    case DYNAMIC_2:break;
+    }
   }
 
 

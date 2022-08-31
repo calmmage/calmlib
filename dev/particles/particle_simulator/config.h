@@ -77,9 +77,18 @@ static const SpriteColorScheme SPRITE_COLOR_SCHEME = PLAIN_COLOR_SCHEME;
 
 //////////////////////////////////////////////
 // New configs
+
+// Trail fade
 static const bool TRAIL_FADE = true; // TODO: add to visualizer
 static const int TRAIL_FADE_AMOUNT = 5;
 static const Uint8 TRAIL_FADE_MIN = 50;
+
+// Friction
+static const bool FRICTION = true;
+static const double FRICTION_RATE = 1e-3;
+enum FrictionType { LINEAR_FRICTION, QUADRATIC_FRICTION };
+static const FrictionType FRICTION_TYPE = LINEAR_FRICTION; // linear or quadratic
+
 
 //////////////////////////////////////////////
 // preset 6 - white background
