@@ -36,7 +36,9 @@ lib_discoverer.enable_libs(libs)
 # 3.1 defaultenv
 
 # 3.2 code keeper
+from code_keeper import remind
 
+print(remind())
 
 if __name__ == '__main__':
     # todo: print info from memory keeper

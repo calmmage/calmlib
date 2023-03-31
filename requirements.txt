@@ -1,7 +1,8 @@
 pytz
-dropbox
-protobuf
 tqdm
-git+https://github.com/bobuk/defaultenv@master#egg=defaultenv
+pyperclip
+dropbox[full]
+protobuf[full]
 pandas[full]
 seaborn[full]
+# git+https://github.com/bobuk/defaultenv@master#egg=defaultenv
