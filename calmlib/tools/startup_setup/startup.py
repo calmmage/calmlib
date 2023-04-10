@@ -23,18 +23,30 @@ from calmlib.utils.lib_discoverer import LibDiscoverer
 lib_discoverer = LibDiscoverer()
 
 # todo 2: add all the libs
+lib_discoverer.enable('code_keeper', depth=5)
 # 2.1 code keeper, memory keeper
 libs = [
-    'defaultenv',
-    'code_keeper',
-    'gpt_api',
+    'calmlib',
+    'gpt_kit',
     'bmmb'
 ]
 lib_discoverer.enable_libs(libs)
 
 # todo 3: import all the libs. initialize default variables
+# --------------------------------
 # 3.1 defaultenv
+# --------------------------------
+try:
+    from pathlib import Path
+    import sys
 
+    p = Path('~/home/lib/defaultenv').expanduser()
+    sys.path.append(str(p))
+    from defaultenv import ENVCD as env
+except:
+    logger.warning('import defaultenv failed, traceback:', exc_info=True)
+
+# --------------------------------
 # 3.2 code keeper
 from code_keeper import remind
 
