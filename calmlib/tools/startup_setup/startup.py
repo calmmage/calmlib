@@ -1,3 +1,14 @@
+# import os
+# os.putenv("MAGIC_ENABLED", "1")
+import logging
+from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv(os.path.expanduser('~/.env'))
+logger = logging.getLogger(__name__)
+
+
 def get_calmlib_root():
     from pathlib import Path
     # if this file is in calmlib: use that
