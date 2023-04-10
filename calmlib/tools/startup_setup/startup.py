@@ -64,7 +64,41 @@ except:
 
 # --------------------------------
 # 3.2 code keeper
-from code_keeper import remind
+# --------------------------------
+try:
+    from calmlib.utils.code_keeper import remind, plant, garden_stats, \
+        code_keeper
+
+    remind()  # == remind('code_keeper')
+except:
+    logger.warning('import code_keeper failed, traceback:', exc_info=True)
+
+# --------------------------------
+# 3.3 gpt_kit
+# --------------------------------
+try:
+    from gpt_kit import gpt_api, complete, complete_chat, edit, insert
+    from gpt_kit.api.utils import init_gpt_api_key
+
+    init_gpt_api_key()
+    # todo: chat
+    # usage: remind('gpt_kit')
+except:
+    logger.warning('import gpt_kit failed, traceback:', exc_info=True)
+
+# --------------------------------
+# 3.4 bmmb - app template
+# --------------------------------
+# todo
+
+# --------------------------------
+# 3.5 logging - bmmb.logging_utils
+# --------------------------------
+# todo
+
+# --------------------------------
+# 3.6 database - bmmb.data
+# --------------------------------
 
 print(remind())
 
