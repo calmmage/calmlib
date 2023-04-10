@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 class LibDiscoverer:
-    DEFAULT_ROOT_PATHS = ['~/home/', '~/calmmage/', '~/']
+    DEFAULT_ROOT_PATHS = ['~/home', '~/calmmage', '~']
     DEFAULT_LIBS = ['defaultenv', 'gpt_api', 'bmmb', 'calmlib', 'code_keeper']
 
     def __init__(self, root_paths=None):
@@ -18,7 +18,7 @@ class LibDiscoverer:
         self.root_paths = self.format_paths(root_paths)
 
     @staticmethod
-    def discover_lib_path(lib_name, root_path, depth=3):
+    def discover_lib_root(lib_name, root_path, depth=3):
         """
         find a path to add to sys.path so that import lib_name works
         start with root_path and go deeper up to depth layers
@@ -45,7 +45,7 @@ class LibDiscoverer:
     def format_paths(paths):
         return [Path(p).expanduser() for p in paths]
 
-    def register_lib(self, lib_name, root_path=None, force=False):
+    def register_lib(self, lib_name, root_path=None, force=False, depth=3):
         """make it so import lib_name works
         lib_path is the path where approximately lib should be
         """
@@ -65,7 +65,8 @@ class LibDiscoverer:
 
         for root_path in root_paths:
             try:
-                root_path = self.discover_lib_path(lib_name, root_path)
+                lib_root = self.discover_lib_root(lib_name, root_path,
+                                                  depth=depth)
             except ValueError:
                 continue
             else:
@@ -74,9 +75,13 @@ class LibDiscoverer:
             raise ValueError(f'lib {lib_name} not found in {root_paths}')
 
         # add discovered lib path to self._lib_roots - at the start.
-        lib_root = root_path.parent
-        if lib_root not in self.root_paths:
-            self.root_paths.insert(0, lib_root)
+        if lib_root.name == lib_name:
+            new_root_path = lib_root.parent
+            if new_root_path not in self.root_paths:
+                self.root_paths.insert(0, new_root_path)
+
+        # step 2: add lib path to sys.path
+        self.register_path(lib_root)
 
     enable = enable_lib = register_lib
 
@@ -86,7 +91,7 @@ class LibDiscoverer:
         if p not in sys.path:
             sys.path.append(str(p))
 
-    def discover_and_register_libs(self, libs=None):
+    def discover_and_register_libs(self, libs=None, depth=3):
         """make it so import lib_name works for each lib in libs"""
         if libs is None:
             libs = self.DEFAULT_LIBS
@@ -94,7 +99,7 @@ class LibDiscoverer:
             libs = [libs]
 
         for lib in libs:
-            self.register_lib(lib)
+            self.register_lib(lib, depth=depth)
 
     enable_libs = discover_and_register_libs
 
@@ -114,3 +119,5 @@ class LibDiscoverer:
 if __name__ == '__main__':
     ld = LibDiscoverer()
     ld.print_status()
+
+    ld.enable('code_keeper', depth=5)
