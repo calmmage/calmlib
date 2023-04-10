@@ -1,8 +1,12 @@
 pytz
 tqdm
 pyperclip
+mongoengine
 dropbox[full]
 protobuf[full]
 pandas[full]
 seaborn[full]
-# git+https://github.com/bobuk/defaultenv@master#egg=defaultenv
+git+https://github.com/bobuk/defaultenv@master#egg=defaultenv[full]
+git+https://github.com/calmmage/bot_me_maybe@main#egg=bot_me_maybe[full]
+git+https://github.com/calmmage/gpt_kit.git@main#egg=gpt_kit[full]
+# flask_mongoengine
