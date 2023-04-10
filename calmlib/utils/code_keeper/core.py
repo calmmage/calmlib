@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from collections import Counter
 from dataclasses import dataclass
@@ -9,7 +10,7 @@ from typing import Dict
 from typing import List, Union
 
 import pyperclip
-import logging
+
 from .utils import cast_enum
 
 logger = logging.getLogger(__file__)
@@ -229,7 +230,7 @@ class CodeKeeper:
         # step 1: parse the tagline
         if isinstance(tags, str):
             if '/' in tags:
-                area, tagline = tags.rsplit('/', 1)
+                area, tags = tags.rsplit('/', 1)
             tags = self._parse_tagline(tags)
 
         # step 0: parse the code

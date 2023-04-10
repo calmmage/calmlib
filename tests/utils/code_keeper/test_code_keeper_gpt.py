@@ -14,7 +14,7 @@ tmp_path = TemporaryDirectory()
 @pytest.fixture
 def code_garden(tmp_path):
     code_garden_path = tmp_path / 'code_garden'
-    shutil.copytree('fixtures/code_garden', code_garden_path)
+    shutil.copytree('tests/fixtures/code_garden', code_garden_path)
     return CodeGarden(code_garden_path)
 
 
@@ -23,7 +23,7 @@ def test_code_garden_initialization(code_garden, tmp_path):
     # Test with default path
     code_garden_default_path = CodeGarden()
     assert code_garden_default_path.path == Path(
-        os.path.expanduser('~/.code_garden'))
+        os.path.expanduser('~/code_garden'))
 
     # Test with custom path
     assert code_garden.path == Path(tmp_path) / 'code_garden'
@@ -119,17 +119,6 @@ def test_code_keeper_remind(code_garden):
     assert len(result) == 2
     assert "# test1.code1" in result
     assert "# test2.code1" in result
-
-
-# import pytest
-# import shutil
-#
-#
-# @pytest.fixture
-# def code_garden(tmp_path):
-#     code_garden_path = tmp_path / 'code_garden'
-#     shutil.copytree('tests/fixtures/code_garden', code_garden_path)
-#     return CodeGarden(code_garden_path)
 
 
 @pytest.mark.parametrize("tags,area,expected_count,results", [
