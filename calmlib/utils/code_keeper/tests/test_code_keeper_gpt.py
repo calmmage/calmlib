@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from code_keeper import CodeKeeper, CodeGarden, GardenArea
+from calmlib.utils.code_keeper import CodeKeeper, CodeGarden, GardenArea
 
 tmp_path = TemporaryDirectory()
 
