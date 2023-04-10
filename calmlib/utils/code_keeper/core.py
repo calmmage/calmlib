@@ -158,7 +158,7 @@ class CodeGarden:
     # -----------------
     SWIMLINE = "~~~~~~~~~~~~~~~~~~\n"
 
-    def _generate_summary_by_tag(self, limit=None, swimlines=5):
+    def generate_summary_by_tag(self, limit=None, swimlines=5):
         # count the number of code fragments per tag
         all_patterns = self.find("")
         counter = Counter()
@@ -243,7 +243,8 @@ class CodeKeeper:
             code, tags, area, force=force
         )
 
-    def _parse_tagline(self, tagline):
+    @staticmethod
+    def _parse_tagline(tagline):
         if isinstance(tagline, str):
             tagline = tagline.split('.')
         return tagline
@@ -253,7 +254,7 @@ class CodeKeeper:
     def generate_summary(self):
         summary = ""
         # genereate summary by tag (most used)
-        summary += self.code_garden._generate_summary_by_tag()
+        summary += self.code_garden.generate_summary_by_tag()
 
         # todo: generate summary by usage (most visited / least visited)
         # todo: generate summary by creaetion date (most recent few)

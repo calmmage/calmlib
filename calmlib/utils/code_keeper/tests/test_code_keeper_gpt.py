@@ -207,8 +207,8 @@ def test_code_keeper_remind(code_garden, tagline, area, expected_count,
 ])
 def test_generate_summary_by_tag(code_garden, limit, swimlines,
                                  expected_result):
-    result = code_garden._generate_summary_by_tag(limit=limit,
-                                                  swimlines=swimlines)
+    result = code_garden.generate_summary_by_tag(limit=limit,
+                                                 swimlines=swimlines)
     assert result == expected_result
 
     # # Check if the output is sorted in descending order of tag count
