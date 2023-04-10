@@ -1,8 +1,0 @@
-https://www.pythonanywhere.com/forums/topic/14221/
-
-https://www.dropbox.com/developers/documentation/http/documentation
-
-TLDR:
-There's no official dropbox support anymore
-Solution is to connect to dropbox api manually and sync with a scheduled regular task.
-

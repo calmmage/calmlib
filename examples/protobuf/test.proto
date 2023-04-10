@@ -1,6 +1,0 @@
-syntax = "proto2";
-
-message TUid {
-    optional string Uid = 1;
-    repeated string AssociatedItems = 2; // items types that are referenced to this uid
-}
