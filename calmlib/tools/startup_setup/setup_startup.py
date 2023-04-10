@@ -41,15 +41,31 @@ def add_to_bashrc(source_path):
         f.write(command_to_add)
 
 
+def link_dotenv(source_path):
+    # create softlink
+    target_path = Path('~').expanduser() / '.env'
+    if not target_path.exists():
+        # create the target path
+        target_path.symlink_to(source_path)
+    elif not target_path.is_symlink():
+        # warn if the target path is not a symlink
+        print(f'Warning: {target_path} exists but is not a symlink')
+
+
 # todo: add to pycharm
 
 def main(path=None):
+    # startup.py
     if path is None:
         # assume that this file is in the same directory as the main.py file
         # path = os.path.dirname(os.path.abspath(__file__))
         path = Path(__file__).parent / 'startup.py'
     add_to_ipython(path)
     add_to_bashrc(path)
+
+    # dot env
+    path = Path(__file__).parent / '.env'
+    link_dotenv(path)
 
 
 if __name__ == '__main__':
