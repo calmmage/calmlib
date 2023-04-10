@@ -100,8 +100,62 @@ except:
 # 3.6 database - bmmb.data
 # --------------------------------
 
-print(remind())
+try:
+    from bmmb.data.mongo_utils import MongoItem, MongoTable, connect_mongo, \
+        get_conn_str, MongoDatabase
+    mongo_db_name = mongo_db_alias = 'jupyter'
+    conn_str = get_conn_str()
+    db = MongoDatabase(
+        db_name=mongo_db_name, db_alias=mongo_db_alias, conn_str=conn_str
+    )
+    # for usage: remind("mongo.jupyter")
+
+    from mongoengine import \
+        StringField as MongoString, \
+        IntField as MongoInt, \
+        FloatField as MongoFloat, \
+        BooleanField as MongoBool, \
+        DateTimeField as MongoDateTime, \
+        ListField as MongoList, \
+        DictField as MongoDict, \
+        EmbeddedDocumentField as MongoEmbed, \
+        ReferenceField as MongoReference
+except:
+    logger.warning('import mongoengine failed, traceback:', exc_info=True)
+
+
+# 3.7 scheduler?
+# 3.8 notion / bookmarks / archive
+
+# 4. Basic libs, that I use all the time
+try:
+    import os, sys
+    from tqdm.auto import tqdm
+    from pathlib import Path
+    from typing import Union, List, Dict, Any, Optional, Tuple, Callable, \
+        TypeVar
+    from pprint import pprint
+    from functools import partial
+    import time
+    from datetime import datetime
+    from copy import deepcopy
+    from dataclasses import dataclass
+    from enum import Enum
+    from collections import defaultdict, Counter
+    import json, pickle, toml, dotenv, yaml, pyperclip  # , requests, bs4, lxml
+except:
+    logger.warning('import libs failed, traceback:', exc_info=True)
 
 if __name__ == '__main__':
     # todo: print info from memory keeper
+    # option 1: remind about more stuff - like tqdm. remind('tqdm')
+    # option 2: print the memory keeper info garden_stats()
+    # option 3: print direcly some of the usages for the libs.
     pass
+
+# prevent import optimisation
+_ = remind, plant, garden_stats, code_keeper, \
+    os, sys, tqdm, Path, Union, List, Dict, Any, Optional, Tuple, Callable, \
+    TypeVar, pprint, partial, time, datetime, deepcopy, dataclass, Enum, \
+    defaultdict, Counter
+_ = json, pickle, toml, dotenv, yaml, pyperclip  # , requests, bs4, lxml
