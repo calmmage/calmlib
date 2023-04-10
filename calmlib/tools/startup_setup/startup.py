@@ -6,7 +6,7 @@ def get_calmlib_root():
         return __file__.rsplit('calmlib', 1)[0]
     # else check ./calmlib_path.txt
     else:
-        config_path = Path(__file__).parent / 'calmlib_path.txt'
+        config_path = Path(__file__).parent / 'calmlib_root.txt'
         calmlib_path = config_path.read_text().strip()
         return calmlib_path
 
