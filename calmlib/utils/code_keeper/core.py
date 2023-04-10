@@ -9,8 +9,10 @@ from typing import Dict
 from typing import List, Union
 
 import pyperclip
-
+import logging
 from .utils import cast_enum
+
+logger = logging.getLogger(__file__)
 
 
 # from aenum import MultiValueEnum
@@ -57,7 +59,10 @@ class CodeFragment:
         #     # todo: _record_event - creation
 
 
-DEFAULT_GARDEN_ROOT = os.path.expanduser('~/code_garden')
+DEFAULT_HOME_PATHS = ['~/home', '~/calmmage', '~']
+
+
+# DEFAULT_GARDEN_ROOT = os.path.expanduser('~/code_garden')
 
 
 class CodeGarden:
@@ -67,10 +72,19 @@ class CodeGarden:
         self.path = Path(path).expanduser()
         # create if not exists
         self.path.mkdir(parents=True, exist_ok=True)
+        for area in GardenArea:
+            (self.path / area.value).mkdir(parents=True, exist_ok=True)
 
     @staticmethod
-    def _find_garden():
-        return os.getenv('CODE_GARDEN_ROOT', DEFAULT_GARDEN_ROOT)
+    def _find_garden() -> str:
+        # global DEFAULT_GARDEN_ROOT
+        for home_path in DEFAULT_HOME_PATHS:
+            DEFAULT_GARDEN_ROOT = (Path(home_path) / 'code_garden').expanduser()
+            if DEFAULT_GARDEN_ROOT.exists():
+                logger.info(
+                    f"Found default code garden at {DEFAULT_GARDEN_ROOT}")
+                break
+        return os.getenv('CODE_GARDEN_ROOT', str(DEFAULT_GARDEN_ROOT))
 
     @staticmethod
     def _cast_area(area):
@@ -210,13 +224,13 @@ class CodeKeeper:
 
     find = remind
 
-    def plant(self, code: Union[str, Path], tagline, area: Union[str,
-    GardenArea] =
-    GardenArea.inbox, force=False):
+    def plant(self, code: Union[str, Path], tags: Union[str, List[str]],
+              area: Union[str, GardenArea] = GardenArea.inbox, force=False):
         # step 1: parse the tagline
-        if '/' in tagline:
-            area, tagline = tagline.rsplit('/', 1)
-        tags = self._parse_tagline(tagline)
+        if isinstance(tags, str):
+            if '/' in tags:
+                area, tagline = tags.rsplit('/', 1)
+            tags = self._parse_tagline(tags)
 
         # step 0: parse the code
         if Path(code).exists():
@@ -230,7 +244,9 @@ class CodeKeeper:
         )
 
     def _parse_tagline(self, tagline):
-        return tagline.split('.')
+        if isinstance(tagline, str):
+            tagline = tagline.split('.')
+        return tagline
 
     add = add_code = add_file = plant
 
