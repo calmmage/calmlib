@@ -28,20 +28,25 @@ import sys
 if calmlib_root not in sys.path:
     sys.path.append(calmlib_root)
 
-# todo 1: add LibDiscoverer
-from calmlib.utils.lib_discoverer import LibDiscoverer
+# --------------------------------
+# 1 init and run LibDiscoverer
+# --------------------------------
+try:
+    from calmlib.utils.lib_discoverer import LibDiscoverer
 
-lib_discoverer = LibDiscoverer()
+    lib_discoverer = LibDiscoverer()
 
-# todo 2: add all the libs
-lib_discoverer.enable('code_keeper', depth=5)
-# 2.1 code keeper, memory keeper
-libs = [
-    'calmlib',
-    'gpt_kit',
-    'bmmb'
-]
-lib_discoverer.enable_libs(libs)
+    # todo 2: add all the libs
+    lib_discoverer.enable('code_keeper', depth=5)
+    # 2.1 code keeper, memory keeper
+    libs = [
+        'calmlib',
+        'gpt_kit',
+        'bmmb'
+    ]
+    lib_discoverer.enable_libs(libs)
+except:
+    logger.warning('import lib_discoverer failed, traceback:', exc_info=True)
 
 # todo 3: import all the libs. initialize default variables
 # --------------------------------
