@@ -99,23 +99,23 @@ def test_code_keeper_remind(code_garden):
     # Test reminding with valid parameters
     code_keeper = CodeKeeper(code_garden)
     result = code_keeper.remind(keys='tag2.tag3', area=GardenArea.main,
-                                keys_and=True)
+                                keys_and=True, to_clipboard=False)
     assert len(result) == 1
     assert "# test1.code1" in result
 
     # Test reminding with invalid tag
     result = code_keeper.remind(keys='invalid', area=GardenArea.main,
-                                keys_and=True)
+                                keys_and=True, to_clipboard=False)
     assert result == ""
 
     # Test reminding with valid and invalid tags
     result = code_keeper.remind(keys=['test1', 'invalid'], area=GardenArea.main,
-                                keys_and=True)
+                                keys_and=True, to_clipboard=False)
     assert result == ""
 
     # Test reminding with valid and invalid tags and keys_and=False
     result = code_keeper.remind(keys=['tag1', 'tag2'], area=GardenArea.main,
-                                keys_and=False)
+                                keys_and=False, to_clipboard=False)
     assert len(result) == 2
     assert "# test1.code1" in result
     assert "# test2.code1" in result
@@ -152,7 +152,7 @@ def test_code_garden_find(code_garden, tags, area, expected_count, results):
 def test_code_keeper_remind(code_garden, tagline, area, expected_count,
                             results):
     code_keeper = CodeKeeper(code_garden)
-    result = code_keeper.remind(keys=tagline, area=area)
+    result = code_keeper.remind(keys=tagline, area=area, to_clipboard=False)
     # assert len(result) == expected_count
     assert all([key in result for key in results])
     # print(result)
@@ -219,7 +219,7 @@ def test_code_keeper_plant(code_garden):
     tagline = "main/test"
     code_keeper.plant(code, tagline, force=True)
     result = code_keeper.remind(keys='test', area=GardenArea.main,
-                                keys_and=True)
+                                keys_and=True, to_clipboard=False)
     assert "# main/test.py" in result
 
     # Test planting with duplicate tag and force=False
@@ -229,7 +229,7 @@ def test_code_keeper_plant(code_garden):
     # Test planting with duplicate tag and force=True
     code_keeper.plant(code, tagline, area=GardenArea.main, force=True)
     result = code_keeper.remind(keys='test', area=GardenArea.main,
-                                keys_and=True)
+                                keys_and=True, to_clipboard=False)
     assert result == "# main/test.py\nprint('Hello World')\n\n"
 
 
