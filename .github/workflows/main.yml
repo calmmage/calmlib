@@ -29,4 +29,5 @@ jobs:
       #          ruff --format=github --target-version=py37 .
       - name: Test with pytest
         run: |
-          pytest -m calmlib/utils/code_keeper/tests -rootdir /home/runner/work/calmlib/
+          export PYTHONPATH="$PYTHONPATH:/home/runner/work/calmlib"
+          pytest
