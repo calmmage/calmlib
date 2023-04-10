@@ -1,0 +1,49 @@
+# pyproject.toml for the bmmb package
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calmlib"
+description = "calmlib - Various python utils I wrote for myself."
+#version = {file = "calmlib/__init__.py", attr = "__version__"}
+requires-python = ">=3.7"
+#readme = "README.md"
+license = { file = "LICENSE", encoding = "utf-8" }
+dynamic = ["version", "readme"]
+
+dependencies = [
+    "mongoengine",
+    "pyperclip",
+    "pytz",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+full = [
+    "dropbox",
+    "protobuf",
+    "pandas",
+    "seaborn",
+    "defaultenv @ git+https://github.com/bobuk/defaultenv@master#egg=defaultenv",
+    "bot_me_maybe @ git+https://github.com/calmmage/bot_me_maybe@main#egg=bmmb",
+    "gpt_kit @ git+https://github.com/calmmage/gpt_kit.git@main#egg=gpt_kit"
+    ]
+
+authors = [
+    { name = "Petr Lavrov", email = "petr.b.lavrov@gmail.com" },
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "calmlib.__version__"}
+readme = {file = ["README.md"]}
+
+# todo: try poetry
+#[tool.poetry]
+#name = "bmmb"
+#version = "0.1.0"
+#description = "BotMeMaybe - a collection of utils for easy bot development"
