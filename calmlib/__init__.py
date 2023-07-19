@@ -1,6 +1,18 @@
-from .execution import run_cmd, run_bg
-from .unsorted import fix_path, trim, rtrim
-from .read_write import load, dump, load_json, dump_json, load_pickle, dump_pickle
-from .autocast import autocast_args
-from .logging_utils import get_personal_logger
-from .datetime_utils import get_current_date, get_current_datetime, to_date
+from . import utils
+from .utils.code_keeper import remind, plant, garden_stats, code_keeper
+
+try:
+    from . import experimental
+    from .experimental import config_mixin, gpt_router
+except:
+    pass
+
+from .utils.lib_discoverer import LibDiscoverer
+
+import toml
+from pathlib import Path
+
+path = Path(__file__).parent.parent / 'pyproject.toml'
+__version__ = toml.load(path)['tool']['poetry']['version']
+del toml
+del Path
