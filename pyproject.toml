@@ -1,5 +1,6 @@
 [tool.poetry]
 name = "calmlib"
+version = "0.2.0"
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
@@ -12,7 +13,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-version = "0.2.0"
 
 [tool.poetry.dependencies]
 python = "^3.8"
