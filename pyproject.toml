@@ -4,20 +4,31 @@ version = "0.2.0"
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Environment :: Other Environment",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.7"
+pytest = "^6.2.4"
 pytz = "^2023.3"
 tqdm = "^4.65.0"
 pyperclip = "^1.8.2"
 mongoengine = "^0.27.0"
 loguru = "^0.5.3"
 defaultenv = { git = "https://github.com/bobuk/defaultenv.git", branch = "master", optional = true }
-bot_me_maybe = { git = "https://github.com/calmmage/bot_me_maybe.git", branch = "main", optional = true }
+bmmb = { git = "https://github.com/calmmage/bot_me_maybe.git", branch = "main", optional = true }
 gpt_kit = { git = "https://github.com/calmmage/gpt_kit.git", branch = "main", optional = true }
 
 [tool.poetry.extras]
-full = ["dropbox", "protobuf", "pandas", "seaborn", "defaultenv", "bot_me_maybe", "gpt_kit", "httpx", "pydantic", "bokeh", "click", "fastapi", "nltk"]
+full = ["dropbox", "protobuf", "pandas", "seaborn", "defaultenv", "bmmb",
+    "gpt_kit", "httpx", "pydantic", "bokeh", "click", "fastapi", "nltk"]
 
 [build-system]
 requires = ["poetry-core"]
@@ -25,4 +36,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.urls]
 "Home" = "https://github.com/calmmage/calmlib"
-
