@@ -1,50 +1,37 @@
-# pyproject.toml for the bmmb package
-[build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "calmlib"
-description = "calmlib - Various python utils I wrote for myself."
-#version = {file = "calmlib/__init__.py", attr = "__version__"}
-requires-python = ">=3.7"
-#readme = "README.md"
-license = { file = "LICENSE", encoding = "utf-8" }
-dynamic = ["version", "readme"]
+version = { attr = "calmlib.__version__" }
+description = "Calmlib"
+authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
+readme = "README.md"
 
-dependencies = [
-    "mongoengine",
-    "pyperclip",
-    "pytz",
-    "tqdm",
-]
+[tool.poetry.dependencies]
+python = "^3.10"
+pytz = "^2023.3"
+tqdm = "^4.65.0"
+pyperclip = "^1.8.2"
+mongoengine = "^0.27.0"
+dropbox = { optional = true }
+protobuf = { optional = true }
+pandas = { optional = true }
+seaborn = { optional = true }
+defaultenv = { git = "https://github.com/bobuk/defaultenv.git", branch = "master", optional = true }
+bot_me_maybe = { git = "https://github.com/calmmage/bot_me_maybe.git", branch = "main", optional = true }
+gpt_kit = { git = "https://github.com/calmmage/gpt_kit.git", branch = "main", optional = true }
+httpx = { optional = true }
+pydantic = { optional = true }
+bokeh = { optional = true }
+click = { optional = true }
+fastapi = { optional = true }
+nltk = { optional = true }
 
+[tool.poetry.extras]
+full = ["dropbox", "protobuf", "pandas", "seaborn", "defaultenv", "bot_me_maybe", "gpt_kit", "httpx", "pydantic", "bokeh", "click", "fastapi", "nltk"]
 
-authors = [
-    { name = "Petr Lavrov", email = "petr.b.lavrov@gmail.com" },
-]
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
-classifiers = [
-    "Programming Language :: Python :: 3",
-]
+[tool.poetry.urls]
+"Home" = "https://github.com/calmmage/calmlib"
 
-[project.optional-dependencies]
-full = [
-    "dropbox",
-    "protobuf",
-    "pandas",
-    "seaborn",
-    "defaultenv @ git+https://github.com/bobuk/defaultenv@master#egg=defaultenv",
-    "bot_me_maybe @ git+https://github.com/calmmage/bot_me_maybe@main#egg=bmmb",
-    "gpt_kit @ git+https://github.com/calmmage/gpt_kit.git@main#egg=gpt_kit"
-    ]
-
-[tool.setuptools.dynamic]
-version = {attr = "calmlib.__version__"}
-readme = {file = ["README.md"]}
-
-# todo: try poetry
-#[tool.poetry]
-#name = "bmmb"
-#version = "0.1.0"
-#description = "BotMeMaybe - a collection of utils for easy bot development"
