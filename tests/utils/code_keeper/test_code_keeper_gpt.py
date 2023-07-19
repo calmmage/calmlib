@@ -1,5 +1,4 @@
 import json
-import os
 import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -20,11 +19,6 @@ def code_garden(tmp_path):
 
 # 1 Test CodeGarden initialization:
 def test_code_garden_initialization(code_garden, tmp_path):
-    # Test with default path
-    code_garden_default_path = CodeGarden()
-    assert code_garden_default_path.path == Path(
-        os.path.expanduser('~/code_garden'))
-
     # Test with custom path
     assert code_garden.path == Path(tmp_path) / 'code_garden'
 

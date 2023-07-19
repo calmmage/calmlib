@@ -9,12 +9,10 @@ except:
 
 from .utils.lib_discoverer import LibDiscoverer
 
-import importlib.metadata
+import toml
+from pathlib import Path
 
-try:
-    __version__ = importlib.metadata.version('calmlib')
-except:
-    from loguru import logger
-
-    logger.warning('failed to get version of calmlib, traceback:',
-                   exc_info=True)
+path = Path(__file__).parent.parent / 'pyproject.toml'
+__version__ = toml.load(path)['tool']['poetry']['version']
+del toml
+del Path
