@@ -1,3 +1,3 @@
 def test_import():
     import calmlib
-    assert calmlib
+    assert calmlib.__version__
