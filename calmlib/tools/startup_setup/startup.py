@@ -1,12 +1,18 @@
 # import os
 # os.putenv("MAGIC_ENABLED", "1")
 import logging
-from pathlib import Path
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv(os.path.expanduser('~/.env'))
-logger = logging.getLogger(__name__)
+
+try:
+    from bmmb.logging_utils import get_logger
+
+    logger = get_logger(to_mongo=False)
+except:
+    logger = logging.getLogger(__name__)
 
 
 def get_calmlib_root():
@@ -109,6 +115,7 @@ try:
         db_name=mongo_db_name, db_alias=mongo_db_alias, conn_str=conn_str
     )
     # for usage: remind("mongo.jupyter")
+    logger = db.logger
 
     from mongoengine import \
         StringField as MongoString, \
@@ -159,3 +166,4 @@ _ = remind, plant, garden_stats, code_keeper, \
     TypeVar, pprint, partial, time, datetime, deepcopy, dataclass, Enum, \
     defaultdict, Counter
 _ = json, pickle, toml, dotenv, yaml, pyperclip  # , requests, bs4, lxml
+del libs, p

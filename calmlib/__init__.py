@@ -14,5 +14,4 @@ from pathlib import Path
 
 path = Path(__file__).parent.parent / 'pyproject.toml'
 __version__ = toml.load(path)['tool']['poetry']['version']
-del toml
-del Path
+del toml, Path, path
