@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "0.2.0"
+version = "0.2.1" # fix version variable loading..
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
@@ -17,14 +17,14 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.8"
 pytest = "^6.2.4"
-toml = "^0.10.2"
-pytz = "^2023.3"
-tqdm = "^4.65.0"
-pyperclip = "^1.8.2"
+toml = "*"
+pytz = "*"
+tqdm = "*"
+pyperclip = "*"
 mongoengine = "^0.27.0"
-loguru = "^0.5.3"
-defaultenv = { git = "https://github.com/bobuk/defaultenv.git", branch = "master", optional = true }
-bmmb = { git = "https://github.com/calmmage/bot_me_maybe.git", branch = "main", optional = true }
+loguru = "*"
+# defaultenv = { git = "https://github.com/bobuk/defaultenv.git", branch ="master", optional = true }
+# bmmb = { git = "https://github.com/calmmage/bot_me_maybe.git", branch ="main", optional = true }
 gpt_kit = { git = "https://github.com/calmmage/gpt_kit.git", branch = "main", optional = true }
 
 [tool.poetry.extras]
