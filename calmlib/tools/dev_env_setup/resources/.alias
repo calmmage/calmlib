@@ -1,8 +1,9 @@
 alias help="echo \"$HELP\""
 alias subl="/Applications/Sublime\ Text.app/Contents/MacOS/sublime_text"
 
-alias ai="python ~/home/tools/command-ai/main.py --prompt "
-alias ai4="python ~/home/tools/command-ai/main.py --model gpt-4 --prompt "
+alias ghc="gh copilot"
+alias aie="gh copilot explain"
+alias ai-help="gh copilot explain"
+alias ai="gh copilot suggest"
 
 alias gcu="(gcloud compute ssh --zone "europe-west1-b" "instance-default-mar-2023"  --project "jarvis-mar-2022-pub")"
-
