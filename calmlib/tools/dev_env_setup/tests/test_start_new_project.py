@@ -7,7 +7,6 @@ import pytest
 from calmlib.tools.dev_env_setup.dev_env import CalmmageDevEnv
 
 
-# todo
 def test_start_new_project(tmp_path):
     """
     Test that the create_root method correctly creates the root directory and its subdirectories.

@@ -28,7 +28,7 @@ class CalmmageDevEnv:
             preset = latest_preset
         self.preset = preset
 
-        if self.root_dir.exists() and not overwrite:
+        if self.root_dir.exists() and list(self.root_dir.iterdir()) and not overwrite:
             if not self._validate_structure():
                 raise ValueError(
                     f"root dir exists but has invalid structure: {self.root_dir}. Set overwrite=True to ignore that"
@@ -50,6 +50,8 @@ class CalmmageDevEnv:
         # self._setup_new_project_dir('test')
         self.monthly_job()
         # self.daily_job()
+
+    def setup_shell_profiles(self):
         self._setup_app_data_dir()
 
     def _validate_structure(self):

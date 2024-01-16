@@ -18,6 +18,7 @@ def create_devenv(
         dev_env = CalmmageDevEnv(
             root_dir=root_dir, app_data_dir=app_data_dir, overwrite=True
         )
+        dev_env.setup_shell_profiles()
         typer.echo(f"Development environment created at {root_dir}")
         typer.echo(f"App data directory created at {app_data_dir}")
 
