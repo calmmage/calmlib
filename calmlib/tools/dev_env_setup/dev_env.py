@@ -40,6 +40,7 @@ class CalmmageDevEnv:
         # todo: use calmlib.setup_logger
         self._logger = None
         self._templates = None
+        self._local_templates = None
 
         if setup or overwrite:
             self.setup()
@@ -225,7 +226,7 @@ class CalmmageDevEnv:
             ]
         else:
             # github
-            return self.get_template_names()
+            return self.get_github_template_names()
 
     # github
     def get_templates(self, reset_cache=False):
@@ -238,7 +239,7 @@ class CalmmageDevEnv:
         templates = self.get_templates(reset_cache=reset_cache)
         return templates[name]
 
-    def get_template_names(self, reset_cache=False):
+    def get_github_template_names(self, reset_cache=False):
         templates = self.get_templates(reset_cache=reset_cache)
         return list(templates.keys())
 
@@ -253,7 +254,7 @@ class CalmmageDevEnv:
         username = github_client.get_user().login
         template_owner = username
         # check template name is valid
-        templates = self.get_template_names()
+        templates = self.get_github_template_names()
         if template_name not in templates:
             raise ValueError(
                 f"Invalid template name: {template_name}. Available templates: {templates}"
@@ -269,6 +270,25 @@ class CalmmageDevEnv:
         # return the repo link ?
         return f"https://github.com/{username}/{name}"
 
+    # local
+    def get_local_template(self, name):
+        templates = self.get_local_templates()
+        return templates[name]
+
+    def get_local_templates(self):
+        if self._local_templates is None:
+            templates_dir = Path(__file__).parent / "resources" / "templates"
+            self._local_templates = {
+                template.name: template
+                for template in templates_dir.iterdir()
+                if template.is_dir()
+            }
+        return self._local_templates
+
+    def get_local_template_names(self):
+        templates = self.get_local_templates()
+        return list(templates.keys())
+
     def _create_local_project_from_template(self, name, template_name):
         project_dir = self._setup_new_project_dir(name)
 
@@ -276,16 +296,13 @@ class CalmmageDevEnv:
         script_dir = Path(__file__).parent
         templates_dir = script_dir / "resources" / "templates"
 
-        templates = [
-            template.name for template in templates_dir.iterdir() if template.is_dir()
-        ]
+        templates = self.get_local_template_names()
         if template_name not in templates:
             raise ValueError(
                 f"Invalid template name: {template_name}. Available templates: {templates}"
             )
-
         # copy template to the new project dir
-        template_dir = templates_dir / template_name
+        template_dir = self.get_local_template(template_name)
         from distutils.dir_util import copy_tree
 
         copy_tree(str(template_dir), str(project_dir))
