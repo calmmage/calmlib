@@ -1,7 +1,0 @@
-# Setup
-
-# Usage
-
-## aliases
-
-## 
