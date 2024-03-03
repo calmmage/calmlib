@@ -2,8 +2,9 @@
 # os.putenv("MAGIC_ENABLED", "1")
 import logging
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 load_dotenv(os.path.expanduser('~/.env'))
 
