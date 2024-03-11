@@ -1,5 +1,4 @@
 from . import utils, beta
-from .utils.code_keeper import remind, plant, garden_stats, code_keeper
 
 # try:
 #     from . import experimental
@@ -7,7 +6,7 @@ from .utils.code_keeper import remind, plant, garden_stats, code_keeper
 # except:
 #     pass
 
-from .utils.lib_discoverer import LibDiscoverer
+from calmlib.tools.lib_discoverer import LibDiscoverer
 
 from importlib.metadata import PackageNotFoundError
 

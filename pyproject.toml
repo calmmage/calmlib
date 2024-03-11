@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "0.4.1" # add logging_utils
+version = "0.5.0" # refactoring - move utils from beta to stable
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"

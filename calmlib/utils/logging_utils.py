@@ -25,11 +25,18 @@ def configure_calmmage_logger(logger_instance, path=None):
     logger_instance.add(path, rotation="10 MB", enqueue=True)
 
 
-def get_calmmage_logger(name=None, level="INFO", format=None, log_file=None):
+def get_logger(name=None, level="INFO", format=None, log_file=None):
     # todo: get a logger with a specific name - use loguru.bind
     # todo: set logger level
     # todo: set logger format
     # todo: set logger path
-    if not is_logger_configured(loguru_logger):
-        configure_calmmage_logger(loguru_logger)
-    return loguru_logger
+    logger = loguru_logger
+    if level != "INFO":
+        logger.warning("Level is unused for now")
+    if format:
+        logger.warning("Format is unused for now")
+    if log_file:
+        logger.warning("Log file varaible is unused for now")
+    if not is_logger_configured(logger):
+        configure_calmmage_logger(logger)
+    return logger
