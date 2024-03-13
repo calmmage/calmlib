@@ -1,4 +1,4 @@
-from calmlib.beta.utils.logging_utils import (
+from calmlib.utils.logging_utils import (
     is_logger_configured,
     configure_calmmage_logger,
 )
