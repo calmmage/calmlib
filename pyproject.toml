@@ -15,7 +15,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.8.1,<4.0"  # because of langchain..
 pytest = "*"
 typer = "*"
 toml = "*"
