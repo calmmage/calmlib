@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "0.5.1" # refactoring - move utils from beta to stable
+version = "0.5.2" # add multiui app base
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
