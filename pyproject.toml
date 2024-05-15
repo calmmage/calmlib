@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "0.5.3" # move multiui app base
+version = "0.5.4" # add gpt utils from old bot template
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
@@ -41,6 +41,9 @@ pytest = "*"
 pytest-mongodb = "*"
 black = "*"
 easydict = ">=1.10"
+pydub = "*"
+tiktoken = "*"
+aiolimiter = "*"
 
 #pytest = "*"
 #tqdm = "*"
