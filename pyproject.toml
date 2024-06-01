@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "0.5.4" # add gpt utils from old bot template
+version = "0.5.5" # add check_mode util decorator to check mode for methods of a class
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
