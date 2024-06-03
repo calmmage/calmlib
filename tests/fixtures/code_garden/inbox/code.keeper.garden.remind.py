@@ -8,7 +8,7 @@ cp = """
 # Sample code garden reminder!
 """
 
-ck.plant(cp, 'sample')
+ck.plant(cp, "sample")
 
 # todo:
-ck.
+# ck
