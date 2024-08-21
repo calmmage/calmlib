@@ -37,6 +37,7 @@ langchain = "*"
 langchain-openai = "*"
 langchain-community = "*"
 langchain-anthropic = "*"
+langfuse = "*"
 
 [tool.poetry.group.dev.dependencies]
 jupyter = ">=1.0.0"
