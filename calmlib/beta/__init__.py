@@ -1,26 +1,22 @@
-# calmlib/beta/__init__.py
 import importlib
-import logging
-import os
+from loguru import logger
 import sys
+from pathlib import Path
 
 # Initialize __all__ for wildcard imports
 __all__ = []
 
 # Directory of the current file
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(__file__).resolve().parent
+
 
 # List everything in the directory
-for item in os.listdir(dir_path):
-    module_name, ext = os.path.splitext(item)
-    # Filter out non-Python files and __init__.py
-    if ext == ".py" and module_name != "__init__":
+for item in dir_path.iterdir():
+    if (item.suffix == ".py" and item.stem != "__init__") or item.is_dir():
         try:
             # Dynamically import the module
-            imported_module = importlib.import_module(
-                "." + module_name, package="calmlib.beta"
-            )
-            setattr(sys.modules[__name__], module_name, imported_module)
-            __all__.append(module_name)
+            imported_module = importlib.import_module("." + item.stem, package="calmlib.beta")
+            setattr(sys.modules[__name__], item.stem, imported_module)
+            __all__.append(item.stem)
         except Exception as e:
-            logging.warning(f"Warning: Failed to import {module_name}: {e}")
+            logger.warning(f"Warning: Failed to import {item.stem}: {e}")

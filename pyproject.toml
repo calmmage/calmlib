@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "0.5.8" # add more beta gpt utils
+version = "0.5.9" # add more beta gpt utils
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
