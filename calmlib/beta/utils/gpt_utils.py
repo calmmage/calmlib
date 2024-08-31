@@ -1,14 +1,24 @@
 import asyncio
 import json
-from functools import partial
+import os
+from functools import lru_cache, partial
 from io import BytesIO
-from typing import Union, BinaryIO
+from pathlib import Path
+from typing import BinaryIO, Union, Generator, TYPE_CHECKING
 
 import loguru
 import openai
 import pydub
 import tiktoken
 from aiolimiter import AsyncLimiter
+from dotenv import load_dotenv
+
+Pathlike = Union[str, Path]
+load_dotenv()
+
+if TYPE_CHECKING:
+    from langchain.prompts import ChatPromptTemplate
+
 
 WHISPER_RATE_LIMIT = 50  # 50 requests per minute
 whisper_limiter = AsyncLimiter(WHISPER_RATE_LIMIT, 60)  # 50 requests per minute
@@ -172,23 +182,6 @@ async def amap_gpt_command(chunks, command, model="gpt-3.5-turbo", merge=False):
         return completed_tasks
 
 
-import os
-from functools import lru_cache
-from pathlib import Path
-from typing import Union, Generator
-
-from dotenv import load_dotenv
-from langchain.prompts import ChatPromptTemplate
-from langchain_community.chat_models.azureml_endpoint import (
-    AzureMLChatOnlineEndpoint,
-    AzureMLEndpointApiType,
-)
-from langchain_community.chat_models.azureml_endpoint import CustomOpenAIChatContentFormatter
-
-Pathlike = Union[str, Path]
-load_dotenv()
-
-
 def _assume_alternating_messages(warmup_messages):
     for i, msg in enumerate(warmup_messages):
         if i % 2 == 0:
@@ -208,7 +201,9 @@ role_map = {
 }
 
 
-def build_langchain_prompt(system: str, warmup_messages=None, prompt_template="{prompt}") -> ChatPromptTemplate:
+def build_langchain_prompt(system: str, warmup_messages=None, prompt_template="{prompt}") -> "ChatPromptTemplate":
+    from langchain.prompts import ChatPromptTemplate
+
     # messages = [SystemMessage(content=system)]
     messages = [("system", system)]
     if warmup_messages:
@@ -261,7 +256,6 @@ def query_openai(
     max_retries=2,
     **kwargs,
 ) -> str:
-    # from langchain_openai import ChatOpenAI
     from langchain_community.chat_models import ChatOpenAI
 
     # config = {}
@@ -311,6 +305,12 @@ def _get_llm(
     streaming=False,
     **kwargs,
 ):
+    from langchain_community.chat_models.azureml_endpoint import (
+        AzureMLChatOnlineEndpoint,
+        AzureMLEndpointApiType,
+    )
+    from langchain_community.chat_models.azureml_endpoint import CustomOpenAIChatContentFormatter
+
     common_params = {
         "temperature": temperature,
         "max_tokens": max_tokens,
