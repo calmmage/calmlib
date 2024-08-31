@@ -1,14 +1,11 @@
 import os
 
-import deepl
-
-from defaultenv import ENVCD as env
-
 
 def discover_deepl_auth_key():
     # env
-    if env.DEEPL_AUTH_KEY:
-        return env.DEEPL_AUTH_KEY
+    key = os.getenv("DEEPL_AUTH_KEY")
+    if key:
+        return key
     # file on disk
     path_candidates = [os.path.join(os.path.expanduser("~"), ".deepl_auth_key"), ".deepl_auth_key"]
     for path in path_candidates:
@@ -30,6 +27,8 @@ registry = {}
 
 
 def init_deepl(auth_key=None):
+    import deepl
+
     if auth_key is None:
         auth_key = discover_deepl_auth_key()
 
