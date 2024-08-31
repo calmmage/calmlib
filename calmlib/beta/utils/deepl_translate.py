@@ -10,10 +10,7 @@ def discover_deepl_auth_key():
     if env.DEEPL_AUTH_KEY:
         return env.DEEPL_AUTH_KEY
     # file on disk
-    path_candidates = [
-        os.path.join(os.path.expanduser("~"), ".deepl_auth_key"),
-        ".deepl_auth_key"
-    ]
+    path_candidates = [os.path.join(os.path.expanduser("~"), ".deepl_auth_key"), ".deepl_auth_key"]
     for path in path_candidates:
         if os.path.exists(path):
             with open(path, "r") as f:
@@ -60,14 +57,14 @@ ru_pattern = re.compile("[а-яА-Я]")
 en_pattern = re.compile("[a-zA-Z]")
 
 lang_dict = {
-    'russian': 'RU',
-    'english': 'EN-US',
-    'ru': 'RU',
-    'en': 'EN-US',
-    'ru-ru': 'RU',
-    'en-uk': 'EN-GB',
-    'en-gb': 'EN-GB',
-    'en-us': 'EN-US',
+    "russian": "RU",
+    "english": "EN-US",
+    "ru": "RU",
+    "en": "EN-US",
+    "ru-ru": "RU",
+    "en-uk": "EN-GB",
+    "en-gb": "EN-GB",
+    "en-us": "EN-US",
 }
 
 
@@ -75,16 +72,15 @@ def parse_lang(lang):
     return lang_dict[lang.lower()]
 
 
-def requires_translation(text: str, target_lang: str, rel_tolerance=0.5,
-                         abs_tolerance=200):
+def requires_translation(text: str, target_lang: str, rel_tolerance=0.5, abs_tolerance=200):
     lang = parse_lang(target_lang)
 
-    if lang == 'RU':
+    if lang == "RU":
         count_wrong = len(en_pattern.findall(text))
-    elif lang in ['EN-US', 'EN-GB']:
+    elif lang in ["EN-US", "EN-GB"]:
         count_wrong = len(ru_pattern.findall(text))
     else:
-        raise ValueError('Invalid target language')
+        raise ValueError("Invalid target language")
 
     rel = count_wrong / len(text)
     if rel > rel_tolerance or count_wrong > abs_tolerance:
