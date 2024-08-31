@@ -5,7 +5,6 @@ from typing import BinaryIO
 
 import loguru
 import tqdm
-from pydub import AudioSegment
 
 from .gpt_utils import (
     Audio,
@@ -18,9 +17,9 @@ DEFAULT_PERIOD = 120 * 1000
 DEFAULT_BUFFER = 5 * 1000
 
 
-def split_audio(
-    audio: Audio, period=DEFAULT_PERIOD, buffer=DEFAULT_BUFFER, logger=None
-):
+def split_audio(audio: Audio, period=DEFAULT_PERIOD, buffer=DEFAULT_BUFFER, logger=None):
+    from pydub import AudioSegment
+
     if isinstance(audio, (str, BytesIO, BinaryIO)):
         logger.debug(f"Loading audio from {audio}")
         audio = AudioSegment.from_file(audio)
@@ -60,6 +59,8 @@ async def split_and_transcribe_audio(
     parallel: bool = None,
     logger=None,
 ):
+    from pydub import AudioSegment
+
     if logger is None:
         logger = loguru.logger
 
