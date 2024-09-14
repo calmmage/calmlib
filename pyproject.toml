@@ -46,7 +46,7 @@ python-dotenv = "*"
 pymongo = "*"                 # MongoDB client
 #mongoengine = "*"            # MongoDB ORM
 #PyDrive = "*"                # Google Drive API client
-#protobuf = "*"               # Protocol buffers
+protobuf = "*"               # Protocol buffers
 #dropbox = "*"                # Dropbox API client
 
 # utils

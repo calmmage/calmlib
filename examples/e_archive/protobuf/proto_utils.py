@@ -5,7 +5,8 @@ def compile_proto(path, output_path=None, package_path=None):
     """
     compile a proto file located at :path:
     """
-    from calmlib import run_cmd
+    from calmlib.utils.run_utils import run_cmd
+
     # protoc -I=proto/ --python_out=proto/ proto/test.proto
     path = Path(path)
     if output_path is None:
