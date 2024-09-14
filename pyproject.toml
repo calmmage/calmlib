@@ -22,7 +22,6 @@ loguru = ">=0.7"
 toml = ">=0.10"
 python-dotenv = "*"
 
-
 [tool.poetry.group.extras.dependencies]
 # dependencies for extra features
 
@@ -35,73 +34,71 @@ pytest-mongodb = "*"
 
 [tool.poetry.group.dev.dependencies]
 # dev / research utils
-jupyter = ">=1.0.0"
-black = ">=24"
-pre-commit = ">=3.8"
-tqdm = "*"
+jupyter = ">=1.0.0"          # Interactive notebooks
+black = ">=24.0.0"           # Code formatter
+pre-commit = ">=3.8.0"       # Pre-commit hooks
+tqdm = "*"                   # Progress bars
 
-# data analysis, research
-#pandas = ">=2.0.0"
-#seaborn = "*"
-#bokeh = "*"
-#matplotlib = "*"
-#numpy = "*"
-
-# cli
-#click = "*"
-#typer = "*"
-
-# API
-#fastapi = "*"
-#httpx = "*"  # async http client
+# Main
+## Pydantic
+#pydantic = ">=2"            # Data validation and settings management
+#pydantic-settings = ">=2"   # Pydantic settings management
 
 # git ops
-#PyGithub = "*"
-#gitpython = "*"
+#PyGithub = "*"              # GitHub API client
+#gitpython = "*"             # Git repository interface
+
+# api
+#fastapi = "*"               # High-performance API framework
+#httpx = "*"                 # Async HTTP client
+
+# cli
+#click = "*"                 # CLI creation toolkit
+#typer = "*"                 # Easy CLI building
+
+# data, databases
+pymongo = "*"                 # MongoDB client
+#mongoengine = "*"            # MongoDB ORM
+#PyDrive = "*"                # Google Drive API client
+#protobuf = "*"              # Protocol buffers
+#dropbox = "*"               # Dropbox API client
+
+# utils
+#pytz = "*"                   # Timezone definitions
+#retry = "*"                 # Retry decorator
+#nltk = "*"                  # Natural language toolkit
+#easydict = ">=1.10"         # Easy access to dict keys - dotdict
+#pydub = ">=0.25"            # Audio manipulation
+#apscheduler = ">=4"         # Scheduling library
+#pyperclip = "*"             # Copying to clipboard
+#aiolimiter = ">=1.1"        # Async rate limiting
+
+# LLM, GPT, AI
+#tiktoken = ">=0.7"          # Tokenization for OpenAI models
+#openai = ">=1.45"           # OpenAI API client
+langchain = ">=0.3.0"            # Language model framework
+langchain-openai = ">=0.3.0"     # OpenAI integration for LangChain
+langchain-community = "*"        # Community extensions for LangChain
+langchain-anthropic = ">=0.2.0"  # Anthropic integration for LangChain
+langfuse = "*"                   # Language model analytics
+#assemblyai = "*"             # Speech-to-text API
+#whisperx = { git = "https://github.com/m-bain/whisperX.git", branch = "main" }  # Advanced Whisper model
+
+# Extras
+## data analysis, research
+#pandas = ">=2.0.0"          # Data manipulation and analysis
+#seaborn = "*"               # Statistical data visualization
+#bokeh = "*"                 # Interactive visualizations
+#matplotlib = "*"            # Plotting library
+#numpy = "*"                 # Numerical computing
 
 # Misc
-#protobuf = "*"
-#dropbox = "*"
-#nltk = "*"  # natural language toolkit. Word collections etc.
-#easydict = ">=1.10"  # for easy access to dict keys - dotdict
-#pyperclip = "*"  # for copying to clipboard
-
-# Unsorted
-#aiogram = "*"
-#streamlit = "*"
-
-#ipykernel = "*"
-#ipywidgets = "*"
-#joblib = "*"
-#retry = "*"
-#paramiko = "*"
-#scp = "*"
-#pymorphy2 = "*"
-
-#pydantic = ">=2"
-#pydantic-settings = ">=2"
-#pydub = ">=0.25"
-#openai = ">=1.45"
-#apscheduler = ">=4"
-#tiktoken = ">=0.7"
-#aiolimiter = ">=1.1"
-#langchain-anthropic = ">=0.2"
-#langchain-openai = ">=0.2"
-#langchain = ">=0.3"
-#pytz = "*"
-#mongoengine = "*" # databases
-
-#assemblyai = "*"
-#whisperx = { git = "https://github.com/m-bain/whisperX.git", branch = "main" }
-#PyDrive = "*" # google drive
-langchain = "*"
-langchain-openai = "*"
-langchain-community = "*"
-langchain-anthropic = "*"
-langfuse = "*"
-pydub = "*"
-tiktoken = "*"
-aiolimiter = "*"
+#ipykernel = "*"             # IPython kernel
+#ipywidgets = "*"            # Interactive widgets for Jupyter
+#joblib = "*"                # Lightweight pipelining
+#paramiko = "*"              # SSH2 protocol library
+#scp = "*"                   # Secure copy
+#pymorphy2 = "*"             # Morphological analyzer
 
 # legacy. Todo: Sort out
 #defaultenv = { git = "https://github.com/bobuk/defaultenv.git", branch ="master", optional = true }
