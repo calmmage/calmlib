@@ -25,34 +25,6 @@ python-dotenv = "*"
 
 [tool.poetry.group.extras.dependencies]
 # dependencies for extra features
-pydantic = ">=2"
-pydantic-settings = ">=2"
-#pydub = ">=0.25"
-#openai = ">=1.45"
-#apscheduler = ">=4"
-#tiktoken = ">=0.7"
-#aiolimiter = ">=1.1"
-#langchain-anthropic = ">=0.2"
-#langchain-openai = ">=0.2"
-#langchain = ">=0.3"
-pytz = "*"
-pyperclip = "*"  # for copying to clipboard
-mongoengine = "*" # databases
-
-# git ops
-PyGithub = "*"
-gitpython = "*"
-#assemblyai = "*"
-#whisperx = { git = "https://github.com/m-bain/whisperX.git", branch = "main" }
-#PyDrive = "*" # google drive
-langchain = "*"
-langchain-openai = "*"
-langchain-community = "*"
-langchain-anthropic = "*"
-langfuse = "*"
-pydub = "*"
-tiktoken = "*"
-aiolimiter = "*"
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=6"
@@ -67,20 +39,6 @@ jupyter = ">=1.0.0"
 black = ">=24"
 pre-commit = ">=3.8"
 tqdm = "*"
-
-# my frequently used libs - exclude for now?
-#aiogram = "*"
-#streamlit = "*"
-
-#ipykernel = "*"
-#ipywidgets = "*"
-#joblib = "*"
-#retry = "*"
-#pyperclip = "*"
-#paramiko = "*"
-#scp = "*"
-#pymorphy2 = "*"
-
 
 # data analysis, research
 #pandas = ">=2.0.0"
@@ -97,13 +55,53 @@ tqdm = "*"
 #fastapi = "*"
 #httpx = "*"  # async http client
 
+# git ops
+#PyGithub = "*"
+#gitpython = "*"
+
 # Misc
 #protobuf = "*"
 #dropbox = "*"
 #nltk = "*"  # natural language toolkit. Word collections etc.
 #easydict = ">=1.10"  # for easy access to dict keys - dotdict
+#pyperclip = "*"  # for copying to clipboard
 
 # Unsorted
+#aiogram = "*"
+#streamlit = "*"
+
+#ipykernel = "*"
+#ipywidgets = "*"
+#joblib = "*"
+#retry = "*"
+#paramiko = "*"
+#scp = "*"
+#pymorphy2 = "*"
+
+#pydantic = ">=2"
+#pydantic-settings = ">=2"
+#pydub = ">=0.25"
+#openai = ">=1.45"
+#apscheduler = ">=4"
+#tiktoken = ">=0.7"
+#aiolimiter = ">=1.1"
+#langchain-anthropic = ">=0.2"
+#langchain-openai = ">=0.2"
+#langchain = ">=0.3"
+#pytz = "*"
+#mongoengine = "*" # databases
+
+#assemblyai = "*"
+#whisperx = { git = "https://github.com/m-bain/whisperX.git", branch = "main" }
+#PyDrive = "*" # google drive
+langchain = "*"
+langchain-openai = "*"
+langchain-community = "*"
+langchain-anthropic = "*"
+langfuse = "*"
+pydub = "*"
+tiktoken = "*"
+aiolimiter = "*"
 
 # legacy. Todo: Sort out
 #defaultenv = { git = "https://github.com/bobuk/defaultenv.git", branch ="master", optional = true }
