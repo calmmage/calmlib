@@ -2,8 +2,6 @@
 # ADDED MANUALLY
 # ----------------------------------------
 
-archive
-dev
 config*.toml
 *secret*.toml
 *.token
