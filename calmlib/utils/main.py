@@ -1,5 +1,13 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
+from typing import Union
+
+Pathlike = Union[str, Path]
+
+
+def fix_path(path: Pathlike) -> Path:
+    path = Path(path)
+    return path.expanduser().absolute()
 
 
 def trim(s, l=None, r=None):

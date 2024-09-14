@@ -14,4 +14,4 @@ def stopwatch(message):
         yield
     finally:
         t1 = time.time()
-        logger.debug('Total elapsed time for %s: %.3f' % (message, t1 - t0))
+        logger.debug("Total elapsed time for %s: %.3f" % (message, t1 - t0))

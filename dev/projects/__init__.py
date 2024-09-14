@@ -1,7 +1,8 @@
 import importlib
-from loguru import logger
 import sys
 from pathlib import Path
+
+from loguru import logger
 
 # Initialize __all__ for wildcard imports
 __all__ = []

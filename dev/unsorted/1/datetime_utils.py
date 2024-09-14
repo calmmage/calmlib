@@ -1,6 +1,7 @@
 import datetime
-import pytz
 import time
+
+import pytz
 
 DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
 
@@ -30,4 +31,4 @@ def get_current_date(timezone=None):
 
 
 def format_date(ts):
-    return ts.strftime('%Y-%m-%d')
+    return ts.strftime("%Y-%m-%d")

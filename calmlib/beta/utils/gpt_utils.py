@@ -3,7 +3,6 @@ import json
 import os
 from functools import lru_cache, partial
 from io import BytesIO
-from pathlib import Path
 from typing import BinaryIO, Union, Generator, TYPE_CHECKING
 
 import loguru
@@ -13,7 +12,6 @@ import tiktoken
 from aiolimiter import AsyncLimiter
 from dotenv import load_dotenv
 
-Pathlike = Union[str, Path]
 load_dotenv()
 
 if TYPE_CHECKING:

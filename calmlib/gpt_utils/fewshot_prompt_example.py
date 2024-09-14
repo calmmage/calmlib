@@ -1,7 +1,8 @@
 from textwrap import dedent
 
-from calmlib.gpt_utils.langchain_fewshot_prompt_base import LangchainFewshotPromptBase
 from langchain_openai import ChatOpenAI
+
+from calmlib.gpt_utils.langchain_fewshot_prompt_base import LangchainFewshotPromptBase
 
 
 class DummyPrompt(LangchainFewshotPromptBase):
@@ -10,19 +11,19 @@ class DummyPrompt(LangchainFewshotPromptBase):
 
     SYSTEM_TEMPLATE = dedent(
         f"""
-    You're command executor. Out of the following commands, which one would you like to execute?. 
-    By default, you have the following command available: {DEFAULT_COMMAND}
-    """
+        You're command executor. Out of the following commands, which one would you like to execute?. 
+        By default, you have the following command available: {DEFAULT_COMMAND}
+        """
     )
 
     # todo: polish the human template for ...
     HUMAN_TEMPLATE = dedent(
         """
-    AVAILABLE COMMANDS:
-    {commands_list}
-    USER INPUT
-    {user_input}
-    """
+        AVAILABLE COMMANDS:
+        {commands_list}
+        USER INPUT
+        {user_input}
+        """
     )
 
     SAMPLE_MESSAGES = [
