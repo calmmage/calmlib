@@ -3,15 +3,6 @@ basic actions I needed at some point and the go-tos for doing them.
 covered topics
 
 
-# Protobuf - how to work with protobuf
-calmlib.compile_proto
-
-# tempfile
-tempfile usage
-
-# date - parsing
-todo
-
 # read write
 ```python
 calmlib.read_write.dump # , load - serialization,

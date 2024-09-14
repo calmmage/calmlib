@@ -1,8 +1,7 @@
 from textwrap import dedent
 
-from langchain_openai import ChatOpenAI
-
 from calmlib.gpt_utils.langchain_fewshot_prompt_base import LangchainFewshotPromptBase
+from langchain_openai import ChatOpenAI
 
 
 class DummyPrompt(LangchainFewshotPromptBase):

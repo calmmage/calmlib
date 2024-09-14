@@ -2,13 +2,6 @@ import shutil
 from pathlib import Path
 from typing import Union
 
-Pathlike = Union[str, Path]
-
-
-def fix_path(path: Pathlike) -> Path:
-    path = Path(path)
-    return path.expanduser().absolute()
-
 
 def trim(s, l=None, r=None):
     """
@@ -73,6 +66,15 @@ def is_subsequence(sub: str, main: str):
     return sub_index == len(sub)
 
 
+# region Path utils
+Pathlike = Union[str, Path]
+
+
+def fix_path(path: Pathlike) -> Path:
+    path = Path(path)
+    return path.expanduser().absolute()
+
+
 def copy_tree(source, destination, overwrite=True):
     """ """
     source_path = Path(source)
@@ -98,3 +100,34 @@ def copy_tree(source, destination, overwrite=True):
                 #  save side-by-side?
                 #  for text - one solution, for non-text - another solution?
                 raise NotImplementedError("Non-overwrite mode is Not implemented yet")
+
+
+# endregion Path utils
+
+# region Enum utils
+from enum import Enum
+from typing import Type, Union
+
+
+def cast_enum(value, desired_type: Type[Enum]) -> Enum:
+    if isinstance(value, desired_type):
+        return value
+    elif isinstance(value, Enum):
+        value = value.value
+
+    return desired_type(value)
+
+
+Enumlike = Union[Enum, str]
+
+
+def compare_enums(enum1: Enumlike, enum2: Enumlike):
+    if isinstance(enum1, Enum):
+        enum1 = enum1.value
+    if isinstance(enum2, Enum):
+        enum2 = enum2.value
+
+    return enum1 == enum2
+
+
+# endregion Enum utils

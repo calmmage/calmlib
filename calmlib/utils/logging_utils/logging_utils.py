@@ -1,5 +1,6 @@
-from loguru import logger as loguru_logger
 from pathlib import Path
+
+from loguru import logger as loguru_logger
 
 # Default log directory and file
 DEFAULT_LOG_DIR = Path("~/.calmmage/logs").expanduser()

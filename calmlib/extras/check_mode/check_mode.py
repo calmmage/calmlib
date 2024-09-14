@@ -1,5 +1,5 @@
-from functools import wraps
 from enum import Enum
+from functools import wraps
 
 
 def check_mode(allowed_modes=None, mode_attr="mode"):

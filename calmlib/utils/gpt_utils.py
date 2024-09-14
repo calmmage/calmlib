@@ -2,12 +2,10 @@ import asyncio
 import json
 import os
 from functools import lru_cache, partial
-from io import BytesIO
-from typing import BinaryIO, Union, Generator, TYPE_CHECKING
+from typing import Union, Generator, TYPE_CHECKING
 
 import loguru
 import openai
-import pydub
 import tiktoken
 from aiolimiter import AsyncLimiter
 from dotenv import load_dotenv
@@ -17,9 +15,6 @@ load_dotenv()
 if TYPE_CHECKING:
     from langchain.prompts import ChatPromptTemplate
 
-
-WHISPER_RATE_LIMIT = 50  # 50 requests per minute
-whisper_limiter = AsyncLimiter(WHISPER_RATE_LIMIT, 60)  # 50 requests per minute
 GPT_RATE_LIMIT = 200  # 200 requests per minute
 gpt_limiter = AsyncLimiter(GPT_RATE_LIMIT, 60)  # 200 requests per minute
 
@@ -62,23 +57,6 @@ async def arun_command_with_gpt(command: str, data: str, model="gpt-3.5-turbo"):
     async with gpt_limiter:
         response = await openai.ChatCompletion.acreate(messages=messages, model=model)
     return response.choices[0].message.content
-
-
-Audio = Union[pydub.AudioSegment, BytesIO, BinaryIO, str]
-
-
-def transcribe_audio(audio: Audio, model="whisper-1"):
-    if isinstance(audio, str):
-        audio = open(audio)
-    return openai.Audio.transcribe(model, audio).text
-
-
-async def atranscribe_audio(audio: Audio, model="whisper-1"):
-    if isinstance(audio, str):
-        audio = open(audio)
-    async with whisper_limiter:
-        result = await openai.Audio.atranscribe(model, audio)
-    return result.text
 
 
 def default_merger(chunks, keyword="TEMPORARY_RESULT:"):
@@ -178,6 +156,9 @@ async def amap_gpt_command(chunks, command, model="gpt-3.5-turbo", merge=False):
         return apply_command_recursively(merge_command, completed_tasks, model=model)
     else:
         return completed_tasks
+
+
+# region langchain
 
 
 def _assume_alternating_messages(warmup_messages):
@@ -392,6 +373,8 @@ def escape_curly_braces(text):
 def langfuse_env_available():
     return bool(os.getenv("LANGFUSE_SECRET_KEY"))
 
+
+# endregion langchain
 
 if __name__ == "__main__":
     load_dotenv()

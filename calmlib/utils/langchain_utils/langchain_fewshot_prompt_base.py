@@ -1,8 +1,8 @@
-from typing import List, Dict
-from langchain.prompts import ChatPromptTemplate
-import re
 import abc
-from textwrap import dedent
+import re
+from typing import List, Dict
+
+from langchain.prompts import ChatPromptTemplate
 
 
 class LangchainFewshotPromptBase(abc.ABC):

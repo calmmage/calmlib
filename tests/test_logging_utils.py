@@ -1,8 +1,9 @@
+from loguru import logger as loguru_logger
+
 from calmlib.utils.logging_utils import (
     is_logger_configured,
     configure_calmmage_logger,
 )
-from loguru import logger as loguru_logger
 
 
 # Unit test for the logger configuration check

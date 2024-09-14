@@ -1,4 +1,5 @@
 from enum import Enum
+
 from calmlib.beta.check_mode.check_mode import check_mode
 
 

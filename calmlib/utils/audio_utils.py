@@ -6,17 +6,16 @@ from typing import BinaryIO
 import loguru
 import tqdm
 
-from .gpt_utils import (
-    Audio,
-    atranscribe_audio,
-    transcribe_audio,
-    WHISPER_RATE_LIMIT,
-)
+from .whisper_utils import WHISPER_RATE_LIMIT, Audio, transcribe_audio, atranscribe_audio
 
-DEFAULT_PERIOD = 120 * 1000
-DEFAULT_BUFFER = 5 * 1000
+# region Whisper Bot
+
+DEFAULT_PERIOD = 120 * 1000  # 2 minutes
+DEFAULT_BUFFER = 5 * 1000  # 5 seconds
 
 
+# todo: rework this function to split audio inplace to avoid huge memory usage
+#  I did experiments somewhere.. /Users/petrlavrov/Downloads/macbook_migration/code-searcher/highlights/bot_lib_plugins/cut-audio-bot
 def split_audio(audio: Audio, period=DEFAULT_PERIOD, buffer=DEFAULT_BUFFER, logger=None):
     from pydub import AudioSegment
 
@@ -82,3 +81,16 @@ async def split_and_transcribe_audio(
 
     logger.debug(f"Parsed audio", data=pprint.pformat(text_chunks))
     return text_chunks
+
+
+# endregion Whisper Bot
+
+# region Cut Audio inplace
+# todo: (failed?) /Users/petrlavrov/Downloads/macbook_migration/code-searcher/highlights/bot_lib_plugins/cut-audio-bot
+
+# todo 2: /Users/petrlavrov/work/projects/examples/dev/unsorted/split_audio
+# endregion Cut Audio inplace
+
+# region Video to Audio
+# todo:
+# endregion Video to Audio
