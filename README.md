@@ -1,1 +1,0 @@
-Various python util I wrote for myself.
