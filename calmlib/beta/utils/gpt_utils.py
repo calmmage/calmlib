@@ -321,11 +321,11 @@ def _get_llm(
     }
 
     if engine == "openai":
-        from langchain_community.chat_models import ChatOpenAI
+        from langchain_openai import ChatOpenAI
 
         return ChatOpenAI(model_name=model, **common_params)
     elif engine == "azure":
-        from langchain_community.chat_models import AzureChatOpenAI
+        from langchain_openai import AzureChatOpenAI
 
         return AzureChatOpenAI(
             deployment_name=model,
