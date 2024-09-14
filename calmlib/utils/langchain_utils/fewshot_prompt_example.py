@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from calmlib.gpt_utils.langchain_fewshot_prompt_base import LangchainFewshotPromptBase
+from calmlib.utils.langchain_utils.langchain_fewshot_prompt_base import LangchainFewshotPromptBase
 from langchain_openai import ChatOpenAI
 
 

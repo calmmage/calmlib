@@ -1,7 +1,7 @@
 import contextlib
 import time
 
-from calmlib import get_personal_logger
+from calmlib.utils.logging_utils import get_personal_logger
 
 logger = get_personal_logger(__name__)
 

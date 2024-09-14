@@ -1,5 +1,7 @@
 if [ -f ~/.bashrc ]; then . ~/.bashrc; fi
 
+export PS1="\u: \w/$ "
+
 # added by Miniconda3 4.7.12 installer
 # >>> conda init >>>
 # !! Contents within this block are managed by 'conda init' !!
