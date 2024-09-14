@@ -1,5 +1,5 @@
 import pytest
-from calmlib.beta.check_mode.check_mode_example import SampleClass, SampleMode
+from calmlib.extras.check_mode.check_mode_example import SampleClass, SampleMode
 
 
 def test_sample_class_default_mode_method_1():
