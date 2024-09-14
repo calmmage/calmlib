@@ -25,20 +25,6 @@ python-dotenv = "*"
 [tool.poetry.group.extras.dependencies]
 # dependencies for extra features
 
-[tool.poetry.group.test.dependencies]
-pytest = ">=6"
-pytest-mongodb = "*"
-
-[tool.poetry.group.docs.dependencies]
-#mkdocs = ">=1.6"
-
-[tool.poetry.group.dev.dependencies]
-# dev / research utils
-jupyter = ">=1.0.0"          # Interactive notebooks
-black = ">=24.0.0"           # Code formatter
-pre-commit = ">=3.8.0"       # Pre-commit hooks
-tqdm = "*"                   # Progress bars
-
 # Main
 ## Pydantic
 #pydantic = ">=2"            # Data validation and settings management
@@ -60,37 +46,30 @@ tqdm = "*"                   # Progress bars
 pymongo = "*"                 # MongoDB client
 #mongoengine = "*"            # MongoDB ORM
 #PyDrive = "*"                # Google Drive API client
-#protobuf = "*"              # Protocol buffers
-#dropbox = "*"               # Dropbox API client
+#protobuf = "*"               # Protocol buffers
+#dropbox = "*"                # Dropbox API client
 
 # utils
-#pytz = "*"                   # Timezone definitions
+#pytz = "*"                  # Timezone definitions
 #retry = "*"                 # Retry decorator
 #nltk = "*"                  # Natural language toolkit
 #easydict = ">=1.10"         # Easy access to dict keys - dotdict
-#pydub = ">=0.25"            # Audio manipulation
+pydub = ">=0.25"             # Audio manipulation
 #apscheduler = ">=4"         # Scheduling library
-#pyperclip = "*"             # Copying to clipboard
-#aiolimiter = ">=1.1"        # Async rate limiting
+pyperclip = "*"              # Copying to clipboard
+aiolimiter = ">=1.1"         # Async rate limiting
+deepl = ">=1.18"             # DeepL API client
 
 # LLM, GPT, AI
-#tiktoken = ">=0.7"          # Tokenization for OpenAI models
-#openai = ">=1.45"           # OpenAI API client
-langchain = ">=0.3.0"            # Language model framework
-langchain-openai = ">=0.3.0"     # OpenAI integration for LangChain
-langchain-community = "*"        # Community extensions for LangChain
-langchain-anthropic = ">=0.2.0"  # Anthropic integration for LangChain
-langfuse = "*"                   # Language model analytics
-#assemblyai = "*"             # Speech-to-text API
+#tiktoken = ">=0.7"            # Tokenization for OpenAI models
+#openai = ">=1.45"             # OpenAI API client
+langchain = ">=0.3"            # Language model framework
+langchain-openai = ">=0.2"     # OpenAI integration for LangChain
+langchain-community = "*"      # Community extensions for LangChain
+langchain-anthropic = ">=0.2"  # Anthropic integration for LangChain
+langfuse = "*"                 # Language model analytics
+#assemblyai = "*"              # Speech-to-text API
 #whisperx = { git = "https://github.com/m-bain/whisperX.git", branch = "main" }  # Advanced Whisper model
-
-# Extras
-## data analysis, research
-#pandas = ">=2.0.0"          # Data manipulation and analysis
-#seaborn = "*"               # Statistical data visualization
-#bokeh = "*"                 # Interactive visualizations
-#matplotlib = "*"            # Plotting library
-#numpy = "*"                 # Numerical computing
 
 # Misc
 #ipykernel = "*"             # IPython kernel
@@ -99,6 +78,27 @@ langfuse = "*"                   # Language model analytics
 #paramiko = "*"              # SSH2 protocol library
 #scp = "*"                   # Secure copy
 #pymorphy2 = "*"             # Morphological analyzer
+
+[tool.poetry.group.test.dependencies]
+pytest = ">=6"
+pytest-mongodb = "*"
+
+[tool.poetry.group.docs.dependencies]
+#mkdocs = ">=1.6"
+
+[tool.poetry.group.dev.dependencies]
+# dev / research utils
+jupyter = ">=1.0.0"          # Interactive notebooks
+black = ">=24.0.0"           # Code formatter
+pre-commit = ">=3.8.0"       # Pre-commit hooks
+tqdm = "*"                   # Progress bars
+
+## data analysis, research
+#pandas = ">=2.0.0"          # Data manipulation and analysis
+#seaborn = "*"               # Statistical data visualization
+#bokeh = "*"                 # Interactive visualizations
+#matplotlib = "*"            # Plotting library
+#numpy = "*"                 # Numerical computing
 
 # legacy. Todo: Sort out
 #defaultenv = { git = "https://github.com/bobuk/defaultenv.git", branch ="master", optional = true }
