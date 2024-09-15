@@ -89,6 +89,8 @@ pytest-mongodb = "*"
 [tool.poetry.group.dev.dependencies]
 # dev / research utils
 jupyter = ">=1.0.0"          # Interactive notebooks
+#jupyter-nbextensions-configurator = "*"
+#jupyter_contrib_nbextensions = "*"
 black = ">=24.0.0"           # Code formatter
 pre-commit = ">=3.8.0"       # Pre-commit hooks
 tqdm = "*"                   # Progress bars
