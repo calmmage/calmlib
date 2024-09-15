@@ -1,13 +1,13 @@
 import asyncio
 import pprint
 from io import BytesIO
-from typing import BinaryIO
+from typing import BinaryIO, TYPE_CHECKING
 
 import loguru
 import tqdm
 
-from .whisper_utils import WHISPER_RATE_LIMIT, Audio, transcribe_audio, atranscribe_audio
-
+if TYPE_CHECKING:
+    from .whisper_utils import Audio
 # region Whisper Bot
 
 DEFAULT_PERIOD = 120 * 1000  # 2 minutes
@@ -16,8 +16,9 @@ DEFAULT_BUFFER = 5 * 1000  # 5 seconds
 
 # todo: rework this function to split audio inplace to avoid huge memory usage
 #  I did experiments somewhere.. /Users/petrlavrov/Downloads/macbook_migration/code-searcher/highlights/bot_lib_plugins/cut-audio-bot
-def split_audio(audio: Audio, period=DEFAULT_PERIOD, buffer=DEFAULT_BUFFER, logger=None):
+def split_audio(audio: "Audio", period=DEFAULT_PERIOD, buffer=DEFAULT_BUFFER, logger=None):
     from pydub import AudioSegment
+    from .whisper_utils import WHISPER_RATE_LIMIT
 
     if isinstance(audio, (str, BytesIO, BinaryIO)):
         logger.debug(f"Loading audio from {audio}")
@@ -52,13 +53,14 @@ def split_audio(audio: Audio, period=DEFAULT_PERIOD, buffer=DEFAULT_BUFFER, logg
 
 
 async def split_and_transcribe_audio(
-    audio: Audio,
+    audio: "Audio",
     period: int = DEFAULT_PERIOD,
     buffer: int = DEFAULT_BUFFER,
     parallel: bool = None,
     logger=None,
 ):
     from pydub import AudioSegment
+    from .whisper_utils import transcribe_audio, atranscribe_audio
 
     if logger is None:
         logger = loguru.logger
