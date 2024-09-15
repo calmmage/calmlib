@@ -1,7 +1,6 @@
 from textwrap import dedent
 
 from calmlib.utils.langchain_utils.langchain_fewshot_prompt_base import LangchainFewshotPromptBase
-from langchain_openai import ChatOpenAI
 
 
 class DummyPrompt(LangchainFewshotPromptBase):
@@ -67,6 +66,7 @@ class DummyPrompt(LangchainFewshotPromptBase):
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
+    from langchain_openai import ChatOpenAI
 
     load_dotenv()
     full_prompt = DummyPrompt.get_prompt(True)

@@ -2,8 +2,6 @@ import abc
 import re
 from typing import List, Dict
 
-from langchain.prompts import ChatPromptTemplate
-
 
 class LangchainFewshotPromptBase(abc.ABC):
     SYSTEM_TEMPLATE: str
@@ -32,6 +30,8 @@ class LangchainFewshotPromptBase(abc.ABC):
 
     @classmethod
     def get_prompt(cls, trim_extra_whitespace=False):
+        from langchain.prompts import ChatPromptTemplate
+
         role_message = cls.SYSTEM_TEMPLATE
         human_template = cls.HUMAN_TEMPLATE
         # output_example = "output_example"
@@ -42,9 +42,7 @@ class LangchainFewshotPromptBase(abc.ABC):
             messages.append(
                 (
                     "human",
-                    cls.escape_curly_braces(
-                        cls.HUMAN_TEMPLATE.format(**sample_message)
-                    ),
+                    cls.escape_curly_braces(cls.HUMAN_TEMPLATE.format(**sample_message)),
                 )
             )
             messages.append(
@@ -59,8 +57,7 @@ class LangchainFewshotPromptBase(abc.ABC):
         #     print(role, message)
 
         if trim_extra_whitespace:
-            messages = [
-                (role, cls.trim_extra_whitespace(message)) for role, message in messages
-            ]
+            messages = [(role, cls.trim_extra_whitespace(message)) for role, message in messages]
+
         full_prompt = ChatPromptTemplate.from_messages(messages)
         return full_prompt

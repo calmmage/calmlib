@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "1.0.1" # rework pyproject.toml for faster builds
+version = "1.0.2" # rework pyproject.toml for faster builds
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
