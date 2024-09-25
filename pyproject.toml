@@ -16,7 +16,7 @@ classifiers = [
 
 # todo: cleanup dependencies to speed up installation and resolving
 [tool.poetry.dependencies]
-python = ">=3.12,<4.0"
+python = ">=3.11,<4.0"
 loguru = ">=0.7"
 # for parsing version
 toml = ">=0.10"
