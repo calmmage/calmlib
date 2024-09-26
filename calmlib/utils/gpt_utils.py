@@ -201,7 +201,9 @@ def build_langchain_prompt(system: str, warmup_messages=None, prompt_template="{
     return ChatPromptTemplate.from_messages(messages=messages)
 
 
-def _query_llm(llm, system, prompt, warmup_messages=None, use_langfuse=False, stream=False):
+def _query_llm(
+    llm, system, prompt, warmup_messages=None, use_langfuse=False, stream=False, structured_output_schema=None
+):
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
@@ -214,13 +216,19 @@ def _query_llm(llm, system, prompt, warmup_messages=None, use_langfuse=False, st
     else:
         chat_prompt = system
 
+    if structured_output_schema:
+        llm = llm.with_structured_output(structured_output_schema)
+
     chain = chat_prompt | llm
 
     if stream:
         return chain.stream(input={"prompt": prompt}, config=config)
     else:
         result = chain.invoke(input={"prompt": prompt}, config=config)
-        return result.content
+        if structured_output_schema:
+            return result
+        else:
+            return result.content
 
 
 def query_openai(
@@ -343,6 +351,7 @@ def query_gpt(
     timeout=None,
     max_retries=2,
     stream=False,
+    structured_output_schema=None,
     **kwargs,
 ) -> Union[str, Generator[str, None, None]]:
     if use_langfuse is None:
@@ -358,7 +367,15 @@ def query_gpt(
         **kwargs,
     )
 
-    result = _query_llm(llm, system, prompt, use_langfuse=use_langfuse, warmup_messages=warmup_messages, stream=stream)
+    result = _query_llm(
+        llm,
+        system,
+        prompt,
+        use_langfuse=use_langfuse,
+        warmup_messages=warmup_messages,
+        stream=stream,
+        structured_output_schema=structured_output_schema,
+    )
 
     if stream:
         return (chunk.content for chunk in result)
