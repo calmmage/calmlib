@@ -383,6 +383,62 @@ def query_gpt(
         return result
 
 
+async def aquery_gpt(
+    prompt,
+    system,
+    warmup_messages=None,
+    model=DEFAULT_MODEL,
+    engine=DEFAULT_ENGINE,
+    use_langfuse=None,
+    temperature=0.7,
+    max_tokens=1024,
+    timeout=None,
+    max_retries=2,
+    stream=False,
+    structured_output_schema=None,
+    **kwargs,
+):
+    """Async version of query_gpt using langchain's .ainvoke()"""
+    if use_langfuse is None:
+        use_langfuse = langfuse_env_available()
+
+    llm = _get_llm(
+        model=model,
+        engine=engine,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        timeout=timeout,
+        max_retries=max_retries,
+        streaming=stream,
+        **kwargs,
+    )
+
+    if structured_output_schema:
+        llm = llm.with_structured_output(structured_output_schema)
+
+    chat_prompt = build_langchain_prompt(system, warmup_messages=warmup_messages) if isinstance(system, str) else system
+
+    chain = chat_prompt | llm
+
+    config = {}
+    if use_langfuse:
+        from langfuse.callback import CallbackHandler
+
+        config["callbacks"] = [CallbackHandler()]
+
+    if stream:
+
+        async def config_stream():
+            async for chunk in chain.astream(input={"prompt": prompt}, config=config):
+                yield chunk.content if not structured_output_schema else chunk
+
+        return config_stream()
+    else:
+        result = await chain.ainvoke(input={"prompt": prompt}, config=config)
+
+    return result if structured_output_schema else result.content
+
+
 def escape_curly_braces(text):
     return text.replace("{", "{{").replace("}", "}}")
 
