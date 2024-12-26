@@ -6,8 +6,6 @@ from typing import Union, Generator, TYPE_CHECKING
 
 import loguru
 import openai
-import tiktoken
-from aiolimiter import AsyncLimiter
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,7 +14,13 @@ if TYPE_CHECKING:
     from langchain.prompts import ChatPromptTemplate
 
 GPT_RATE_LIMIT = 200  # 200 requests per minute
-gpt_limiter = AsyncLimiter(GPT_RATE_LIMIT, 60)  # 200 requests per minute
+
+
+@lru_cache
+def get_limiter(name, rate_limit=GPT_RATE_LIMIT):
+    from aiolimiter import AsyncLimiter
+
+    return AsyncLimiter(rate_limit, 60)
 
 
 # Then use atranscribe_audio_limited instead of atranscribe_audio
@@ -34,6 +38,8 @@ def get_token_count(text, model="gpt-3.5-turbo"):
     model: gpt-3.5-turbo, gpt-4
     """
     # To get the tokeniser corresponding to a specific model in the OpenAI API:
+    import tiktoken
+
     enc = tiktoken.encoding_for_model(model)
     return len(enc.encode(text))
 
@@ -54,6 +60,7 @@ async def arun_command_with_gpt(command: str, data: str, model="gpt-3.5-turbo"):
         {"role": "system", "content": command},
         {"role": "user", "content": data},
     ]
+    gpt_limiter = get_limiter("gpt")
     async with gpt_limiter:
         response = await openai.ChatCompletion.acreate(messages=messages, model=model)
     return response.choices[0].message.content
