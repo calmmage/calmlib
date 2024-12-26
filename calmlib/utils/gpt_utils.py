@@ -299,11 +299,6 @@ def _get_llm(
     streaming=False,
     **kwargs,
 ):
-    from langchain_community.chat_models.azureml_endpoint import (
-        AzureMLChatOnlineEndpoint,
-        AzureMLEndpointApiType,
-    )
-    from langchain_community.chat_models.azureml_endpoint import CustomOpenAIChatContentFormatter
 
     common_params = {
         "temperature": temperature,
@@ -313,7 +308,6 @@ def _get_llm(
         "streaming": streaming,
         **kwargs,
     }
-
     if engine == "openai":
         from langchain_openai import ChatOpenAI
 
@@ -331,6 +325,12 @@ def _get_llm(
 
         return ChatOllama(model=model, **common_params)
     elif engine == "azure_llama":
+        from langchain_community.chat_models.azureml_endpoint import (
+            AzureMLChatOnlineEndpoint,
+            AzureMLEndpointApiType,
+        )
+        from langchain_community.chat_models.azureml_endpoint import CustomOpenAIChatContentFormatter
+
         return AzureMLChatOnlineEndpoint(
             endpoint_url=os.getenv("AZURE_ENDPOINT_URL"),
             endpoint_api_type=AzureMLEndpointApiType.serverless,
