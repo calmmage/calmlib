@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 from functools import lru_cache, partial
-from typing import Union, Generator, TYPE_CHECKING
+from typing import Union, Generator, TYPE_CHECKING, Any
 
 import loguru
 import openai
@@ -209,7 +209,13 @@ def build_langchain_prompt(system: str, warmup_messages=None, prompt_template="{
 
 
 def _query_llm(
-    llm, system, prompt, warmup_messages=None, use_langfuse=False, stream=False, structured_output_schema=None
+    llm,
+    system,
+    prompt,
+    warmup_messages=None,
+    use_langfuse=False,
+    stream=False,
+    structured_output_schema=None,
 ):
     config = {}
     if use_langfuse:
@@ -261,7 +267,7 @@ def query_openai(
         model_name=model_name,
         temperature=temperature,
         max_tokens=max_tokens,
-        timeout=timeout,
+        # timeout=timeout,
         max_retries=max_retries,
         **kwargs,
     )
@@ -329,7 +335,9 @@ def _get_llm(
             AzureMLChatOnlineEndpoint,
             AzureMLEndpointApiType,
         )
-        from langchain_community.chat_models.azureml_endpoint import CustomOpenAIChatContentFormatter
+        from langchain_community.chat_models.azureml_endpoint import (
+            CustomOpenAIChatContentFormatter,
+        )
 
         return AzureMLChatOnlineEndpoint(
             endpoint_url=os.getenv("AZURE_ENDPOINT_URL"),
@@ -360,7 +368,7 @@ def query_gpt(
     stream=False,
     structured_output_schema=None,
     **kwargs,
-) -> Union[str, Generator[str, None, None]]:
+) -> Union[str, Generator[str, None, None], Any]:
     if use_langfuse is None:
         use_langfuse = langfuse_env_available()
     llm = _get_llm(
@@ -467,7 +475,10 @@ if __name__ == "__main__":
     # Streaming example
     print("\nStreaming response:")
     for chunk in query_gpt(
-        prompt, system="You're a helpful assistant", use_langfuse=langfuse_env_available(), stream=True
+        prompt,
+        system="You're a helpful assistant",
+        use_langfuse=langfuse_env_available(),
+        stream=True,
     ):
         print(chunk, end="", flush=True)
     print()  # New line after streaming is complete
