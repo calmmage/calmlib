@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "1.0.8" # add aquery_gpt
+version = "1.0.9" # add aquery_gpt
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"

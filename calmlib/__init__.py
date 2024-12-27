@@ -1,3 +1,6 @@
+from importlib.metadata import PackageNotFoundError
+
+from calmlib.tools.lib_discoverer import LibDiscoverer
 from . import utils, beta
 
 # try:
@@ -5,10 +8,6 @@ from . import utils, beta
 #     from .experimental import config_mixin, gpt_router
 # except:
 #     pass
-
-from calmlib.tools.lib_discoverer import LibDiscoverer
-
-from importlib.metadata import PackageNotFoundError
 
 try:
     import importlib.metadata
