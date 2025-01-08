@@ -1,16 +1,15 @@
 import asyncio
 import json
+import loguru
 import os
+from dotenv import load_dotenv
 from functools import lru_cache, partial
 from typing import Union, Generator, TYPE_CHECKING, Any
-
-import loguru
-import openai
-from dotenv import load_dotenv
 
 load_dotenv()
 
 if TYPE_CHECKING:
+    import openai
     from langchain.prompts import ChatPromptTemplate
 
 GPT_RATE_LIMIT = 200  # 200 requests per minute
@@ -50,6 +49,8 @@ def run_command_with_gpt(command: str, data: str, model="gpt-3.5-turbo"):
         {"role": "system", "content": command},
         {"role": "user", "content": data},
     ]
+    import openai
+
     response = openai.ChatCompletion.create(messages=messages, model=model)
     return response.choices[0].message.content
 
@@ -62,6 +63,9 @@ async def arun_command_with_gpt(command: str, data: str, model="gpt-3.5-turbo"):
     ]
     gpt_limiter = get_limiter("gpt")
     async with gpt_limiter:
+
+        import openai
+
         response = await openai.ChatCompletion.acreate(messages=messages, model=model)
     return response.choices[0].message.content
 
