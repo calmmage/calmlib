@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "1.0.11" # add aquery_gpt
+version = "1.0.12" # add aquery_gpt
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
@@ -63,10 +63,12 @@ deepl = ">=1.18"             # DeepL API client
 # LLM, GPT, AI
 #tiktoken = ">=0.7"            # Tokenization for OpenAI models
 #openai = ">=1.45"             # OpenAI API client
-langchain = ">=0.3"            # Language model framework
-langchain-openai = ">=0.2"     # OpenAI integration for LangChain
+langchain = "^0.3.14"          # Language model framework
+langchain-openai = "^0.3.0"    # OpenAI integration for LangChain
 langchain-community = "*"      # Community extensions for LangChain
-langchain-anthropic = ">=0.2"  # Anthropic integration for LangChain
+langchain-anthropic = "^0.3.3" # Anthropic integration for LangChain
+langchain-ollama = "^0.2.2"
+langchain-google-genai = "^2.0.9"
 langfuse = "*"                 # Language model analytics
 #assemblyai = "*"              # Speech-to-text API
 #whisperx = { git = "https://github.com/m-bain/whisperX.git", branch = "main" }  # Advanced Whisper model
