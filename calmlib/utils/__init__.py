@@ -10,6 +10,7 @@ from .read_write import *
 from .run_utils import *
 from .unsorted import load_global_env
 from .logging_utils import setup_logger
+from .service_registry import *
 
 
 # from .notion_utils import *
