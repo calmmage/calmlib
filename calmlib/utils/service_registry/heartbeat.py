@@ -1,4 +1,53 @@
-"""Heartbeat utilities for service health monitoring"""
+"""Heartbeat utilities for service health monitoring.
+
+This module provides utilities for implementing service health monitoring via heartbeats.
+Services can send periodic heartbeats to a central registry to indicate they are alive and functioning.
+
+Example:
+    Basic synchronous usage:
+    ```python
+    from calmlib.utils.service_registry import heartbeat
+
+    # Run heartbeat in current thread (will block)
+    heartbeat("my-service", period=60)
+    ```
+
+    Async usage:
+    ```python
+    from calmlib.utils.service_registry import aheartbeat
+
+    async def main():
+        await aheartbeat("my-service", period=60)
+    ```
+
+    As a decorator for sync functions:
+    ```python
+    from calmlib.utils.service_registry import heartbeat_for_sync
+
+    @heartbeat_for_sync("my-service", period=60)
+    def my_long_running_function():
+        while True:
+            do_work()
+            time.sleep(5)
+    ```
+
+    With async main:
+    ```python
+    from calmlib.utils.service_registry import run_with_heartbeat
+
+    async def my_async_main():
+        while True:
+            await do_async_work()
+            await asyncio.sleep(5)
+
+    # This will run both the heartbeat and your main function
+    run_with_heartbeat(my_async_main(), "my-service", period=60)
+    ```
+
+Configuration:
+    Set CALMMAGE_SERVICE_REGISTRY_URL environment variable to the registry API URL.
+    Example: export CALMMAGE_SERVICE_REGISTRY_URL=http://localhost:8765
+"""
 
 import asyncio
 import os
