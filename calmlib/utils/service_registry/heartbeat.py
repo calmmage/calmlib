@@ -59,6 +59,11 @@ import httpx
 from loguru import logger
 
 
+def normalize_service_key(service_key: str) -> str:
+    """Normalize service key by replacing spaces with dashes"""
+    return service_key.strip().replace(" ", "-")
+
+
 def get_api_url() -> Optional[str]:
     """Get API URL from environment variable"""
     url = os.getenv("CALMMAGE_SERVICE_REGISTRY_URL")
@@ -69,6 +74,7 @@ def get_api_url() -> Optional[str]:
 
 def heartbeat(service_key: str, period: int = 300) -> None:
     """Run heartbeat loop in current thread. Default period is 5 minutes."""
+    service_key = normalize_service_key(service_key)
     api_url = get_api_url()
     if not api_url:
         logger.warning("Heartbeat disabled: CALMMAGE_SERVICE_REGISTRY_URL not set")
@@ -79,15 +85,12 @@ def heartbeat(service_key: str, period: int = 300) -> None:
 
     while True:
         try:
-            response = httpx.post(
-                f"{api_url}/heartbeat",
-                json={"service_key": service_key}
-            )
+            response = httpx.post(f"{api_url}/heartbeat", json={"service_key": service_key})
             response.raise_for_status()
             logger.info(f"Heartbeat sent for {service_key}")
         except Exception as e:
             logger.error(f"Failed to send heartbeat for {service_key}: {e}")
-        
+
         try:
             time.sleep(period)
         except KeyboardInterrupt:
@@ -97,6 +100,8 @@ def heartbeat(service_key: str, period: int = 300) -> None:
 
 async def aheartbeat(service_key: str, period: int = 300) -> None:
     """Run heartbeat loop asynchronously. Default period is 5 minutes."""
+    service_key = normalize_service_key(service_key)
+
     api_url = get_api_url()
     if not api_url:
         logger.warning("Heartbeat disabled: CALMMAGE_SERVICE_REGISTRY_URL not set")
@@ -109,14 +114,13 @@ async def aheartbeat(service_key: str, period: int = 300) -> None:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"{api_url}/heartbeat",
-                    json={"service_key": service_key}
+                    f"{api_url}/heartbeat", json={"service_key": service_key}
                 )
                 response.raise_for_status()
                 logger.info(f"Heartbeat sent for {service_key}")
         except Exception as e:
             logger.error(f"Failed to send heartbeat for {service_key}: {e}")
-        
+
         try:
             await asyncio.sleep(period)
         except asyncio.CancelledError:
@@ -126,45 +130,44 @@ async def aheartbeat(service_key: str, period: int = 300) -> None:
 
 def heartbeat_for_sync(service_key: str, period: int = 300) -> Callable:
     """Decorator that runs heartbeat in background thread for sync functions"""
+    service_key = normalize_service_key(service_key)
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Start heartbeat in background thread
-            thread = threading.Thread(
-                target=heartbeat,
-                args=(service_key, period),
-                daemon=True
-            )
+            thread = threading.Thread(target=heartbeat, args=(service_key, period), daemon=True)
             thread.start()
             logger.info(f"Started heartbeat service for {service_key} in background")
-            
+
             # Run the main function
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 def run_with_heartbeat(
-    coro: Coroutine,
-    service_key: str,
-    period: int = 300,
-    debug: bool = False
+    coro: Coroutine, service_key: str, period: int = 300, debug: bool = False
 ) -> None:
     """
     Run an async function with a heartbeat service.
     Similar to asyncio.run but adds a heartbeat service.
-    
+
     Args:
         coro: The coroutine to run
         service_key: Service identifier for heartbeat
         period: Heartbeat interval in seconds (default: 5 minutes)
         debug: Enable asyncio debug mode
     """
+    service_key = normalize_service_key(service_key)
+
     async def _run_with_heartbeat():
         # Create heartbeat task
         heartbeat_task = asyncio.create_task(aheartbeat(service_key, period))
         logger.info(f"Started heartbeat service for {service_key} in background")
-        
+
         try:
             # Run both the heartbeat and the main coroutine
             main_task = asyncio.create_task(coro)
@@ -183,4 +186,4 @@ def run_with_heartbeat(
     try:
         asyncio.run(_run_with_heartbeat(), debug=debug)
     except KeyboardInterrupt:
-        logger.info("Shutting down...") 
+        logger.info("Shutting down...")
