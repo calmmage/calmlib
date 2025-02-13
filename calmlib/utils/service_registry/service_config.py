@@ -17,11 +17,10 @@ Example:
     ```
 """
 
-from enum import Enum
-from typing import Optional, Dict, Any
-
 import httpx
+from enum import Enum
 from loguru import logger
+from typing import Optional, Dict, Any
 
 
 class ServiceType(str, Enum):
@@ -33,7 +32,7 @@ class ServiceType(str, Enum):
 
 def setup_service(
     service_key: str,
-    service_type: Optional[ServiceType] = None,
+    service_type: Optional[str] = None,
     expected_period: Optional[int] = None,
     dead_after: Optional[int] = None,
 ) -> Dict[str, Any]:
@@ -61,21 +60,22 @@ def setup_service(
         raise ValueError("CALMMAGE_SERVICE_REGISTRY_URL not set")
 
     try:
-        # Only include provided parameters
-        params = {}
-        if service_type is not None:
-            params["service_type"] = service_type
-        if expected_period is not None:
-            params["expected_period"] = expected_period
-        if dead_after is not None:
-            params["dead_after"] = dead_after
+        # Build request body
+        request_data = {
+            "service_key": service_key,
+            "service_type": service_type,
+            "expected_period": expected_period,
+            "dead_after": dead_after,
+        }
+        # Remove None values
+        request_data = {k: v for k, v in request_data.items() if v is not None}
 
-        response = httpx.post(f"{api_url}/test/update-service/{service_key}", params=params)
+        response = httpx.post(f"{api_url}/configure-service", json=request_data)
         response.raise_for_status()
-        service = response.json()["service"]
+        service = response.json()
 
         logger.info(f"Service {service_key} configured successfully")
-        logger.info(f"Type: {service['service_type']}")
+        logger.info(f"Type: {service.get('service_type', 'default')}")
         if service.get("expected_period"):
             logger.info(f"Expected period: {service['expected_period']} seconds")
         if service.get("dead_after"):
