@@ -113,9 +113,7 @@ async def aheartbeat(service_key: str, period: int = 300) -> None:
     while True:
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{api_url}/heartbeat", json={"service_key": service_key}
-                )
+                response = await client.post(f"{api_url}/heartbeat", json={"service_key": service_key})
                 response.raise_for_status()
                 logger.info(f"Heartbeat sent for {service_key}")
         except Exception as e:
@@ -148,9 +146,7 @@ def heartbeat_for_sync(service_key: str, period: int = 300) -> Callable:
     return decorator
 
 
-def run_with_heartbeat(
-    coro: Coroutine, service_key: str, period: int = 300, debug: bool = False
-) -> None:
+def run_with_heartbeat(coro: Coroutine, service_key: str, period: int = 300, debug: bool = False) -> None:
     """
     Run an async function with a heartbeat service.
     Similar to asyncio.run but adds a heartbeat service.
@@ -187,3 +183,48 @@ def run_with_heartbeat(
         asyncio.run(_run_with_heartbeat(), debug=debug)
     except KeyboardInterrupt:
         logger.info("Shutting down...")
+
+
+def send_heartbeat(service_key: str) -> bool:
+    """Send a single heartbeat to the service registry.
+
+    Returns:
+        bool: True if heartbeat was sent successfully, False otherwise
+    """
+    service_key = normalize_service_key(service_key)
+    api_url = get_api_url()
+    if not api_url:
+        logger.warning("Heartbeat disabled: CALMMAGE_SERVICE_REGISTRY_URL not set")
+        return False
+
+    try:
+        response = httpx.post(f"{api_url}/heartbeat", json={"service_key": service_key})
+        response.raise_for_status()
+        logger.info(f"Single heartbeat sent for {service_key}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send heartbeat for {service_key}: {e}")
+        return False
+
+
+async def asend_heartbeat(service_key: str) -> bool:
+    """Send a single heartbeat to the service registry asynchronously.
+
+    Returns:
+        bool: True if heartbeat was sent successfully, False otherwise
+    """
+    service_key = normalize_service_key(service_key)
+    api_url = get_api_url()
+    if not api_url:
+        logger.warning("Heartbeat disabled: CALMMAGE_SERVICE_REGISTRY_URL not set")
+        return False
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(f"{api_url}/heartbeat", json={"service_key": service_key})
+            response.raise_for_status()
+            logger.info(f"Single heartbeat sent for {service_key}")
+            return True
+    except Exception as e:
+        logger.error(f"Failed to send heartbeat for {service_key}: {e}")
+        return False

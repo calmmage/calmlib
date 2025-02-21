@@ -1,6 +1,7 @@
 # from .audio_utils import *
 # from .deepl_translate import *
-from .gpt_utils import query_gpt
+from .llm_utils.gpt_utils import query_gpt
+from .llm_utils import gpt_utils
 
 # from .langchain_utils import *
 # from .whisper_utils import *
