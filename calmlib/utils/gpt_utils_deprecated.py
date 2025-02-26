@@ -81,7 +81,9 @@ def split_by_weight(items, weight_func, limit):
         item_weight = weight_func(item)
         if group_weight + item_weight > limit:
             if not group:
-                raise ValueError(f"Item {item} is too big to fit into a single group with limit {limit}")
+                raise ValueError(
+                    f"Item {item} is too big to fit into a single group with limit {limit}"
+                )
             groups.append(group)
             group = []
             group_weight = 0
@@ -94,7 +96,9 @@ def split_by_weight(items, weight_func, limit):
     return groups
 
 
-async def apply_command_recursively(command, chunks, model="gpt-3.5-turbo", merger=None, logger=None):
+async def apply_command_recursively(
+    command, chunks, model="gpt-3.5-turbo", merger=None, logger=None
+):
     """
     Apply GPT command recursively to the data
     """
@@ -161,7 +165,9 @@ async def amap_gpt_command(chunks, command, model="gpt-3.5-turbo", merge=False):
     completed_tasks = await asyncio.gather(*tasks)
 
     if merge:
-        merge_command = MERGE_COMMAND_TEMPLATE.format(command=command, keyword="TEMPORARY_RESULT:").strip()
+        merge_command = MERGE_COMMAND_TEMPLATE.format(
+            command=command, keyword="TEMPORARY_RESULT:"
+        ).strip()
         return apply_command_recursively(merge_command, completed_tasks, model=model)
     else:
         return completed_tasks
@@ -171,16 +177,16 @@ async def amap_gpt_command(chunks, command, model="gpt-3.5-turbo", merge=False):
 
 
 def query_openai(
-        prompt: str,
-        system: str = "You're a helpful assistant",
-        warmup_messages=None,
-        model_name="gpt-3.5-turbo",
-        use_langfuse=False,
-        temperature=0,
-        max_tokens=None,
-        timeout=None,
-        max_retries=2,
-        **kwargs,
+    prompt: str,
+    system: str = "You're a helpful assistant",
+    warmup_messages=None,
+    model_name="gpt-3.5-turbo",
+    use_langfuse=False,
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+    **kwargs,
 ) -> str:
     from langchain_community.chat_models import ChatOpenAI
 
@@ -197,8 +203,11 @@ def query_openai(
         max_retries=max_retries,
         **kwargs,
     )
-    from calmlib.utils.gpt_utils import _query_llm
-    return _query_llm(llm, system, prompt, use_langfuse=use_langfuse, warmup_messages=warmup_messages)
+    from calmlib.utils.llm_utils.gpt_utils import _query_llm
+
+    return _query_llm(
+        llm, system, prompt, use_langfuse=use_langfuse, warmup_messages=warmup_messages
+    )
 
     # # Build the prompt
     # chat_prompt = build_langchain_prompt(system)
@@ -217,16 +226,18 @@ if __name__ == "__main__":
     prompt = "Tell me a random scientific concept / theory"
 
     # Non-streaming example
-    response = query_gpt(prompt, system="You're a helpful assistant", use_langfuse=langfuse_env_available())
+    response = query_gpt(
+        prompt, system="You're a helpful assistant", use_langfuse=langfuse_env_available()
+    )
     print("Non-streaming response:", response)
 
     # Streaming example
     print("\nStreaming response:")
     for chunk in query_gpt(
-            prompt,
-            system="You're a helpful assistant",
-            use_langfuse=langfuse_env_available(),
-            stream=True,
+        prompt,
+        system="You're a helpful assistant",
+        use_langfuse=langfuse_env_available(),
+        stream=True,
     ):
         print(chunk, end="", flush=True)
     print()  # New line after streaming is complete
