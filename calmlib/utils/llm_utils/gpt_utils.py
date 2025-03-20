@@ -39,7 +39,10 @@ role_map = {
     "ai": "ai",
 }
 
-def build_langchain_prompt(system: str, warmup_messages=None, prompt_template="{prompt}") -> "ChatPromptTemplate":
+
+def build_langchain_prompt(
+    system: str, warmup_messages=None, prompt_template="{prompt}"
+) -> "ChatPromptTemplate":
     from langchain.prompts import ChatPromptTemplate
 
     # messages = [SystemMessage(content=system)]
@@ -62,14 +65,14 @@ def build_langchain_prompt(system: str, warmup_messages=None, prompt_template="{
 
 @lru_cache
 def _get_llm(
-        model=DEFAULT_MODEL,
-        engine=DEFAULT_ENGINE,
-        temperature=0.7,
-        max_tokens=1024,
-        timeout=None,
-        max_retries=2,
-        streaming=False,
-        **kwargs,
+    model=DEFAULT_MODEL,
+    engine=DEFAULT_ENGINE,
+    temperature=0.7,
+    max_tokens=1024,
+    timeout=None,
+    max_retries=2,
+    streaming=False,
+    **kwargs,
 ):
     common_params = {
         "temperature": temperature,
@@ -126,6 +129,7 @@ def _get_llm(
 @dataclass
 class LLMModelParams:
     """Parameters for configuring the LLM model"""
+
     model: str = DEFAULT_MODEL
     engine: str = DEFAULT_ENGINE
     temperature: float = 0.7
@@ -138,6 +142,7 @@ class LLMModelParams:
 @dataclass
 class LLMQueryParams:
     """Parameters for the query itself"""
+
     warmup_messages: Optional[list] = None
     use_langfuse: Optional[bool] = None
     structured_output_schema: Optional[Any] = None
@@ -151,22 +156,23 @@ def _check_output_schema(output_schema: Type[BaseModel], engine: str):
         if not issubclass(output_schema, BaseModel):
             raise ValueError("Output schema must be a subclass of BaseModel for Anthropic")
 
+
 def query_llm_raw(
-        prompt: str,
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        structured_output_schema: Optional[Any] = None,
-        **extra_kwargs
+    prompt: str,
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    structured_output_schema: Optional[Any] = None,
+    **extra_kwargs,
 ) -> Any:
     """Raw LLM query - returns the complete response object from the underlying LLM."""
     if structured_output_schema:
@@ -177,13 +183,13 @@ def query_llm_raw(
         temperature=temperature,
         max_tokens=max_tokens,
         timeout=timeout,
-        max_retries=max_retries
+        max_retries=max_retries,
     )
 
     query_params = LLMQueryParams(
         warmup_messages=warmup_messages,
         use_langfuse=use_langfuse,
-        structured_output_schema=structured_output_schema
+        structured_output_schema=structured_output_schema,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
@@ -191,36 +197,38 @@ def query_llm_raw(
     if structured_output_schema:
         llm = llm.with_structured_output(structured_output_schema)
 
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     return chain.invoke(input={"prompt": prompt}, config=config)
 
 
 def query_llm_text(
-        prompt: str,
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> str:
     """LLM query that returns just the text response."""
     result = query_llm_raw(
@@ -234,26 +242,26 @@ def query_llm_text(
         max_retries=max_retries,
         warmup_messages=warmup_messages,
         use_langfuse=use_langfuse,
-        **extra_kwargs
+        **extra_kwargs,
     )
     return result.content
 
 
 def query_llm_stream(
-        prompt: str,
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> Generator[str, None, None]:
     """Stream text chunks from LLM."""
     model_params = LLMModelParams(
@@ -263,20 +271,22 @@ def query_llm_stream(
         max_tokens=max_tokens,
         timeout=timeout,
         max_retries=max_retries,
-        streaming=True
+        streaming=True,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     for chunk in chain.stream(input={"prompt": prompt}, config=config):
@@ -284,21 +294,21 @@ def query_llm_stream(
 
 
 def query_llm_structured(
-        prompt: str,
-        output_schema: Type[BaseModel],
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    output_schema: Type[BaseModel],
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> BaseModel:
     """Query LLM with structured output."""
     _check_output_schema(output_schema, engine)
@@ -308,43 +318,45 @@ def query_llm_structured(
         temperature=temperature,
         max_tokens=max_tokens,
         timeout=timeout,
-        max_retries=max_retries
+        max_retries=max_retries,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
     llm = llm.with_structured_output(output_schema)
 
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     return chain.invoke(input={"prompt": prompt}, config=config)
 
 
 def query_llm_structured_stream(
-        prompt: str,
-        output_schema: Type[BaseModel],
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    output_schema: Type[BaseModel],
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> Generator[BaseModel, None, None]:
     """Stream structured output from LLM."""
     _check_output_schema(output_schema, engine)
@@ -355,22 +367,24 @@ def query_llm_structured_stream(
         max_tokens=max_tokens,
         timeout=timeout,
         max_retries=max_retries,
-        streaming=True
+        streaming=True,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
     llm = llm.with_structured_output(output_schema)
 
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     for chunk in chain.stream(input={"prompt": prompt}, config=config):
@@ -379,20 +393,20 @@ def query_llm_structured_stream(
 
 # Async versions
 async def aquery_llm_raw(
-        prompt: str,
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> Any:
     """Raw async LLM query."""
     model_params = LLMModelParams(
@@ -401,40 +415,42 @@ async def aquery_llm_raw(
         temperature=temperature,
         max_tokens=max_tokens,
         timeout=timeout,
-        max_retries=max_retries
+        max_retries=max_retries,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     return await chain.ainvoke(input={"prompt": prompt}, config=config)
 
 
 async def aquery_llm_text(
-        prompt: str,
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> str:
     """Async LLM query that returns just the text response."""
     result = await aquery_llm_raw(
@@ -448,26 +464,26 @@ async def aquery_llm_text(
         max_retries=max_retries,
         warmup_messages=warmup_messages,
         use_langfuse=use_langfuse,
-        **extra_kwargs
+        **extra_kwargs,
     )
     return result.content
 
 
 async def aquery_llm_stream(
-        prompt: str,
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> AsyncGenerator[str, None]:
     """Async streaming of text chunks from LLM."""
     model_params = LLMModelParams(
@@ -477,20 +493,22 @@ async def aquery_llm_stream(
         max_tokens=max_tokens,
         timeout=timeout,
         max_retries=max_retries,
-        streaming=True
+        streaming=True,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     async for chunk in chain.astream(input={"prompt": prompt}, config=config):
@@ -498,21 +516,21 @@ async def aquery_llm_stream(
 
 
 async def aquery_llm_structured(
-        prompt: str,
-        output_schema: Type[BaseModel],
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    output_schema: Type[BaseModel],
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> BaseModel:
     """Async query with structured output."""
     _check_output_schema(output_schema, engine)
@@ -522,43 +540,45 @@ async def aquery_llm_structured(
         temperature=temperature,
         max_tokens=max_tokens,
         timeout=timeout,
-        max_retries=max_retries
+        max_retries=max_retries,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
     llm = llm.with_structured_output(output_schema)
 
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     return await chain.ainvoke(input={"prompt": prompt}, config=config)
 
 
 async def aquery_llm_structured_stream(
-        prompt: str,
-        output_schema: Type[BaseModel],
-        system: str = DEFAULT_SYSTEM_MESSAGE,
-        *,
-        # Model configuration
-        model: str = DEFAULT_MODEL,
-        engine: str = DEFAULT_ENGINE,
-        temperature: float = 0.7,
-        max_tokens: int = 1024,
-        timeout: Optional[float] = None,
-        max_retries: int = 2,
-        # Query configuration
-        warmup_messages: Optional[list] = None,
-        use_langfuse: Optional[bool] = None,
-        **extra_kwargs
+    prompt: str,
+    output_schema: Type[BaseModel],
+    system: str = DEFAULT_SYSTEM_MESSAGE,
+    *,
+    # Model configuration
+    model: str = DEFAULT_MODEL,
+    engine: str = DEFAULT_ENGINE,
+    temperature: float = 0.7,
+    max_tokens: int = 1024,
+    timeout: Optional[float] = None,
+    max_retries: int = 2,
+    # Query configuration
+    warmup_messages: Optional[list] = None,
+    use_langfuse: Optional[bool] = None,
+    **extra_kwargs,
 ) -> AsyncGenerator[BaseModel, None]:
     """Async streaming of structured output from LLM."""
     _check_output_schema(output_schema, engine)
@@ -569,22 +589,24 @@ async def aquery_llm_structured_stream(
         max_tokens=max_tokens,
         timeout=timeout,
         max_retries=max_retries,
-        streaming=True
+        streaming=True,
     )
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
     llm = llm.with_structured_output(output_schema)
 
-    chat_prompt = build_langchain_prompt(
-        system,
-        warmup_messages=warmup_messages
-    ) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
     config = {}
     if use_langfuse:
         from langfuse.callback import CallbackHandler
+
         config["callbacks"] = [CallbackHandler()]
 
     async for chunk in chain.astream(input={"prompt": prompt}, config=config):
@@ -601,13 +623,13 @@ def langfuse_env_available():
 
 @deprecated(reason="deprecated together with query_gpt and aquery_gpt")
 def _query_llm(
-        llm,
-        system,
-        prompt,
-        warmup_messages=None,
-        use_langfuse=False,
-        stream=False,
-        structured_output_schema=None,
+    llm,
+    system,
+    prompt,
+    warmup_messages=None,
+    use_langfuse=False,
+    stream=False,
+    structured_output_schema=None,
 ):
     config = {}
     if use_langfuse:
@@ -638,24 +660,24 @@ def _query_llm(
 
 @deprecated(
     reason=(
-            "deprecated in favor of typed methods - query_llm_text, query_llm_stream, "
-            "query_llm_structured, query_llm_structured_stream"
+        "deprecated in favor of typed methods - query_llm_text, query_llm_stream, "
+        "query_llm_structured, query_llm_structured_stream"
     )
 )
 def query_gpt(
-        prompt,
-        system,
-        warmup_messages=None,
-        model=DEFAULT_MODEL,
-        engine=DEFAULT_ENGINE,
-        use_langfuse=None,
-        temperature=0.7,
-        max_tokens=1024,
-        timeout=None,
-        max_retries=2,
-        stream=False,
-        structured_output_schema=None,
-        **kwargs,
+    prompt,
+    system,
+    warmup_messages=None,
+    model=DEFAULT_MODEL,
+    engine=DEFAULT_ENGINE,
+    use_langfuse=None,
+    temperature=0.7,
+    max_tokens=1024,
+    timeout=None,
+    max_retries=2,
+    stream=False,
+    structured_output_schema=None,
+    **kwargs,
 ) -> Union[str, Generator[str, None, None], Any]:
     if use_langfuse is None:
         use_langfuse = langfuse_env_available()
@@ -688,24 +710,24 @@ def query_gpt(
 
 @deprecated(
     reason=(
-            "deprecated in favor of typed methods - aquery_llm_text, aquery_llm_stream, "
-            "aquery_llm_structured, aquery_llm_structured_stream"
+        "deprecated in favor of typed methods - aquery_llm_text, aquery_llm_stream, "
+        "aquery_llm_structured, aquery_llm_structured_stream"
     )
 )
 async def aquery_gpt(
-        prompt,
-        system,
-        warmup_messages=None,
-        model=DEFAULT_MODEL,
-        engine=DEFAULT_ENGINE,
-        use_langfuse=None,
-        temperature=0.7,
-        max_tokens=1024,
-        timeout=None,
-        max_retries=2,
-        stream=False,
-        structured_output_schema=None,
-        **kwargs,
+    prompt,
+    system,
+    warmup_messages=None,
+    model=DEFAULT_MODEL,
+    engine=DEFAULT_ENGINE,
+    use_langfuse=None,
+    temperature=0.7,
+    max_tokens=1024,
+    timeout=None,
+    max_retries=2,
+    stream=False,
+    structured_output_schema=None,
+    **kwargs,
 ):
     """Async version of query_gpt using langchain's .ainvoke()"""
     if use_langfuse is None:
@@ -725,7 +747,11 @@ async def aquery_gpt(
     if structured_output_schema:
         llm = llm.with_structured_output(structured_output_schema)
 
-    chat_prompt = build_langchain_prompt(system, warmup_messages=warmup_messages) if isinstance(system, str) else system
+    chat_prompt = (
+        build_langchain_prompt(system, warmup_messages=warmup_messages)
+        if isinstance(system, str)
+        else system
+    )
 
     chain = chat_prompt | llm
 
@@ -746,3 +772,22 @@ async def aquery_gpt(
         result = await chain.ainvoke(input={"prompt": prompt}, config=config)
 
     return result if structured_output_schema else result.content
+
+
+__all__ = [
+    "query_gpt",
+    "aquery_gpt",
+    "query_llm_raw",
+    "query_llm_text",
+    "query_llm_stream",
+    "query_llm_structured",
+    "query_llm_structured_stream",
+    "aquery_llm_raw",
+    "aquery_llm_text",
+    "aquery_llm_stream",
+    "aquery_llm_structured",
+    "aquery_llm_structured_stream",
+    "DEFAULT_ENGINE",
+    "DEFAULT_MODEL",
+    "models_per_engine",
+]
