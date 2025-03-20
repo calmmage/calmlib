@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "1.0.18" # add aquery_gpt
+version = "1.0.19" # add aquery_gpt
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
@@ -17,7 +17,7 @@ classifiers = [
 # todo: cleanup dependencies to speed up installation and resolving
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-loguru = ">=0.7"
+loguru = ">=0.7.3"
 # for parsing version
 toml = ">=0.10"
 python-dotenv = "*"

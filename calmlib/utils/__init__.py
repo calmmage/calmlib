@@ -5,7 +5,7 @@ from .llm_utils import gpt_utils
 
 # from .langchain_utils import *
 # from .whisper_utils import *
-from .logging_utils import get_logger
+from .logging_utils import get_logger, setup_logger
 from .main import *
 from .read_write import *
 from .run_utils import *
