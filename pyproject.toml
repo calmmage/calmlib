@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "1.1.0" # add aquery_gpt
+version = "1.1.1" # add aquery_gpt
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
@@ -15,6 +15,11 @@ classifiers = [
 ]
 
 # todo: cleanup dependencies to speed up installation and resolving
+packages=[
+    { include = "calmlib", from = "." },
+]
+
+
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
 loguru = ">=0.7.3"
@@ -87,6 +92,13 @@ langfuse = "*"                 # Language model analytics
 [tool.poetry.group.test.dependencies]
 pytest = ">=6"
 pytest-mongodb = "*"
+vulture = "^2.14"
+pytest-cov = "^6.1.1"
+pytest-asyncio = "^0.26.0"
+pytest-mock = "^3.14.0"
+pyupgrade = "^3.19.1"
+pyright = "^1.1.399"
+ruff = "^0.11.6"
 
 [tool.poetry.group.docs.dependencies]
 #mkdocs = ">=1.6"

@@ -4,7 +4,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Generator, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Generator, Optional, Type
 from loguru import logger
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
@@ -133,7 +133,9 @@ class LLMProvider:
             return model
         return MODEL_NAME_SHORTCUTS.get(model, model)
 
-    def _prepare_messages(self, prompt: str, system_message: Optional[str] = None) -> list:
+    def _prepare_messages(
+        self, prompt: str, system_message: Optional[str] = None
+    ) -> list:
         """Prepare messages for the LLM request."""
         messages = []
 
@@ -180,13 +182,16 @@ class LLMProvider:
         Returns:
             Raw response from the LLM
         """
-        import asyncio
 
         from litellm import completion
 
         # Get model parameters with defaults
         model = model or self.settings.default_model
-        temperature = temperature if temperature is not None else self.settings.default_temperature
+        temperature = (
+            temperature
+            if temperature is not None
+            else self.settings.default_temperature
+        )
         max_tokens = max_tokens or self.settings.default_max_tokens
         timeout = timeout or self.settings.default_timeout
 
@@ -274,14 +279,17 @@ class LLMProvider:
 
         Arguments are the same as query_llm_raw but returns a generator of text chunks.
         """
-        import asyncio
 
         from litellm import completion
         from litellm.litellm_core_utils.streaming_handler import CustomStreamWrapper
 
         # Get model parameters with defaults
         model = model or self.settings.default_model
-        temperature = temperature if temperature is not None else self.settings.default_temperature
+        temperature = (
+            temperature
+            if temperature is not None
+            else self.settings.default_temperature
+        )
         max_tokens = max_tokens or self.settings.default_max_tokens
         timeout = timeout or self.settings.default_timeout
 
@@ -331,7 +339,6 @@ class LLMProvider:
         Returns:
             An instance of the provided Pydantic model
         """
-        import asyncio
 
         from litellm import completion
         from litellm.types.utils import ModelResponse, StreamingChoices
@@ -339,7 +346,11 @@ class LLMProvider:
         # Get model parameters with defaults
         model = model or self.settings.default_model
 
-        temperature = temperature if temperature is not None else self.settings.default_temperature
+        temperature = (
+            temperature
+            if temperature is not None
+            else self.settings.default_temperature
+        )
         max_tokens = max_tokens or self.settings.default_max_tokens
         timeout = timeout or self.settings.default_timeout
 
@@ -406,7 +417,11 @@ class LLMProvider:
 
         # Get model parameters with defaults
         model = model or self.settings.default_model
-        temperature = temperature if temperature is not None else self.settings.default_temperature
+        temperature = (
+            temperature
+            if temperature is not None
+            else self.settings.default_temperature
+        )
         max_tokens = max_tokens or self.settings.default_max_tokens
         timeout = timeout or self.settings.default_timeout
 
@@ -434,7 +449,9 @@ class LLMProvider:
         # Make the actual API call
         response = await acompletion(model=full_model_name, messages=messages, **params)
 
-        assert isinstance(response, ModelResponse), "Expected ModelResponse but got CustomStreamWrapper"
+        assert isinstance(
+            response, ModelResponse
+        ), "Expected ModelResponse but got CustomStreamWrapper"
         return response
 
     async def aquery_llm_text(
@@ -497,7 +514,11 @@ class LLMProvider:
 
         # Get model parameters with defaults
         model = model or self.settings.default_model
-        temperature = temperature if temperature is not None else self.settings.default_temperature
+        temperature = (
+            temperature
+            if temperature is not None
+            else self.settings.default_temperature
+        )
         max_tokens = max_tokens or self.settings.default_max_tokens
         timeout = timeout or self.settings.default_timeout
 
@@ -551,7 +572,11 @@ class LLMProvider:
 
         # Get model parameters with defaults
         model = model or self.settings.default_model
-        temperature = temperature if temperature is not None else self.settings.default_temperature
+        temperature = (
+            temperature
+            if temperature is not None
+            else self.settings.default_temperature
+        )
         max_tokens = max_tokens or self.settings.default_max_tokens
         timeout = timeout or self.settings.default_timeout
 
@@ -616,8 +641,12 @@ def initialize(settings: LLMProviderSettings) -> LLMProvider:
 
         logger.debug("litellm version: %s", litellm.api_version)
     except ImportError:
-        logger.error("litellm is not installed. Please install it to use the LLM Provider component.")
-        raise ImportError("litellm is not installed. Run 'poetry add litellm' or 'pip install litellm'")
+        logger.error(
+            "litellm is not installed. Please install it to use the LLM Provider component."
+        )
+        raise ImportError(
+            "litellm is not installed. Run 'poetry add litellm' or 'pip install litellm'"
+        )
     if not settings.skip_import_check:
         ai_libraries = {
             "openai": "openai",  # poetry add openai -> import openai
@@ -650,7 +679,9 @@ def initialize(settings: LLMProviderSettings) -> LLMProvider:
                 msg = f"✅ {lib_name} is available."
                 # todo: check api key, if not -> print warning
                 env_key = api_keys_env_names.get(lib_name)
-                assert env_key is not None, f"Expected env key for {lib_name} but got None"
+                assert (
+                    env_key is not None
+                ), f"Expected env key for {lib_name} but got None"
                 api_key = os.getenv(env_key)
 
                 if api_key:
@@ -659,7 +690,9 @@ def initialize(settings: LLMProviderSettings) -> LLMProvider:
                     msg += f" (⚠️ No {env_key})"
                 logger.info(msg)
             except ImportError:
-                logger.info(f"❌ {lib_name} is not installed. `poetry add {lib_name}` to install it.")
+                logger.info(
+                    f"❌ {lib_name} is not installed. `poetry add {lib_name}` to install it."
+                )
 
         if not installed_libraries:
             keys = list(ai_libraries.keys())
@@ -709,7 +742,9 @@ def query_llm_text(
     This is a convenience function that uses the global LLM provider.
     """
     provider = get_llm_provider()
-    return provider.query_llm_text(prompt=prompt, system_message=system_message, model=model, **kwargs)
+    return provider.query_llm_text(
+        prompt=prompt, system_message=system_message, model=model, **kwargs
+    )
 
 
 def query_llm_raw(
@@ -734,7 +769,9 @@ def query_llm_raw(
         Raw response from the LLM with full metadata and usage stats
     """
     provider = get_llm_provider()
-    return provider.query_llm_raw(prompt=prompt, system_message=system_message, model=model, **kwargs)
+    return provider.query_llm_raw(
+        prompt=prompt, system_message=system_message, model=model, **kwargs
+    )
 
 
 def query_llm_structured(
@@ -783,7 +820,9 @@ async def aquery_llm_text(
     This is a convenience function that uses the global LLM provider.
     """
     provider = get_llm_provider()
-    return await provider.aquery_llm_text(prompt=prompt, system_message=system_message, model=model, **kwargs)
+    return await provider.aquery_llm_text(
+        prompt=prompt, system_message=system_message, model=model, **kwargs
+    )
 
 
 async def astream_llm(
@@ -808,7 +847,9 @@ async def astream_llm(
         An async generator that yields text chunks as they become available
     """
     provider = get_llm_provider()
-    async for chunk in provider.aquery_llm_stream(prompt=prompt, system_message=system_message, model=model, **kwargs):
+    async for chunk in provider.aquery_llm_stream(
+        prompt=prompt, system_message=system_message, model=model, **kwargs
+    ):
         yield chunk
 
 
@@ -867,7 +908,9 @@ async def aquery_llm_raw(
         Raw response from the LLM with full metadata and usage stats
     """
     provider = get_llm_provider()
-    return await provider.aquery_llm_raw(prompt=prompt, system_message=system_message, model=model, **kwargs)
+    return await provider.aquery_llm_raw(
+        prompt=prompt, system_message=system_message, model=model, **kwargs
+    )
 
 
 # ---------------------------------------------
