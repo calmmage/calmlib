@@ -101,6 +101,7 @@ def setup_logger(
 
 # Example usage
 if __name__ == "__main__":
+    logger = loguru_logger
     # Default dev mode
     setup_logger()
     logger.info("Dev mode: console only, detailed format")
