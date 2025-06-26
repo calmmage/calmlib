@@ -22,8 +22,8 @@ class LogMode(str, Enum):
 def setup_logger(
     logger=loguru_logger,
     level: str = "INFO",
+    mode: LogMode = LogMode.CUSTOM,
     format: Union[LogFormat, str] = LogFormat.DEFAULT,
-    mode: LogMode = LogMode.DEV,
     console: bool = True,
     file: Optional[Union[str, Path]] = None,
     jupyter: bool = False,

@@ -4,7 +4,7 @@ from .llm_utils.litellm_wrapper import query_llm_text
 
 # from .langchain_utils import *
 # from .whisper_utils import *
-from .logging_utils import get_logger, setup_logger
+from .logging_utils import get_logger, setup_logger, LogMode, LogFormat
 from .main import *
 from .read_write import *
 from .run_utils import run_bg, run_cmd
@@ -29,4 +29,6 @@ __all__ = [
     "asend_heartbeat",
     "run_bg",
     "run_cmd",
+    "LogMode",
+    "LogFormat",
 ]
