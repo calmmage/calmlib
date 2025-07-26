@@ -1,4 +1,3 @@
----
 ARCHIVED - moved to main calmmage repo: https://github.com/calmmage/calmmage/tree/main/calmlib
 
 to import (uv, pyproject.toml), use
