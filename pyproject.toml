@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "1.1.2" # add aquery_gpt
+version = "2.0.9"
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
@@ -15,7 +15,7 @@ classifiers = [
 ]
 
 # todo: cleanup dependencies to speed up installation and resolving
-packages=[
+packages = [
     { include = "calmlib", from = "." },
 ]
 
@@ -52,6 +52,9 @@ litellm = "^1.67.0.post1"
 
 # data, databases
 pymongo = "*"                 # MongoDB client
+
+# telegram bots
+aiogram = "*"                 # Telegram bot framework
 #mongoengine = "*"            # MongoDB ORM
 #PyDrive = "*"                # Google Drive API client
 protobuf = "*"               # Protocol buffers
