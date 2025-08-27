@@ -1,0 +1,38 @@
+name: Code Quality
+
+env:
+  COVERAGE_THRESHOLD: 50
+  VULTURE_MIN_CONFIDENCE: 80
+
+on: [ push ]
+
+jobs:
+  type-check:
+    name: Pyright
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.13" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run Pyright type checker
+        run: uv run pyright
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.13" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests
+        run: uv run pytest

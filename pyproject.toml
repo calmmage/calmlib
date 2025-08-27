@@ -104,7 +104,9 @@ pyright = "^1.1.399"
 ruff = "^0.11.6"
 
 [tool.poetry.group.docs.dependencies]
-#mkdocs = ">=1.6"
+mkdocs = ">=1.6"
+mkdocs-material = ">=9.5"
+mkdocstrings = ">=0.25"
 
 [tool.poetry.group.dev.dependencies]
 # dev / research utils
