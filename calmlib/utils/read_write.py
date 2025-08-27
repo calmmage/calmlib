@@ -3,7 +3,7 @@ import pickle
 from os import PathLike
 from pathlib import Path
 
-from calmlib.utils.main import Pathlike
+from .utils import Pathlike
 
 
 def dump_json(obj, path: PathLike, indent=2, **kwargs):
@@ -12,7 +12,7 @@ def dump_json(obj, path: PathLike, indent=2, **kwargs):
 
 
 def load_json(path: PathLike):
-    with open(path, "r") as f:
+    with open(path) as f:
         return json.load(f)
 
 

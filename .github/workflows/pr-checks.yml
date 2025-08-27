@@ -1,0 +1,87 @@
+name: Code Quality
+
+env:
+  COVERAGE_THRESHOLD: 50
+  VULTURE_MIN_CONFIDENCE: 80
+  SCAN_PATHS: 'src tests'
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  ruff-check:
+    name: Ruff
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.13" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run Ruff linter
+        run: uv run ruff check --output-format=github ${{ env.SCAN_PATHS }}
+
+      - name: Run Ruff formatter check
+        run: uv run ruff format --check --diff ${{ env.SCAN_PATHS }}
+
+  dead-code-check:
+    name: Vulture
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.13" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run Vulture dead code detector
+        run: uv run vulture --min-confidence ${{ env.VULTURE_MIN_CONFIDENCE }} ${{ env.SCAN_PATHS }}
+
+  coverage:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.13" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run coverage analysis
+        run: |
+          uv run pytest ${{ env.SCAN_PATHS }} \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=term \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }}
+
+  #      - name: Upload coverage to Codecov (optional)
+  #        uses: codecov/codecov-action@v3
+  #        if: always()
+  #        with:
+  #          file: ./coverage.xml
+  #          fail_ci_if_error: false
+
+
+  extra-tests:
+    name: Tests Python 3.12
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.12" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests
+        run: uv run pytest

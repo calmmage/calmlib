@@ -10,16 +10,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.10
+          python-version: "3.11"
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.1.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          
+      - name: Setup Poetry cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.cache/pip
+            .venv
+          key: ${{ runner.os }}-poetry-release-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-release-
+            ${{ runner.os }}-poetry-
 
       - name: Build package
         run: |
@@ -37,7 +52,7 @@ jobs:
           prerelease: false
       - name: Extract version
         id: get_version
-        run: echo "::set-output name=version::$(python -c 'import calmlib; print(calmlib.__version__)')"
+        run: echo "version=$(poetry version -s)" >> $GITHUB_OUTPUT
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -46,13 +61,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/calmlib-${{ steps.get_version.outputs.version }}.tar.gz
-          asset_name: calmlib-${{ steps.get_version.outputs.version }}.tar.gz
+          asset_path: ./dist/botspot-${{ steps.get_version.outputs.version }}.tar.gz
+          asset_name: botspot-${{ steps.get_version.outputs.version }}.tar.gz
           asset_content_type: application/gzip
 
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
 
