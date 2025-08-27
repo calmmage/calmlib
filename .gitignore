@@ -145,3 +145,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# AI instruction files (generated)
+CLAUDE.md
+GEMINI.md
+.cursorrules
+
+# AI instruction files (generated)
+.claude
