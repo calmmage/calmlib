@@ -12,24 +12,24 @@ class UserInteractionEngine(ABC):
     @abstractmethod
     async def ask_user(self, question: str, **kwargs) -> str | None:
         """Ask user a text question and get string response"""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def ask_user_choice(
         self, question: str, choices: list[str] | dict[str, str], **kwargs
     ) -> str | None:
         """Ask user to choose from options"""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
         """Ask user yes/no question and get boolean response"""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def ask_user_raw(self, question: str, **kwargs) -> Any | None:
         """Ask user and return raw response object"""
-        pass
+        raise NotImplementedError
 
 
 class PythonInputEngine(UserInteractionEngine):
@@ -85,15 +85,12 @@ class TyperEngine(UserInteractionEngine):
     """Typer CLI engine using rich prompts"""
 
     def __init__(self):
-        try:
-            import typer
-            from rich.prompt import Confirm, Prompt
+        import typer
+        from rich.prompt import Confirm, Prompt
 
-            self.typer = typer
-            self.Prompt = Prompt
-            self.Confirm = Confirm
-        except ImportError:
-            raise ImportError("typer and rich are required for TyperEngine")
+        self.typer = typer
+        self.Prompt = Prompt
+        self.Confirm = Confirm
 
     async def ask_user(self, question: str, **kwargs) -> str | None:
         try:
@@ -256,7 +253,7 @@ class ServiceTelegramBotEngine(UserInteractionEngine):
 
         return None  # Timeout
 
-    def ask_user(self, question: str, **kwargs) -> str | None:
+    async def ask_user(self, question: str, **kwargs) -> str | None:
         """Ask user a text question via telegram"""
         self._ensure_loop()
 
@@ -271,7 +268,7 @@ class ServiceTelegramBotEngine(UserInteractionEngine):
 
         return self.loop.run_until_complete(_ask())
 
-    def ask_user_choice(
+    async def ask_user_choice(
         self, question: str, choices: list[str] | dict[str, str], **kwargs
     ) -> str | None:
         """Ask user to choose via inline keyboard"""
@@ -304,7 +301,7 @@ class ServiceTelegramBotEngine(UserInteractionEngine):
 
         return self.loop.run_until_complete(_ask())
 
-    def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
+    async def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
         """Ask yes/no via inline keyboard"""
         choices = {"yes": "✅ Yes", "no": "❌ No"}
         response = self.ask_user_choice(question, choices, **kwargs)
@@ -315,6 +312,6 @@ class ServiceTelegramBotEngine(UserInteractionEngine):
             return False
         return None
 
-    def ask_user_raw(self, question: str, **kwargs) -> Any | None:
+    async def ask_user_raw(self, question: str, **kwargs) -> Any | None:
         """Return raw text response"""
         return self.ask_user(question, **kwargs)

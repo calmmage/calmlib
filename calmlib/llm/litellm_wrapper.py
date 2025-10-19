@@ -141,7 +141,7 @@ class LLMQueryParams:
 
 
 class LLMProvider:
-    """Main LLM Provider class for Botspot"""
+    """Main LLM Provider class for Calmlib"""
 
     def __init__(self, settings: LLMProviderSettings):
         """Initialize the LLM Provider with the given settings."""

@@ -144,7 +144,7 @@ async def authenticate_telethon_client(
                         )
                     except ValueError:
                         password = await ask_user(
-                            "Enter 2FA Password or ser it as CALMMAGE_TELEGRAM_2FA_PASSWORD"
+                            "Enter 2FA Password or set it as CALMMAGE_TELEGRAM_2FA_PASSWORD"
                         )
                         if password is None:
                             raise ValueError("2FA password is required")
