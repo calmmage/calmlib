@@ -1,17 +1,18 @@
 import json
 import os
 from collections import defaultdict
+from collections.abc import AsyncGenerator, Generator
 from dataclasses import dataclass
-
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Generator, Optional, Type
+from typing import TYPE_CHECKING, Any
+
 from loguru import logger
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
 if TYPE_CHECKING:
-    from litellm.types.utils import ModelResponse
     from litellm.litellm_core_utils.streaming_handler import CustomStreamWrapper
+    from litellm.types.utils import ModelResponse
 
 
 # ---------------------------------------------
@@ -48,6 +49,8 @@ MODEL_NAME_SHORTCUTS = {
     "claude-4-opus": "anthropic/claude-opus-4-20250514",
     "claude-4-sonnet": "anthropic/claude-sonnet-4-20250514",
     "claude-4.1-opus": "anthropic/claude-opus-4-1-20250805",
+    "claude-4.5-sonnet": "anthropic/claude-sonnet-4-5",
+    "claude-4.5-haiku": "anthropic/claude-haiku-4-5",
     # OpenAI models
     "gpt-4o": "openai/gpt-4o",
     "gpt-5": "openai/gpt-5",
@@ -91,10 +94,18 @@ MODEL_NAME_SHORTCUTS = {
     "cursor-fast": "cursor/cursor-fast",
     "cursor-small": "cursor/cursor-small",
     # Deepseek models
-    "deepseek-r1": "deepseek/deepseek-r1",
+    # "deepseek-r1": "deepseek/deepseek-r1",
     "deepseek-v3": "deepseek/deepseek-v3",
     # Meta models
     "llama": "meta/llama",
+    "qwen-7b": "ollama/qwen2.5:7b",
+    "qwen-3b": "ollama/qwen2.5:3b",
+    "qwen-14b": "ollama/qwen2.5:14b",
+    "llama3-8b": "ollama/llama3.1:8b",
+    "llama3-1b": "ollama/llama3.2:1b",
+    "gemma2-2b": "ollama/gemma2:2b",
+    "gemma2-9b": "ollama/gemma2:9b",
+    "deepseek-r1": "ollama/deepseek-r1:latest",
 }
 
 
@@ -105,7 +116,7 @@ class LLMModelParams:
     model: str = "claude-4-sonnet"
     temperature: float = 0.7
     max_tokens: int = 1000
-    timeout: Optional[float] = None
+    timeout: float | None = None
     max_retries: int = 2
     streaming: bool = False
 
@@ -114,9 +125,9 @@ class LLMModelParams:
 class LLMQueryParams:
     """Parameters for the query itself"""
 
-    system_message: Optional[str] = None
+    system_message: str | None = None
     use_structured_output: bool = False
-    structured_output_schema: Optional[Any] = None
+    structured_output_schema: Any | None = None
 
 
 # ---------------------------------------------
@@ -144,9 +155,7 @@ class LLMProvider:
             return model
         return MODEL_NAME_SHORTCUTS.get(model, model)
 
-    def _prepare_messages(
-        self, prompt: str, system_message: Optional[str] = None
-    ) -> list:
+    def _prepare_messages(self, prompt: str, system_message: str | None = None) -> list:
         """Prepare messages for the LLM request."""
         messages = []
 
@@ -167,13 +176,13 @@ class LLMProvider:
         self,
         prompt: str,
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
-        structured_output_schema: Optional[Type[BaseModel]] = None,
+        structured_output_schema: type[BaseModel] | None = None,
         **extra_kwargs,
     ) -> "ModelResponse | CustomStreamWrapper":
         """
@@ -236,11 +245,11 @@ class LLMProvider:
         self,
         prompt: str,
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
         **extra_kwargs,
     ) -> str:
@@ -277,11 +286,11 @@ class LLMProvider:
         self,
         prompt: str,
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
         **extra_kwargs,
     ) -> Generator[str, None, None]:
@@ -330,13 +339,13 @@ class LLMProvider:
     def query_llm_structured[T: BaseModel](
         self,
         prompt: str,
-        output_schema: Type[T],
+        output_schema: type[T],
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
         **extra_kwargs,
     ) -> T:
@@ -409,13 +418,13 @@ class LLMProvider:
         self,
         prompt: str,
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
-        structured_output_schema: Optional[Type[BaseModel]] = None,
+        structured_output_schema: type[BaseModel] | None = None,
         **extra_kwargs,
     ) -> "ModelResponse":
         """
@@ -460,20 +469,20 @@ class LLMProvider:
         # Make the actual API call
         response = await acompletion(model=full_model_name, messages=messages, **params)
 
-        assert isinstance(
-            response, ModelResponse
-        ), "Expected ModelResponse but got CustomStreamWrapper"
+        assert isinstance(response, ModelResponse), (
+            "Expected ModelResponse but got CustomStreamWrapper"
+        )
         return response
 
     async def aquery_llm_text(
         self,
         prompt: str,
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
         **extra_kwargs,
     ) -> str:
@@ -496,9 +505,9 @@ class LLMProvider:
         )
         assert isinstance(response, ModelResponse), "Expected ModelResponse"
         choice = response.choices[0]
-        assert choice is not None and not isinstance(
-            choice, StreamingChoices
-        ), "Expected ModelResponse but got CustomStreamWrapper"
+        assert choice is not None and not isinstance(choice, StreamingChoices), (
+            "Expected ModelResponse but got CustomStreamWrapper"
+        )
         content = choice.message.content
         assert content is not None, "Expected non-None content from LLM response"
         return content
@@ -507,11 +516,11 @@ class LLMProvider:
         self,
         prompt: str,
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
         **extra_kwargs,
     ) -> AsyncGenerator[str, None]:
@@ -558,13 +567,13 @@ class LLMProvider:
     async def aquery_llm_structured[T: BaseModel](
         self,
         prompt: str,
-        output_schema: Type[T],
+        output_schema: type[T],
         *,
-        system_message: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[float] = None,
+        system_message: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
         max_retries: int = 2,
         **extra_kwargs,
     ) -> T:
@@ -642,48 +651,48 @@ class LLMProvider:
 
 def initialize(settings: LLMProviderSettings) -> LLMProvider:
     """Initialize the LLM Provider component."""
-    logger.info("Initializing LLM Provider component")
-    
-    # Check if litellm is installed
-    try:
-        import litellm
-        logger.debug("litellm version: %s", litellm.api_version)
-    except ImportError:
-        logger.error(
-            "litellm is not installed. Please install it to use the LLM Provider component."
-        )
-        raise ImportError(
-            "litellm is not installed. Run 'poetry add litellm' or 'pip install litellm'"
-        )
-    
+    logger.debug("Initializing LLM Provider component")
+
     # Check for API keys
     if not settings.skip_import_check:
         api_keys_env_names = {
-            "OpenAI": "OPENAI_API_KEY",
-            "Anthropic": "ANTHROPIC_API_KEY", 
-            "Google/Gemini": "GEMINI_API_KEY",
-            "xAI/Grok": "XAI_API_KEY",
-            "Huggingface": "HUGGINGFACE_TOKEN",
-            "Cohere": "COHERE_API_KEY",
-            "Mistral": "MISTRAL_API_KEY",
-            "Deepseek": "DEEPSEEK_API_KEY",
-            "Fireworks": "FIREWORKS_API_KEY",
+            "OpenAI": "CALMMAGE_OPENAI_API_KEY",
+            "Anthropic": "CALMMAGE_ANTHROPIC_API_KEY",
+            "Google/Gemini": "CALMMAGE_GEMINI_API_KEY",
+            "xAI/Grok": "CALMMAGE_XAI_API_KEY",
+            # "Huggingface": "HUGGINGFACE_TOKEN",
+            # "Cohere": "COHERE_API_KEY",
+            # "Mistral": "MISTRAL_API_KEY",
+            # "Deepseek": "DEEPSEEK_API_KEY",
+            # "Fireworks": "FIREWORKS_API_KEY",
         }
-        
-        # Check which API keys are available
+
+        # Check which API keys are available using calmmage env discovery
+        from calmlib.utils.env_discovery import find_env_key
+
         available_keys = []
         for provider_name, env_key in api_keys_env_names.items():
-            api_key = os.getenv(env_key)
+            # First try calmmage-prefixed key, then fall back to standard key
+            api_key = find_env_key(env_key)
+            if env_key.startswith("CALMMAGE_"):
+                standard_key = env_key.replace("CALMMAGE_", "")
+                if api_key and not os.getenv(standard_key):
+                    os.environ[standard_key] = api_key
+                else:
+                    # Fallback to standard key name (e.g., OPENAI_API_KEY)
+                    api_key = find_env_key(standard_key)
+
             if api_key:
-                logger.info(f"✅ {provider_name} API key found ({env_key})")
+                logger.debug(f"✅ {provider_name} API key found ({env_key})")
                 available_keys.append(provider_name)
             else:
                 logger.debug(f"⚠️ {provider_name} API key not found ({env_key})")
-        
+
         if not available_keys:
             logger.warning(
                 "No API keys found. You'll need to set at least one API key to use LLM features.\n"
-                "Common keys: OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY"
+                "Run: uv run typer tools/env_setup_script/cli.py run setup\n"
+                "Or set manually: CALMMAGE_OPENAI_API_KEY, CALMMAGE_ANTHROPIC_API_KEY, CALMMAGE_GOOGLE_AI_API_KEY"
             )
 
     provider = LLMProvider(settings)
@@ -712,9 +721,9 @@ def get_llm_provider() -> LLMProvider:
 def query_llm_text(
     prompt: str,
     *,
-    system_message: Optional[str] = None,
-    model: Optional[str] = None,
-    **kwargs,
+    system_message: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
 ) -> str:
     """
     Query the LLM and return the text response.
@@ -730,12 +739,12 @@ def query_llm_text(
 def query_llm_raw(
     prompt: str,
     *,
-    system_message: Optional[str] = None,
-    model: Optional[str] = None,
-    **kwargs,
-) -> "ModelResponse | CustomStreamWrapper":
+    system_message: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
+) -> "ModelResponse":
     """
-    Raw query to the LLM - returns the complete response object.
+    Query the LLM and return the complete response object.
 
     This is a convenience function that uses the global LLM provider.
 
@@ -754,14 +763,14 @@ def query_llm_raw(
     )
 
 
-def query_llm_structured(
+def query_llm_structured[T: BaseModel](
     prompt: str,
-    output_schema: Type[BaseModel],
+    output_schema: type[T],
     *,
-    system_message: Optional[str] = None,
-    model: Optional[str] = None,
-    **kwargs,
-) -> BaseModel:
+    system_message: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
+) -> T:
     """
     Query LLM with structured output.
 
@@ -790,9 +799,9 @@ def query_llm_structured(
 async def aquery_llm_text(
     prompt: str,
     *,
-    system_message: Optional[str] = None,
-    model: Optional[str] = None,
-    **kwargs,
+    system_message: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
 ) -> str:
     """
     Async query the LLM and return the text response.
@@ -808,9 +817,9 @@ async def aquery_llm_text(
 async def astream_llm(
     prompt: str,
     *,
-    system_message: Optional[str] = None,
-    model: Optional[str] = None,
-    **kwargs,
+    system_message: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
 ) -> AsyncGenerator[str, None]:
     """
     Async stream text chunks from the LLM.
@@ -835,11 +844,11 @@ async def astream_llm(
 
 async def aquery_llm_structured[T: BaseModel](
     prompt: str,
-    output_schema: Type[T],
+    output_schema: type[T],
     *,
-    system_message: Optional[str] = None,
-    model: Optional[str] = None,
-    **kwargs,
+    system_message: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
 ) -> T:
     """
     Async query LLM with structured output.
@@ -869,9 +878,9 @@ async def aquery_llm_structured[T: BaseModel](
 async def aquery_llm_raw(
     prompt: str,
     *,
-    system_message: Optional[str] = None,
-    model: Optional[str] = None,
-    **kwargs,
+    system_message: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
 ) -> "ModelResponse":
     """
     Async raw query to the LLM - returns the complete response object.

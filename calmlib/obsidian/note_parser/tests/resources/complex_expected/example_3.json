@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "type": "todo",
+      "text": "a"
+    },
+    {
+      "type": "todo",
+      "text": "b",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Done",
+      "children": [
+        {
+          "type": "todo",
+          "text": "c",
+          "checked": true
+        },
+        {
+          "type": "todo",
+          "text": "d",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "make a done test",
+              "checked": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

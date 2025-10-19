@@ -1,0 +1,144 @@
+{
+  "items": [
+    {
+      "type": "separator",
+      "text": "---"
+    },
+    {
+      "type": "plain_text",
+      "text": "type: workalong",
+      "children": [
+        {
+          "type": "separator",
+          "text": "---"
+        },
+        {
+          "type": "list_item",
+          "text": "protocol",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Steps"
+            },
+            {
+              "type": "plain_text",
+              "text": "-",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "1) brainstorm candidates"
+                }
+              ]
+            },
+            {
+              "type": "plain_text",
+              "text": "-",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "2) select one - specific goal"
+                }
+              ]
+            },
+            {
+              "type": "plain_text",
+              "text": "-",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "3) do it"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Step 1",
+      "children": [
+        {
+          "type": "plain_text",
+          "text": "Write down ideas of what I wanted to do",
+          "children": [
+            {
+              "type": "empty",
+              "text": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Step 2 - people ETL",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Step 3 - track tracker",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "Hobbies"
+        },
+        {
+          "type": "list_item",
+          "text": "Friend"
+        },
+        {
+          "type": "list_item",
+          "text": "Work"
+        },
+        {
+          "type": "list_item",
+          "text": "Love"
+        },
+        {
+          "type": "list_item",
+          "text": "Family"
+        },
+        {
+          "type": "list_item",
+          "text": "Health",
+          "children": [
+            {
+              "type": "empty",
+              "text": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Step 4 - task tracker and AI workflow",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Step 5 - new daily task tracking idea",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Step 6"
+    }
+  ]
+}

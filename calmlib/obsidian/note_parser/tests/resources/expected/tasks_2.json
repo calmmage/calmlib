@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "type": "task",
+      "text": "01",
+      "checked": false,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "unchecked task item"
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "text": "02",
+      "checked": true,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "checked task item"
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "text": "03",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "regular task item"
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "text": "04",
+      "checked": false,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "text"
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "text": "05",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "task text",
+          "checked": false
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "text": "06",
+      "checked": true,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "text",
+          "checked": false
+        }
+      ]
+    }
+  ]
+}

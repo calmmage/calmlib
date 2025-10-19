@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "type": "task",
+      "text": "01",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "some task"
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "text": "02",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "more ideas"
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "text": "03",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "even more text"
+        }
+      ]
+    }
+  ]
+}

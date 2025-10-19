@@ -1,9 +1,7 @@
 import os
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Optional
-from typing import Type, AsyncGenerator
-from typing import Union, Generator, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Generator, Optional, Type, Union
 
 from deprecated import deprecated
 from pydantic import BaseModel
@@ -190,11 +188,7 @@ def query_llm_raw(
         max_retries=max_retries,
     )
 
-    query_params = LLMQueryParams(
-        warmup_messages=warmup_messages,
-        use_langfuse=use_langfuse,
-        structured_output_schema=structured_output_schema,
-    )
+    # Query params are used implicitly in the following logic
 
     llm = _get_llm(**vars(model_params), **extra_kwargs)
 

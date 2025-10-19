@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "type": "todo",
+      "text": "a",
+      "checked": false,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "item under unchecked todo"
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "aa",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "item under double-letter todo"
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "b",
+      "checked": true,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "item under checked todo"
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "c",
+      "checked": false,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "text"
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "d",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "todo text",
+          "checked": false
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "e",
+      "checked": true,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "text",
+          "checked": false
+        }
+      ]
+    }
+  ]
+}

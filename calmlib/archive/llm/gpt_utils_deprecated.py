@@ -4,9 +4,6 @@ from functools import lru_cache, partial
 from typing import TYPE_CHECKING
 
 import loguru
-from dotenv import load_dotenv
-
-# load_dotenv()
 
 if TYPE_CHECKING:
     pass
@@ -177,75 +174,3 @@ async def amap_gpt_command(chunks, command, model="gpt-3.5-turbo", merge=False):
         return apply_command_recursively(merge_command, completed_tasks, model=model)
     else:
         return completed_tasks
-
-
-# region langchain
-
-
-def query_openai(
-    prompt: str,
-    system: str = "You're a helpful assistant",
-    warmup_messages=None,
-    model_name="gpt-3.5-turbo",
-    use_langfuse=False,
-    temperature=0,
-    max_tokens=None,
-    timeout=None,
-    max_retries=2,
-    **kwargs,
-) -> str:
-    from langchain_community.chat_models import ChatOpenAI
-
-    # config = {}
-    # if use_langfuse:
-    #     langfuse_callback = get_langfuse_callback()
-    #     config["callbacks"] = [langfuse_callback]
-    # Initialize the language model
-    llm = ChatOpenAI(
-        model_name=model_name,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        # timeout=timeout,
-        max_retries=max_retries,
-        **kwargs,
-    )
-    from calmlib.utils.llm_utils.gpt_utils import _query_llm
-
-    return _query_llm(
-        llm, system, prompt, use_langfuse=use_langfuse, warmup_messages=warmup_messages
-    )
-
-    # # Build the prompt
-    # chat_prompt = build_langchain_prompt(system)
-    #
-    # # Set up the LangChain chain
-    # chain = chat_prompt | llm
-    # result = chain.invoke(input={"prompt": prompt}, config=config)
-    #
-    # return result.content
-
-
-# endregion langchain
-
-if __name__ == "__main__":
-    load_dotenv()
-    prompt = "Tell me a random scientific concept / theory"
-
-    # Non-streaming example
-    response = query_gpt(
-        prompt,
-        system="You're a helpful assistant",
-        use_langfuse=langfuse_env_available(),
-    )
-    print("Non-streaming response:", response)
-
-    # Streaming example
-    print("\nStreaming response:")
-    for chunk in query_gpt(
-        prompt,
-        system="You're a helpful assistant",
-        use_langfuse=langfuse_env_available(),
-        stream=True,
-    ):
-        print(chunk, end="", flush=True)
-    print()  # New line after streaming is complete

@@ -1,0 +1,12 @@
+- [ ] a
+    - item under unchecked todo
+- aa
+    - item under double-letter todo
+- [x] b
+    - item under checked todo
+- [ ] c
+    - text
+- d
+    - [ ] todo text
+- [x] e
+    - [ ] text

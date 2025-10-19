@@ -1,4 +1,5 @@
 import os
+import re
 
 
 def discover_deepl_auth_key():
@@ -50,10 +51,11 @@ def translate_text(text, target_lang="EN-US"):
     lang = parse_lang(target_lang)
     translator = get_deepl_translator()
     result = translator.translate_text(text, target_lang=lang)
-    return result.text
+    if isinstance(result, list):
+        return result[0].text
+    else:
+        return result.text
 
-
-import re
 
 ru_pattern = re.compile("[а-яА-Я]")
 en_pattern = re.compile("[a-zA-Z]")

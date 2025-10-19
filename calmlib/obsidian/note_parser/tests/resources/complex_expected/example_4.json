@@ -1,0 +1,76 @@
+{
+  "items": [
+    {
+      "type": "list_item",
+      "text": "nest",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "test",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "fest",
+              "children": [
+                {
+                  "type": "list_item",
+                  "text": "rest"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "list_item",
+          "text": "but not",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "too much",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "yet"
+                }
+              ]
+            },
+            {
+              "type": "list_item",
+              "text": "still",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "more",
+                  "children": [
+                    {
+                      "type": "list_item",
+                      "text": "sub"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "list_item",
+              "text": "not sub",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "and another"
+                },
+                {
+                  "type": "plain_text",
+                  "text": "bore"
+                }
+              ]
+            },
+            {
+              "type": "list_item",
+              "text": "ignore"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

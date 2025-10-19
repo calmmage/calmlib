@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "type": "code_block",
+      "text": "```python\ndef hello():\n    print(\"world\")\n```",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "code_block",
+      "text": "```\nplain code block\n```"
+    }
+  ]
+}

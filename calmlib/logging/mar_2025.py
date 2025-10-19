@@ -1,12 +1,14 @@
-from enum import Enum
 import sys
-from typing import Union, Optional
-from loguru import logger as loguru_logger
+from enum import Enum
 from pathlib import Path
+from typing import Optional, Union
+
+from loguru import logger as loguru_logger
+from loguru._logger import Logger
 
 
 class LogFormat(str, Enum):
-    DEFAULT = "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}"
+    DEFAULT = "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>"
     ALTERNATIVE = "<level>{time:HH:mm:ss}</level> | <level>{message}</level>"
     DETAILED = "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{line}</cyan> | {message}"
     BRACKETED = "[<green>{time:HH:mm}</green>] [<level>{level}</level>] {message}"
@@ -20,17 +22,17 @@ class LogMode(str, Enum):
 
 
 def setup_logger(
-    logger=loguru_logger,
+    logger: Logger = loguru_logger,
     level: str = "INFO",
-    mode: LogMode = LogMode.CUSTOM,
     format: Union[LogFormat, str] = LogFormat.DEFAULT,
+    mode: LogMode = LogMode.DEV,
     console: bool = True,
     file: Optional[Union[str, Path]] = None,
     jupyter: bool = False,
     rotation: Optional[str] = None,  # e.g., "1 MB" or "00:00" for daily
     retention: Optional[str] = None,  # e.g., "7 days"
     colorize: bool = True,
-):
+) -> Logger:
     """
     Configure the loguru logger with flexible output options.
 
@@ -97,6 +99,24 @@ def setup_logger(
         )
 
     return logger
+
+
+def setup_logger_simple(debug: bool = False) -> Logger:
+    """
+    Simple logger setup - just debug level on/off.
+
+    Args:
+        debug: If True, set DEBUG level. If False, set INFO level.
+
+    Returns:
+        Configured logger instance
+    """
+    level = "DEBUG" if debug else "INFO"
+    format = LogFormat.DETAILED if debug else LogFormat.DEFAULT
+
+    return setup_logger(
+        level=level, format=format, mode=LogMode.DEV, console=True, colorize=True
+    )
 
 
 # Example usage

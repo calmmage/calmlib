@@ -1,0 +1,197 @@
+{
+  "items": [
+    {
+      "type": "separator",
+      "text": "---"
+    },
+    {
+      "type": "plain_text",
+      "text": "type: action"
+    },
+    {
+      "type": "plain_text",
+      "text": "status: active"
+    },
+    {
+      "type": "plain_text",
+      "text": "project:",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "\"[[Apply to Anthropic - 10 Aug 2025]]\""
+        }
+      ]
+    },
+    {
+      "type": "plain_text",
+      "text": "date: 2025-08-10",
+      "children": [
+        {
+          "type": "separator",
+          "text": "---"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Idea",
+      "children": [
+        {
+          "type": "plain_text",
+          "text": "Find a referral",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Ask friends",
+              "children": [
+                {
+                  "type": "empty",
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "plain_text",
+          "text": "How to ask",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Ask to meet for a coffee"
+            },
+            {
+              "type": "list_item",
+              "text": "Ask for a referral directly"
+            },
+            {
+              "type": "list_item",
+              "text": "Ask for a consultation / \"How is it to work there\" ?",
+              "children": [
+                {
+                  "type": "empty",
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Work",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        },
+        {
+          "type": "header",
+          "text": "### Contacts",
+          "children": [
+            {
+              "type": "empty",
+              "text": ""
+            },
+            {
+              "type": "plain_text",
+              "text": "Linkedin People",
+              "children": [
+                {
+                  "type": "list_item",
+                  "text": "https://www.linkedin.com/in/khalman/",
+                  "checked": true
+                },
+                {
+                  "type": "list_item",
+                  "text": "https://www.linkedin.com/in/pavel-izmailov-8b012b258/",
+                  "checked": true
+                },
+                {
+                  "type": "list_item",
+                  "text": "https://www.linkedin.com/in/andrew-borg-kashin-47513950/ - ru",
+                  "checked": false
+                },
+                {
+                  "type": "list_item",
+                  "text": "https://www.linkedin.com/in/piotr-padlewski/ - ru",
+                  "checked": false
+                },
+                {
+                  "type": "list_item",
+                  "text": "https://www.linkedin.com/in/corentinperretgentil/ - en",
+                  "checked": false,
+                  "children": [
+                    {
+                      "type": "plain_text",
+                      "text": "Non-Linkedin - friends, contacts"
+                    }
+                  ]
+                },
+                {
+                  "type": "list_item",
+                  "text": "Alexey Gronsky"
+                },
+                {
+                  "type": "list_item",
+                  "text": "Denis Zvonov"
+                },
+                {
+                  "type": "list_item",
+                  "text": "...",
+                  "children": [
+                    {
+                      "type": "plain_text",
+                      "text": "Ask in chats?"
+                    }
+                  ]
+                },
+                {
+                  "type": "list_item",
+                  "text": "Google chat"
+                },
+                {
+                  "type": "list_item",
+                  "text": "Petr Swiss Parties"
+                },
+                {
+                  "type": "list_item",
+                  "text": "..."
+                },
+                {
+                  "type": "separator",
+                  "text": "---",
+                  "children": [
+                    {
+                      "type": "empty",
+                      "text": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "text": "### Messages",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "a - russian, linkedin"
+            },
+            {
+              "type": "list_item",
+              "text": "b - en, linkedin"
+            },
+            {
+              "type": "list_item",
+              "text": "c - ru, telegram"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

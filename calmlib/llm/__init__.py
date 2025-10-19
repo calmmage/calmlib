@@ -1,15 +1,17 @@
 from .litellm_wrapper import (
-    query_llm_text,
+    aquery_llm_raw,
+    aquery_llm_structured,
+    aquery_llm_text,
     query_llm_raw,
     query_llm_structured,
-    aquery_llm_raw,
-    aquery_llm_text,
-    aquery_llm_structured,
+    query_llm_text,
 )
 from .utils import (
-    query_llm_with_file,
-    is_this_a_good_that,
+    TitleResponse,
     ValidationResponse,
+    generate_title,
+    is_this_a_good_that,
+    query_llm_with_file,
 )
 
 __all__ = [
@@ -21,5 +23,7 @@ __all__ = [
     "aquery_llm_structured",
     "query_llm_with_file",
     "is_this_a_good_that",
+    "generate_title",
+    "TitleResponse",
     "ValidationResponse",
 ]

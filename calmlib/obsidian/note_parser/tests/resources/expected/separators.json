@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "type": "separator",
+      "text": "---",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "separator",
+      "text": "- ---"
+    }
+  ]
+}
