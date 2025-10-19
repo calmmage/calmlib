@@ -150,6 +150,6 @@ dmypy.json
 CLAUDE.md
 GEMINI.md
 .cursorrules
-
-# AI instruction files (generated)
 .claude
+AGENTS.md
+WARP.md
