@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calmlib"
-version = "2.0.9"
+version = "2.0.10"
 description = "Calmlib"
 authors = ["Reliable Magician <petr.b.lavrov@gmail.com>"]
 readme = "README.md"
