@@ -1,0 +1,48 @@
+{
+  "items": [
+    {
+      "type": "separator",
+      "text": "---"
+    },
+    {
+      "type": "plain_text",
+      "text": "email:"
+    },
+    {
+      "type": "plain_text",
+      "text": "telegram: \"@e2ae8frlng\""
+    },
+    {
+      "type": "plain_text",
+      "text": "phone: \"+420720941808\""
+    },
+    {
+      "type": "plain_text",
+      "text": "birthday: 1993-10-08"
+    },
+    {
+      "type": "plain_text",
+      "text": "type: person_contact",
+      "children": [
+        {
+          "type": "separator",
+          "text": "---"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Info"
+    },
+    {
+      "type": "header",
+      "text": "## Coworking",
+      "children": [
+        {
+          "type": "code_block",
+          "text": "```dataview\nTABLE\nWHERE icontains(coworking, this.file.link)\n```"
+        }
+      ]
+    }
+  ]
+}

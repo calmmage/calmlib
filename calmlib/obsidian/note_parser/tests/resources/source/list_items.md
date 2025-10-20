@@ -1,0 +1,5 @@
+- regular list item
+- another item
+    - nested item
+- [ ] checkbox item
+- [x] checked item

@@ -1,0 +1,156 @@
+{
+  "items": [
+    {
+      "type": "separator",
+      "text": "---"
+    },
+    {
+      "type": "plain_text",
+      "text": "type: thoughts_dump",
+      "children": [
+        {
+          "type": "separator",
+          "text": "---"
+        },
+        {
+          "type": "dump",
+          "text": "001",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Secretary CLI tool"
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "002",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Tools map description"
+            },
+            {
+              "type": "list_item",
+              "text": "cue: Secretary CLI + Telegram tool"
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "003",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Claude auto-runner"
+            },
+            {
+              "type": "list_item",
+              "text": "Cue: Sometimes the work progress is bottlenecked by my presence"
+            },
+            {
+              "type": "list_item",
+              "text": "Idea: have some automated process run in the background"
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "004",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Track tracker"
+            },
+            {
+              "type": "list_item",
+              "text": "Auto-"
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "005",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "People telegram"
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "006",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Telegram auto-download daily"
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "007",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Try setting up prefect"
+            },
+            {
+              "type": "plain_text",
+              "text": "-"
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "008",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Dump what Ideas I have in my head about what to do next"
+            },
+            {
+              "type": "list_item",
+              "text": "What are most important things",
+              "children": [
+                {
+                  "type": "list_item",
+                  "text": "group 1",
+                  "children": [
+                    {
+                      "type": "list_item",
+                      "text": "yoga ..."
+                    },
+                    {
+                      "type": "list_item",
+                      "text": "people ..."
+                    },
+                    {
+                      "type": "list_item",
+                      "text": "telegram ..."
+                    }
+                  ]
+                },
+                {
+                  "type": "list_item",
+                  "text": "group 2",
+                  "children": [
+                    {
+                      "type": "plain_text",
+                      "text": "-"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "dump",
+          "text": "009"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "items": [
+    {
+      "type": "todo",
+      "text": "a",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "some task"
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "b",
+      "checked": false,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "more ideas"
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "c",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "even more text"
+        }
+      ]
+    }
+  ]
+}

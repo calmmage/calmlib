@@ -1,0 +1,50 @@
+{
+  "items": [
+    {
+      "type": "separator",
+      "text": "---"
+    },
+    {
+      "type": "plain_text",
+      "text": "type: project"
+    },
+    {
+      "type": "plain_text",
+      "text": "status: idea/draft"
+    },
+    {
+      "type": "plain_text",
+      "text": "tags:",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "coding"
+        },
+        {
+          "type": "separator",
+          "text": "---"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Description",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "## Actions",
+      "children": [
+        {
+          "type": "code_block",
+          "text": "```dataview\nTABLE\nWHERE type = \"action\" or type = \"artifact\"\nWHERE contains(project, this.file.link)\nSORT created DESC\n```"
+        }
+      ]
+    }
+  ]
+}

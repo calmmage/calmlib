@@ -1,0 +1,88 @@
+{
+  "items": [
+    {
+      "type": "plain_text",
+      "text": "Group 1",
+      "children": [
+        {
+          "type": "todo",
+          "text": "a",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "test"
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "b",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "best"
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "c",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "fest",
+              "children": [
+                {
+                  "type": "empty",
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "plain_text",
+      "text": "Group 2",
+      "children": [
+        {
+          "type": "todo",
+          "text": "d",
+          "children": [
+            {
+              "type": "plain_text",
+              "text": "asd"
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "e",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "wasd"
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "f",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "mama",
+              "children": [
+                {
+                  "type": "empty",
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

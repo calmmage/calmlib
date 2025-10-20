@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "type": "plain_text",
+      "text": "This is plain text"
+    },
+    {
+      "type": "plain_text",
+      "text": "Another line of text"
+    },
+    {
+      "type": "plain_text",
+      "text": "Some more content"
+    }
+  ]
+}

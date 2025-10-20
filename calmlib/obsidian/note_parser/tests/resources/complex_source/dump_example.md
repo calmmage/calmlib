@@ -1,0 +1,32 @@
+---
+type: thoughts_dump
+---
+- 001
+    - Secretary CLI tool
+- 002
+    - Tools map description
+    - cue: Secretary CLI + Telegram tool
+- 003
+    - Claude auto-runner
+    - Cue: Sometimes the work progress is bottlenecked by my presence
+    - Idea: have some automated process run in the background
+- 004
+    - Track tracker
+    - Auto-
+- 005
+    - People telegram
+- 006
+    - Telegram auto-download daily
+- 007
+    - Try setting up prefect
+    -
+- 008
+    - Dump what Ideas I have in my head about what to do next
+    - What are most important things
+        - group 1
+            - yoga ...
+            - people ...
+            - telegram ...
+        - group 2
+          -
+- 009

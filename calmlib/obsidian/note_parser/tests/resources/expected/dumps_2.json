@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "type": "dump",
+      "text": "001",
+      "checked": false,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "unchecked dump item"
+        }
+      ]
+    },
+    {
+      "type": "dump",
+      "text": "002",
+      "checked": true,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "checked dump item"
+        }
+      ]
+    },
+    {
+      "type": "dump",
+      "text": "003",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "regular dump item"
+        }
+      ]
+    },
+    {
+      "type": "dump",
+      "text": "004",
+      "checked": false,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "text"
+        }
+      ]
+    },
+    {
+      "type": "dump",
+      "text": "005",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "dump text",
+          "checked": false
+        }
+      ]
+    },
+    {
+      "type": "dump",
+      "text": "006",
+      "checked": true,
+      "children": [
+        {
+          "type": "list_item",
+          "text": "text",
+          "checked": false
+        }
+      ]
+    }
+  ]
+}

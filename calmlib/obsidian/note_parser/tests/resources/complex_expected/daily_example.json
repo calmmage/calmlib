@@ -1,0 +1,138 @@
+{
+  "items": [
+    {
+      "type": "separator",
+      "text": "---"
+    },
+    {
+      "type": "plain_text",
+      "text": "type: daily",
+      "children": [
+        {
+          "type": "separator",
+          "text": "---"
+        },
+        {
+          "type": "todo",
+          "text": "a",
+          "checked": true,
+          "children": [
+            {
+              "type": "list_item",
+              "text": "[[Fix 146 bot - 18 Jul 2025]]",
+              "checked": true
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "b",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Make it so AI can handle botspot properly"
+            },
+            {
+              "type": "plain_text",
+              "text": "-",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "1) ask gemini to write proper docs for botspot"
+                }
+              ]
+            },
+            {
+              "type": "plain_text",
+              "text": "-",
+              "children": [
+                {
+                  "type": "plain_text",
+                  "text": "2)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "c",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Try weekly planning again?"
+            },
+            {
+              "type": "list_item",
+              "text": "Daily doesn't work that well for me.."
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "d",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Уборка"
+            },
+            {
+              "type": "list_item",
+              "text": "Из подвала -> все \"gratis\""
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "e",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Пойти погулять с ребятами?"
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "f",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Code some - automations - ..."
+            }
+          ]
+        },
+        {
+          "type": "todo",
+          "text": "g",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "Arrange better ai workflows"
+            },
+            {
+              "type": "list_item",
+              "text": "idea 1: move calmlib into calmmage?"
+            },
+            {
+              "type": "list_item",
+              "text": "idea 2: \"new ai project\" which puts botspot and calmlib in a workspace near ..."
+            },
+            {
+              "type": "list_item",
+              "text": "idea 3: git submodule? not that scary.."
+            },
+            {
+              "type": "list_item",
+              "text": "idea 4:"
+            },
+            {
+              "type": "list_item",
+              "text": "idea 5: makefile?"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

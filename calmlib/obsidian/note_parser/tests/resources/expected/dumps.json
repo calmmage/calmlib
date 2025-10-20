@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "type": "dump",
+      "text": "001",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "dump item 1"
+        }
+      ]
+    },
+    {
+      "type": "dump",
+      "text": "002",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "dump item 2"
+        }
+      ]
+    },
+    {
+      "type": "dump",
+      "text": "003",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "dump item 3"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "type": "list_item",
+      "text": "regular list item"
+    },
+    {
+      "type": "list_item",
+      "text": "another item",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "nested item"
+        }
+      ]
+    },
+    {
+      "type": "list_item",
+      "text": "checkbox item",
+      "checked": false
+    },
+    {
+      "type": "list_item",
+      "text": "checked item",
+      "checked": true
+    }
+  ]
+}
