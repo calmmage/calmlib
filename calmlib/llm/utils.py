@@ -5,16 +5,10 @@ import mimetypes
 import random
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
-from calmlib.llm import (
-    aquery_llm_structured,
-    aquery_llm_text,
-    query_llm_structured,
-    query_llm_text,
-)
 from src.utils import get_resources_dir
 
 # todo: create (find and use?) more sophisticated default model picker
@@ -25,10 +19,10 @@ DEFAULT_MODEL = "claude-4-sonnet"
 
 def query_llm_with_file(
     prompt: str,
-    file_path: Union[str, Path, bytes],
+    file_path: str | Path | bytes,
     *,
     model: str = DEFAULT_MODEL,
-    system_message: Optional[str] = None,
+    system_message: str | None = None,
     **kwargs: Any,
 ) -> str:
     """
@@ -51,6 +45,8 @@ def query_llm_with_file(
             model="claude-3.5-sonnet"
         )
     """
+    from calmlib.llm import query_llm_text
+    
     # Handle file input
     if isinstance(file_path, bytes):
         file_bytes = file_path
@@ -88,15 +84,16 @@ def query_llm_with_file(
 class ValidationResponse(BaseModel):
     """Response from is_this_a_good_that validation."""
 
-    reason: Optional[str] = None
+    reason: str | None = None
     is_good: bool
-    suggestion: Optional[str] = None
+    suggestion: str | None = None
+
 
 
 def is_this_a_good_that(
     source: str,
     target: str = "title",
-    candidate: Optional[str] = None,
+    candidate: str | None = None,
     # todo: idea of a criteria
     # criteria: Optional[str] = None,
     model: str = DEFAULT_MODEL,
@@ -105,6 +102,10 @@ def is_this_a_good_that(
     Evaluate if a candidate is a good target for a source.
     Propose a better alternative if not good.
     """
+
+    from calmlib.llm import (
+        query_llm_structured,
+    )
     prompt = f'I need a good {target} for the following text:\n"""\n{source}\n""".\n\n'
     if candidate:
         prompt += f"Candidate: {candidate}."
@@ -144,8 +145,11 @@ def generate_title(
     prompt: str,
     model: str = DEFAULT_MODEL,
     max_length=None,
-    extra_instructions: Optional[str] = None,
+    extra_instructions: str | None = None,
 ):
+    from calmlib.llm import (
+        query_llm_structured,
+    )
     if max_length is None:
         max_length = random.randint(2, 6)
     extra = extra_instructions if extra_instructions else ""
@@ -163,6 +167,10 @@ async def agenerate_title(
     max_length=3,
     extra_instructions: Optional[str] = None,
 ):
+
+    from calmlib.llm import (
+        aquery_llm_structured,
+    )
     extra = extra_instructions if extra_instructions else ""
     return await aquery_llm_structured(
         prompt=prompt,
@@ -179,8 +187,14 @@ secretary_prompt = secretary_prompt_path.read_text()
 
 
 def format_text(text: str, model: str = DEFAULT_MODEL) -> str:
+    from calmlib.llm import (
+        query_llm_text,
+    )
     return query_llm_text(text, system_message=secretary_prompt, model=model)
 
 
 async def aformat_text(text: str, model: str = DEFAULT_MODEL) -> str:
+    from calmlib.llm import (
+        aquery_llm_text,
+    )
     return await aquery_llm_text(text, system_message=secretary_prompt, model=model)
