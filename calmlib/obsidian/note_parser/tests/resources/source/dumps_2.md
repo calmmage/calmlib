@@ -1,0 +1,12 @@
+- [ ] 001
+    - unchecked dump item
+- [x] 002
+    - checked dump item
+- 003
+    - regular dump item
+- [ ] 004
+    - text
+- 005
+    - [ ] dump text
+- [x] 006
+    - [ ] text

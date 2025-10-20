@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "type": "plain_text",
+      "text": "line 1",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "plain_text",
+      "text": "line 3",
+      "children": [
+        {
+          "type": "empty",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "plain_text",
+      "text": "line 6"
+    }
+  ]
+}

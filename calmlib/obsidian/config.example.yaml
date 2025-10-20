@@ -1,0 +1,49 @@
+#class ObsidianCollectionRules(BaseModel):
+#  type: Optional[str] = None
+#  folders: Set[str] = set("")
+#  tags: Set[str] = set()
+#
+#class ObsidianDBConfig(BaseModel):
+#  vault_path: Path
+#  collections: Dict[str, ObsidianCollectionRules]
+
+vault_path: /Users/petrlavrov/calmmage/obsidian
+collections:
+  daily:
+    type: daily
+    folders: [ "daily" ]
+
+  actions:
+    type: action
+    folders: [ "actions" ]
+
+  artifacts:
+    type: artifact
+    folders: [ "artifacts" ]
+
+  chains:
+    type: chain
+    folders: [ "chains" ]
+
+  people:
+    type: person_contact
+    folders: [ "people" ]
+
+  projects:
+    type: project
+    folders: [ "projects" ]
+
+  dumps:
+    type: thoughts_dump
+    folders: [ "dumps" ]
+
+  troubleshooting:
+    type: troubleshooting
+    folders: [ "troubleshooting" ]
+
+  workalongs:
+    type: workalong
+    folders: [ "workalongs" ]
+
+  telegram_input:
+    tags: [ "telegram_input" ]

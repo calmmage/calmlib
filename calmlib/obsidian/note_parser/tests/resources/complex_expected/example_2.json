@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "type": "todo",
+      "text": "a",
+      "children": [
+        {
+          "type": "list_item",
+          "text": "item",
+          "children": [
+            {
+              "type": "empty",
+              "text": "",
+              "children": [
+                {
+                  "type": "list_item",
+                  "text": "another item"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "todo",
+      "text": "b",
+      "children": [
+        {
+          "type": "plain_text",
+          "text": "Misc",
+          "children": [
+            {
+              "type": "list_item",
+              "text": "risc"
+            },
+            {
+              "type": "list_item",
+              "text": "disc"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

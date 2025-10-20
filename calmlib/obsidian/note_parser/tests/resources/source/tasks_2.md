@@ -1,0 +1,12 @@
+- [ ] 01
+    - unchecked task item
+- [x] 02
+    - checked task item
+- 03
+    - regular task item
+- [ ] 04
+    - text
+- 05
+    - [ ] task text
+- [x] 06
+    - [ ] text
