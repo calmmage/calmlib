@@ -114,13 +114,14 @@ class TelegramCache(metaclass=Singleton):
         if client is None:
             client = await self.get_telethon_client()
         if self._root_path is None:
-            from src.utils import get_data_dir
+            # from src.utils import get_data_dir
+            data_dir = Path("~/.calmlib").expanduser()
 
             me = await client.get_me()
             assert me is not None
             assert isinstance(me, User)
             user_id = me.id
-            self._root_path = get_data_dir() / "telegram" / str(user_id)
+            self._root_path = data_dir / "telegram" / str(user_id)
             self._root_path.mkdir(parents=True, exist_ok=True)
 
     @property
