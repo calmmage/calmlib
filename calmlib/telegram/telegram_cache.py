@@ -20,12 +20,7 @@ from tqdm.asyncio import tqdm
 
 class MessageTitle(BaseModel):
     """Schema for AI-generated message title"""
-
-    title: str = Field(
-        ...,
-        description="A short, concise title (max 10 words) summarizing the message content",
-    )
-
+    title: str = Field(..., description="A short, concise title (max 10 words) summarizing the message content")
 
 from calmlib.telegram.chat_utils import (
     chat_is_bot,
@@ -114,14 +109,13 @@ class TelegramCache(metaclass=Singleton):
         if client is None:
             client = await self.get_telethon_client()
         if self._root_path is None:
-            # from src.utils import get_data_dir
-            data_dir = Path("~/.calmlib").expanduser()
+            from src.utils import get_data_dir
 
             me = await client.get_me()
             assert me is not None
             assert isinstance(me, User)
             user_id = me.id
-            self._root_path = data_dir / "telegram" / str(user_id)
+            self._root_path = get_data_dir() / "telegram" / str(user_id)
             self._root_path.mkdir(parents=True, exist_ok=True)
 
     @property
@@ -194,6 +188,24 @@ class TelegramCache(metaclass=Singleton):
         await self.init_telethon_client()
         assert self._telethon_client is not None
         return self._telethon_client
+
+    async def close(self):
+        """Close and cleanup resources, especially the telethon client."""
+        if self._telethon_client is not None and self._telethon_client.is_connected():
+            logger.debug("Disconnecting telethon client")
+            await self._telethon_client.disconnect()
+            self._telethon_client = None
+
+    async def __aenter__(self):
+        """Async context manager entry - initialize the cache."""
+        await self.init_telethon_client()
+        await self.init_messages_collection()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit - cleanup resources."""
+        await self.close()
+        return False  # Don't suppress exceptions
 
     async def _get_chat_id(self, source: int | str):
         if isinstance(source, int):
@@ -438,13 +450,23 @@ class TelegramCache(metaclass=Singleton):
         chat_id: int,
         limit: int | None = None,
         offset: int | None = None,
+        offset_date: datetime.datetime | None = None,
+        min_date: datetime.datetime | None = None,
         enable_tqdm: bool | None = None,
         total: int | None = None,
         **kwargs,
     ):
         logger.debug(
-            f"Fetching messages from Telegram API for chat {chat_id}, limit={limit}, offset={offset}, kwargs={kwargs}"
+            f"Fetching messages from Telegram API for chat {chat_id}, limit={limit}, offset={offset}, offset_date={offset_date}, min_date={min_date}, kwargs={kwargs}"
         )
+
+        # Warn about unexpected parameter combinations
+        if offset_date is not None and offset is not None:
+            logger.warning(
+                f"UNEXPECTED: Both offset_date ({offset_date}) and numeric offset ({offset}) specified for chat {chat_id}. "
+                "This is likely a bug - date-based and numeric offsets should not be mixed."
+            )
+
         client = await self.get_telethon_client()
 
         # Get chat name for progress bar
@@ -459,6 +481,10 @@ class TelegramCache(metaclass=Singleton):
         messages = []
         if offset is not None:
             kwargs["add_offset"] = offset
+
+        # Explicitly pass offset_date to Telegram API if provided
+        if offset_date is not None:
+            kwargs["offset_date"] = offset_date
 
         if total is None:
             if limit is None:
@@ -477,6 +503,10 @@ class TelegramCache(metaclass=Singleton):
             total=total,
             disable=not use_tqdm,
         ):
+            # Stop early if we've gone past min_date
+            if min_date and m.date < min_date:
+                logger.debug(f"Hit min_date ({min_date}), stopping iteration at message date {m.date}")
+                break
             messages.append(m)
 
         logger.debug(
@@ -621,9 +651,11 @@ class TelegramCache(metaclass=Singleton):
         if min_date or max_date:
             query["date"] = {}
             if min_date:
-                query["date"]["$gte"] = min_date
+                # Convert datetime to ISO string for MongoDB query (dates are stored as strings)
+                query["date"]["$gte"] = min_date.isoformat()
             if max_date:
-                query["date"]["$lte"] = max_date
+                # Convert datetime to ISO string for MongoDB query (dates are stored as strings)
+                query["date"]["$lte"] = max_date.isoformat()
 
         cursor = self.messages_collection.find(query).sort("date", -1)
 
@@ -647,9 +679,11 @@ class TelegramCache(metaclass=Singleton):
             if "date" in doc and isinstance(doc["date"], str):
                 doc["date"] = datetime.datetime.fromisoformat(doc["date"])
 
-            # Reconstruct reactions objects from nested dicts
+            # Reconstruct TL objects from nested dicts
             if "reactions" in doc and isinstance(doc["reactions"], dict):
                 doc["reactions"] = self.reconstruct_tl_object(doc["reactions"])
+            if "fwd_from" in doc and isinstance(doc["fwd_from"], dict):
+                doc["fwd_from"] = self.reconstruct_tl_object(doc["fwd_from"])
 
             try:
                 message = Message(**doc)
@@ -847,18 +881,75 @@ class TelegramCache(metaclass=Singleton):
 
             return messages
 
+    async def _has_older_messages_in_range(
+        self, chat_id: int, min_date: datetime.datetime
+    ) -> bool:
+        """
+        Check if we need to fetch older messages to satisfy min_date requirement.
+
+        Returns True if:
+        - MongoDB has no messages at all
+        - Oldest cached message is newer than min_date (missing older messages)
+        """
+        min_date_mongo, max_date_mongo, count = await self._get_message_range(chat_id)
+
+        if count == 0:
+            logger.debug(f"No messages in MongoDB for chat {chat_id}")
+            return True  # No messages cached - need to fetch
+
+        # If oldest cached message is newer than min_date, we're missing older messages
+        if min_date_mongo > min_date:
+            logger.debug(
+                f"MongoDB oldest message ({min_date_mongo}) is newer than min_date ({min_date}), need older messages"
+            )
+            return True
+
+        logger.debug(
+            f"MongoDB has messages back to {min_date_mongo}, covers min_date {min_date}"
+        )
+        return False
+
     async def _load_missing_messages(
         self,
         chat_id: int,
         messages: list[Message],
         limit: int | None = None,
         offset: int | None = None,
+        min_date: datetime.datetime | None = None,
     ) -> list[Message]:
         logger.debug(
-            f"Checking for missing messages for chat {chat_id}, current cached: {len(messages)}, requested limit: {limit}, offset: {offset}"
+            f"Checking for missing messages for chat {chat_id}, current cached: {len(messages)}, requested limit: {limit}, offset: {offset}, min_date={min_date}"
         )
 
-        # idea:
+        # NEW: Smart range-based loading when min_date is specified
+        if min_date is not None:
+            # Check if we need to fetch older messages to satisfy min_date requirement
+            if await self._has_older_messages_in_range(chat_id, min_date):
+                # Get oldest cached message date to start iteration from there
+                min_date_mongo, _, _ = await self._get_message_range(chat_id)
+
+                logger.debug(
+                    f"Fetching older messages from {min_date_mongo} back to {min_date}"
+                )
+
+                # Fetch older messages starting from oldest cached date, stopping at min_date
+                older_messages = await self._get_raw_messages(
+                    chat_id,
+                    offset_date=min_date_mongo,  # Start from oldest cached DATE
+                    min_date=min_date,            # Stop at min_date (early break)
+                )
+                logger.debug(
+                    f"Loaded {len(older_messages)} older messages for chat {chat_id}"
+                )
+            else:
+                logger.debug(
+                    f"MongoDB already has messages back to {min_date}, no older messages needed"
+                )
+
+            # Messages already filtered by MongoDB query, no need to extend
+            return messages
+
+        # Original logic for non-date-filtered queries (full history sync)
         client: TelegramClient = await self.get_telethon_client()
         all_messages = await client.get_messages(chat_id)
         if isinstance(all_messages, Message):
@@ -896,8 +987,13 @@ class TelegramCache(metaclass=Singleton):
                 f"Need to load more messages. New target parameters: limit={limit}, offset={offset}"
             )
 
+            # Use offset_date to start from oldest cached message if available
+            min_date_mongo, _, count = await self._get_message_range(chat_id)
             older_messages = await self._get_raw_messages(
-                chat_id, limit=limit, offset=offset
+                chat_id,
+                limit=limit,
+                offset=offset,
+                offset_date=min_date_mongo if count > 0 else None,  # Start from oldest cached DATE
             )
             logger.debug(
                 f"Loaded {len(older_messages)} older messages for chat {chat_id}"
@@ -971,7 +1067,10 @@ class TelegramCache(metaclass=Singleton):
             return has_cache
 
     async def _get_messages_with_migration(
-        self, chat_id: int, ignore_cache=False, limit=None, offset=None, **kwargs
+        self, chat_id: int, ignore_cache=False, limit=None, offset=None,
+        min_date: datetime.datetime | None = None,
+        max_date: datetime.datetime | None = None,
+        **kwargs
     ) -> list[Message]:
         """
         Get messages for a chat, handling migrations by fetching from both old and new chats.
@@ -989,22 +1088,26 @@ class TelegramCache(metaclass=Singleton):
             # No migration, just fetch normally
             logger.debug(f"Chat {chat_id} has no migration history")
             return await self._get_messages_for_single_chat(
-                chat_id, ignore_cache=ignore_cache, limit=limit, offset=offset, **kwargs
+                chat_id, ignore_cache=ignore_cache, limit=limit, offset=offset,
+                min_date=min_date, max_date=max_date,
+                **kwargs
             )
 
         # This chat was migrated - fetch messages from BOTH old and new chats
-        logger.info(
-            f"Chat {chat_id} was migrated from {old_chat_id}, fetching messages from both"
-        )
+        logger.info(f"Chat {chat_id} was migrated from {old_chat_id}, fetching messages from both")
 
         # Fetch from new chat (current channel)
         new_messages = await self._get_messages_for_single_chat(
-            chat_id, ignore_cache=ignore_cache, limit=None, offset=None, **kwargs
+            chat_id, ignore_cache=ignore_cache, limit=None, offset=None,
+            min_date=min_date, max_date=max_date,
+            **kwargs
         )
 
         # Fetch from old chat (original group)
         old_messages = await self._get_messages_for_single_chat(
-            old_chat_id, ignore_cache=ignore_cache, limit=None, offset=None, **kwargs
+            old_chat_id, ignore_cache=ignore_cache, limit=None, offset=None,
+            min_date=min_date, max_date=max_date,
+            **kwargs
         )
 
         # Merge messages
@@ -1028,48 +1131,58 @@ class TelegramCache(metaclass=Singleton):
         return all_messages
 
     async def get_raw_messages(
-        self, source: str | int, ignore_cache=False, limit=None, offset=None, **kwargs
+        self, source: str | int, ignore_cache=False, limit=None, offset=None,
+        min_date: datetime.datetime | None = None,
+        max_date: datetime.datetime | None = None,
+        **kwargs
     ):
         """Get messages with automatic migration handling."""
         chat_id = await self._get_chat_id(source)
         logger.debug(
-            f"Getting messages for chat {chat_id} (source: {source}), ignore_cache={ignore_cache}, limit={limit}, offset={offset}, kwargs={kwargs}"
+            f"Getting messages for chat {chat_id} (source: {source}), ignore_cache={ignore_cache}, limit={limit}, offset={offset}, min_date={min_date}, max_date={max_date}, kwargs={kwargs}"
         )
 
         return await self._get_messages_with_migration(
-            chat_id, ignore_cache=ignore_cache, limit=limit, offset=offset, **kwargs
+            chat_id, ignore_cache=ignore_cache, limit=limit, offset=offset,
+            min_date=min_date, max_date=max_date,
+            **kwargs
         )
 
     async def _get_messages_for_single_chat(
-        self, chat_id: int, ignore_cache=False, limit=None, offset=None, **kwargs
+        self, chat_id: int, ignore_cache=False, limit=None, offset=None,
+        min_date: datetime.datetime | None = None,
+        max_date: datetime.datetime | None = None,
+        **kwargs
     ) -> list[Message]:
         """Get messages for a single chat ID without migration handling."""
         has_cache = await self._has_cached_messages(chat_id)
 
         if ignore_cache or not has_cache or offset is not None or kwargs:
-            # just load the messages
+            # Load the messages directly from Telegram API
+            # NOTE: min_date is passed to enable early break in iteration
             logger.debug(
-                f"Loading messages directly from API for chat {chat_id} (ignore_cache={ignore_cache}, has_cache={has_cache}, offset={offset}, kwargs={bool(kwargs)})"
+                f"Loading messages directly from API for chat {chat_id} (ignore_cache={ignore_cache}, has_cache={has_cache}, offset={offset}, min_date={min_date}, kwargs={bool(kwargs)})"
             )
             return await self._get_raw_messages(
-                chat_id, limit=limit, offset=offset, **kwargs
+                chat_id, limit=limit, offset=offset, min_date=min_date, **kwargs
             )
         else:
             if self.mongo_enabled:
                 # MongoDB path - simple and efficient
-                logger.debug(f"Using MongoDB cache for chat {chat_id}")
+                logger.debug(f"Using MongoDB cache for chat {chat_id} (min_date={min_date}, max_date={max_date})")
 
                 # Check for newer messages and fetch if needed
                 await self._load_newer_messages(chat_id, [])
 
-                # Load from MongoDB with sorting handled by DB
+                # Load from MongoDB with date filtering
                 messages = await self._load_raw_messages(
-                    chat_id, limit=limit, offset=offset
+                    chat_id, limit=limit, offset=offset,
+                    min_date=min_date, max_date=max_date  # Pass date filters to MongoDB
                 )
 
                 # Check for missing historical messages
                 messages = await self._load_missing_messages(
-                    chat_id, messages, limit=limit, offset=offset
+                    chat_id, messages, limit=limit, offset=offset, min_date=min_date
                 )
 
                 logger.debug(f"Returning {len(messages)} messages for chat {chat_id}")
@@ -1180,11 +1293,16 @@ class TelegramCache(metaclass=Singleton):
         return folders
 
     async def get_messages(
-        self, source: str | int, ignore_cache: bool = False, **kwargs
+        self, source: str | int, ignore_cache: bool = False,
+        min_date: datetime.datetime | None = None,
+        max_date: datetime.datetime | None = None,
+        **kwargs
     ) -> list[TelegramMessage]:
         """Get messages as rich TelegramMessage objects."""
         raw_messages = await self.get_raw_messages(
-            source, ignore_cache=ignore_cache, **kwargs
+            source, ignore_cache=ignore_cache,
+            min_date=min_date, max_date=max_date,
+            **kwargs
         )
         return [TelegramMessage(message) for message in raw_messages]
 
@@ -1292,3 +1410,61 @@ class TelegramCache(metaclass=Singleton):
     # -----------------------------------------------------------------------------
     # endregion Rich Model Methods
     # -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+# Helper functions for context manager usage
+# -----------------------------------------------------------------------------
+
+class _TelegramCacheContextManager:
+    """
+    Temporary TelegramCache instance that properly cleans up after use.
+
+    This bypasses the Singleton pattern to create a fresh instance that
+    will be properly closed when the context exits.
+    """
+    def __init__(self, **kwargs):
+        # Create instance directly without Singleton
+        self._cache = object.__new__(TelegramCache)
+        TelegramCache.__init__(self._cache, **kwargs)
+
+    async def __aenter__(self):
+        """Initialize and return the cache instance."""
+        await self._cache.init_telethon_client()
+        await self._cache.init_messages_collection()
+        return self._cache
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Cleanup the cache instance."""
+        await self._cache.close()
+        return False  # Don't suppress exceptions
+
+
+def get_telegram_cache_context(**kwargs):
+    """
+    Create a temporary TelegramCache instance for use in a context manager.
+
+    This is the recommended way to use TelegramCache when you want to ensure
+    proper cleanup of the telethon client connection.
+
+    Usage:
+        async with get_telegram_cache_context() as cache:
+            messages = await cache.get_messages(chat_id)
+            # Client will be automatically disconnected when exiting the block
+
+    Args:
+        **kwargs: Arguments to pass to TelegramCache constructor
+
+    Returns:
+        Context manager that yields an initialized TelegramCache instance
+
+    Example:
+        # Use with default secondary account
+        async with get_telegram_cache_context() as cache:
+            chats = await cache.get_chats()
+
+        # Use with primary account
+        async with get_telegram_cache_context(telethon_account="primary") as cache:
+            messages = await cache.get_messages(chat_id, limit=100)
+    """
+    return _TelegramCacheContextManager(**kwargs)

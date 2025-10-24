@@ -23,7 +23,6 @@ def log_once(level: str, message: str, key: str | None = None) -> None:
         log_func = getattr(logger, level.lower())
         log_func(message)
 
-
 # Explicit model mapping: friendly name -> litellm format
 IMAGE_MODELS = {
     # Google Gemini - Conversational (nano banana 🍌)
@@ -57,20 +56,20 @@ VENDOR_RESOLUTIONS = {
     "gemini": [
         # Gemini 2.5 Flash Image supports various aspect ratios
         (1024, 1024),  # 1:1 square
-        (1152, 896),  # 9:7 landscape
-        (896, 1152),  # 7:9 portrait
-        (1216, 832),  # 3:2 landscape
-        (832, 1216),  # 2:3 portrait
-        (1344, 768),  # 7:4 landscape
-        (768, 1344),  # 4:7 portrait
-        (1536, 640),  # 12:5 landscape
-        (640, 1536),  # 5:12 portrait
+        (1152, 896),   # 9:7 landscape
+        (896, 1152),   # 7:9 portrait
+        (1216, 832),   # 3:2 landscape
+        (832, 1216),   # 2:3 portrait
+        (1344, 768),   # 7:4 landscape
+        (768, 1344),   # 4:7 portrait
+        (1536, 640),   # 12:5 landscape
+        (640, 1536),   # 5:12 portrait
     ],
     "openai": [
         # DALL-E 3 and GPT Image-1 resolutions
-        (1024, 1024),  # square
-        (1792, 1024),  # landscape
-        (1024, 1792),  # portrait
+        (1024, 1024),   # square
+        (1792, 1024),   # landscape
+        (1024, 1792),   # portrait
     ],
     "openai/dall-e-2": [
         # DALL-E 2 only supports square images
@@ -81,38 +80,38 @@ VENDOR_RESOLUTIONS = {
     "vertex_ai": [
         # Vertex AI Imagen supports similar to Gemini
         (1024, 1024),  # 1:1 square
-        (1152, 896),  # 9:7 landscape
-        (896, 1152),  # 7:9 portrait
-        (1216, 832),  # 3:2 landscape
-        (832, 1216),  # 2:3 portrait
-        (1344, 768),  # 7:4 landscape
-        (768, 1344),  # 4:7 portrait
-        (1536, 640),  # 12:5 landscape
-        (640, 1536),  # 5:12 portrait
+        (1152, 896),   # 9:7 landscape
+        (896, 1152),   # 7:9 portrait
+        (1216, 832),   # 3:2 landscape
+        (832, 1216),   # 2:3 portrait
+        (1344, 768),   # 7:4 landscape
+        (768, 1344),   # 4:7 portrait
+        (1536, 640),   # 12:5 landscape
+        (640, 1536),   # 5:12 portrait
     ],
     "bedrock": [
         # Stable Diffusion XL resolutions
         (1024, 1024),  # square
-        (1152, 896),  # landscape
-        (896, 1152),  # portrait
-        (1216, 832),  # wide landscape
-        (832, 1216),  # tall portrait
-        (1344, 768),  # extra wide
-        (768, 1344),  # extra tall
-        (1536, 640),  # ultra wide
-        (640, 1536),  # ultra tall
+        (1152, 896),   # landscape
+        (896, 1152),   # portrait
+        (1216, 832),   # wide landscape
+        (832, 1216),   # tall portrait
+        (1344, 768),   # extra wide
+        (768, 1344),   # extra tall
+        (1536, 640),   # ultra wide
+        (640, 1536),   # ultra tall
     ],
     "recraft": [
         # Recraft v3 supports flexible resolutions
-        (1024, 1024),  # square
-        (1365, 1024),  # landscape
-        (1024, 1365),  # portrait
-        (1536, 1024),  # wide landscape
-        (1024, 1536),  # tall portrait
-        (1820, 1024),  # extra wide
-        (1024, 1820),  # extra tall
-        (1024, 2048),  # ultra tall
-        (2048, 1024),  # ultra wide
+        (1024, 1024),   # square
+        (1365, 1024),   # landscape
+        (1024, 1365),   # portrait
+        (1536, 1024),   # wide landscape
+        (1024, 1536),   # tall portrait
+        (1820, 1024),   # extra wide
+        (1024, 1820),   # extra tall
+        (1024, 2048),   # ultra tall
+        (2048, 1024),   # ultra wide
     ],
 }
 
@@ -189,9 +188,7 @@ def get_supported_resolutions(model: str) -> list[tuple[int, int]]:
     vendor = get_vendor_from_model(model)
     if vendor in VENDOR_RESOLUTIONS:
         resolutions = VENDOR_RESOLUTIONS[vendor]
-        logger.debug(
-            f"Using vendor resolutions for '{vendor}': {len(resolutions)} options"
-        )
+        logger.debug(f"Using vendor resolutions for '{vendor}': {len(resolutions)} options")
         return resolutions
 
     # No specific resolutions found - allow any
@@ -288,36 +285,24 @@ def auto_select_model() -> str:
 
     # Priority: Gemini > OpenAI
     if available["gemini"]:
-        log_once(
-            "info", "Auto-selected vendor: Gemini (nano-banana)", key="vendor:gemini"
-        )
+        log_once("info", "Auto-selected vendor: Gemini (nano-banana)", key="vendor:gemini")
         return "nano-banana"
 
     if available["openai"]:
-        log_once(
-            "info", "Auto-selected vendor: OpenAI (gpt-image-1)", key="vendor:openai"
-        )
+        log_once("info", "Auto-selected vendor: OpenAI (gpt-image-1)", key="vendor:openai")
         return "gpt-image-1"
 
     # Fallback checks (less common)
     if available["vertex"]:
-        log_once(
-            "info",
-            "Auto-selected vendor: Vertex AI (vertex-imagen)",
-            key="vendor:vertex",
-        )
+        log_once("info", "Auto-selected vendor: Vertex AI (vertex-imagen)", key="vendor:vertex")
         return "vertex-imagen"
 
     if available["bedrock"]:
-        log_once(
-            "info", "Auto-selected vendor: AWS Bedrock (sdxl)", key="vendor:bedrock"
-        )
+        log_once("info", "Auto-selected vendor: AWS Bedrock (sdxl)", key="vendor:bedrock")
         return "sdxl"
 
     if available["recraft"]:
-        log_once(
-            "info", "Auto-selected vendor: Recraft (recraftv3)", key="vendor:recraft"
-        )
+        log_once("info", "Auto-selected vendor: Recraft (recraftv3)", key="vendor:recraft")
         return "recraft"
 
     error_msg = (
@@ -405,7 +390,7 @@ async def generate_image(
     log_once(
         "info",
         f"Using vendor: {vendor}, model: {resolved_model}",
-        key=f"using_vendor:{vendor}",
+        key=f"using_vendor:{vendor}"
     )
     logger.debug(f"Model details - vendor: {vendor}, resolved: {resolved_model}")
 
@@ -437,16 +422,12 @@ async def generate_image(
     # Merge additional kwargs
     params.update(kwargs)
 
-    logger.debug(
-        f"Calling litellm.aimage_generation with params: {list(params.keys())}"
-    )
+    logger.debug(f"Calling litellm.aimage_generation with params: {list(params.keys())}")
 
     # Call litellm
     try:
         response = await litellm.aimage_generation(**params)
-        logger.info(
-            f"Image generation successful, generated {len(response.data)} image(s)"
-        )
+        logger.info(f"Image generation successful, generated {len(response.data)} image(s)")
         logger.debug(f"Response format: {response_format}")
         return response
     except Exception as e:

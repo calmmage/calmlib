@@ -141,7 +141,7 @@ class LLMQueryParams:
 
 
 class LLMProvider:
-    """Main LLM Provider class for Calmlib"""
+    """Main LLM Provider class for Botspot"""
 
     def __init__(self, settings: LLMProviderSettings):
         """Initialize the LLM Provider with the given settings."""
@@ -354,14 +354,15 @@ class LLMProvider:
 
         Args:
             output_schema: A Pydantic model class defining the structure
+            max_retries: Number of retries for network errors (passed to litellm)
             Other arguments same as query_llm_raw
 
         Returns:
             An instance of the provided Pydantic model
         """
-
         from litellm import completion
         from litellm.types.utils import ModelResponse, StreamingChoices
+        from pydantic import ValidationError
 
         # Get model parameters with defaults
         model = model or self.settings.default_model
@@ -383,28 +384,49 @@ class LLMProvider:
 
         messages = self._prepare_messages(prompt, enhanced_system)
 
-        # Make the API call
-        response = completion(
-            model=full_model_name,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            request_timeout=timeout,
-            num_retries=max_retries,
-            response_format=output_schema,
-            **extra_kwargs,
-        )
+        # Application-level retry for validation errors
+        # This handles cases where the LLM returns malformed JSON or missing fields
+        application_retries = 3
+        last_error = None
 
-        # Track usage (approximate tokens)
-        assert isinstance(response, ModelResponse), "Expected ModelResponse"
-        choice = response.choices[0]
-        assert not isinstance(choice, StreamingChoices)
-        content = choice.message.content
-        assert content is not None, "Expected non-None content from LLM response"
+        for attempt in range(application_retries):
+            try:
+                # Make the API call
+                response = completion(
+                    model=full_model_name,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    request_timeout=timeout,
+                    num_retries=max_retries,  # Network-level retries
+                    response_format=output_schema,
+                    **extra_kwargs,
+                )
 
-        # Parse the response into the Pydantic model
-        result_json = json.loads(content)
-        return output_schema(**result_json)
+                # Track usage (approximate tokens)
+                assert isinstance(response, ModelResponse), "Expected ModelResponse"
+                choice = response.choices[0]
+                assert not isinstance(choice, StreamingChoices)
+                content = choice.message.content
+                assert content is not None, "Expected non-None content from LLM response"
+
+                # Parse the response into the Pydantic model
+                result_json = json.loads(content)
+                return output_schema(**result_json)
+
+            except (ValidationError, json.JSONDecodeError, AssertionError) as e:
+                last_error = e
+                if attempt < application_retries - 1:
+                    logger.warning(
+                        f"Structured output validation failed (attempt {attempt + 1}/{application_retries}): {e}"
+                    )
+                    # Continue to next attempt
+                else:
+                    # Final attempt failed, re-raise
+                    logger.error(
+                        f"Structured output validation failed after {application_retries} attempts"
+                    )
+                    raise
 
     # ---------------------------------------------
     # endregion Synchronous Query Methods
@@ -582,6 +604,7 @@ class LLMProvider:
 
         Args:
             output_schema: A Pydantic model class defining the structure
+            max_retries: Number of retries for network errors (passed to litellm)
             Other arguments same as aquery_llm_raw
 
         Returns:
@@ -589,6 +612,7 @@ class LLMProvider:
         """
         from litellm import acompletion
         from litellm.types.utils import ModelResponse, StreamingChoices
+        from pydantic import ValidationError
 
         # Get model parameters with defaults
         model = model or self.settings.default_model
@@ -609,30 +633,51 @@ class LLMProvider:
 
         messages = self._prepare_messages(prompt, enhanced_system)
 
-        # Make the API call
-        response = await acompletion(
-            model=full_model_name,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            request_timeout=timeout,
-            num_retries=max_retries,
-            response_format=output_schema,
-            **extra_kwargs,
-        )
+        # Application-level retry for validation errors
+        # This handles cases where the LLM returns malformed JSON or missing fields
+        application_retries = 3
+        last_error = None
 
-        # Track usage (approximate tokens)
-        assert isinstance(response, ModelResponse)
-        choice = response.choices[0]
-        assert not isinstance(choice, StreamingChoices)
-        content = choice.message.content
+        for attempt in range(application_retries):
+            try:
+                # Make the API call
+                response = await acompletion(
+                    model=full_model_name,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    request_timeout=timeout,
+                    num_retries=max_retries,  # Network-level retries
+                    response_format=output_schema,
+                    **extra_kwargs,
+                )
 
-        assert content is not None, "Expected non-None content from LLM response"
+                # Track usage (approximate tokens)
+                assert isinstance(response, ModelResponse)
+                choice = response.choices[0]
+                assert not isinstance(choice, StreamingChoices)
+                content = choice.message.content
 
-        # Parse the response into the Pydantic model
-        result_text = content
-        result_json = json.loads(result_text)
-        return output_schema(**result_json)
+                assert content is not None, "Expected non-None content from LLM response"
+
+                # Parse the response into the Pydantic model
+                result_text = content
+                result_json = json.loads(result_text)
+                return output_schema(**result_json)
+
+            except (ValidationError, json.JSONDecodeError, AssertionError) as e:
+                last_error = e
+                if attempt < application_retries - 1:
+                    logger.warning(
+                        f"Structured output validation failed (attempt {attempt + 1}/{application_retries}): {e}"
+                    )
+                    # Continue to next attempt
+                else:
+                    # Final attempt failed, re-raise
+                    logger.error(
+                        f"Structured output validation failed after {application_retries} attempts"
+                    )
+                    raise
 
     # ---------------------------------------------
     # endregion Asynchronous Query Methods

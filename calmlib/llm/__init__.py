@@ -9,6 +9,7 @@ from .litellm_wrapper import (
 from .utils import (
     TitleResponse,
     ValidationResponse,
+    aquery_llm_with_file,
     generate_title,
     is_this_a_good_that,
     query_llm_with_file,
@@ -22,6 +23,7 @@ __all__ = [
     "aquery_llm_text",
     "aquery_llm_structured",
     "query_llm_with_file",
+    "aquery_llm_with_file",
     "is_this_a_good_that",
     "generate_title",
     "TitleResponse",

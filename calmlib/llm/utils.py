@@ -5,11 +5,11 @@ import mimetypes
 import random
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
-# from src.utils import get_resources_dir
+from src.utils import get_resources_dir
 
 # todo: create (find and use?) more sophisticated default model picker
 # check which models are available for each provider, pick the latest one
@@ -46,7 +46,7 @@ def query_llm_with_file(
         )
     """
     from calmlib.llm import query_llm_text
-    
+
     # Handle file input
     if isinstance(file_path, bytes):
         file_bytes = file_path
@@ -81,13 +81,78 @@ def query_llm_with_file(
     return query_llm_text(messages=messages, model=model, **kwargs)
 
 
+async def aquery_llm_with_file(
+    prompt: str,
+    file_path: str | Path | bytes,
+    *,
+    model: str = DEFAULT_MODEL,
+    system_message: str | None = None,
+    **kwargs: Any,
+) -> str:
+    """
+    Async query LLM with attached file (image/PDF).
+
+    Args:
+        prompt: Text prompt to send with the file
+        file_path: Path to file, or raw bytes
+        model: Model to use for the query
+        system_message: Optional system message
+        **kwargs: Additional arguments passed to aquery_llm_raw
+
+    Returns:
+        LLM response as string
+
+    Example:
+        response = await aquery_llm_with_file(
+            "What's in this image?",
+            "screenshot.png",
+            model="claude-3.5-sonnet"
+        )
+    """
+    from calmlib.llm import (
+        aquery_llm_text,
+    )
+
+    # Handle file input
+    if isinstance(file_path, bytes):
+        file_bytes = file_path
+        file_type = "image/jpeg"  # Default assumption for bytes
+    else:
+        file_path = Path(file_path)
+        with open(file_path, "rb") as f:
+            file_bytes = f.read()
+
+        # Detect MIME type from file extension
+        mime_type, _ = mimetypes.guess_type(str(file_path))
+        file_type = mime_type or "image/jpeg"
+
+    # Base64 encode the file
+    encoded_file = base64.b64encode(file_bytes).decode("utf-8")
+
+    # Prepare messages with file attachment
+    messages = []
+
+    if system_message:
+        messages.append({"role": "system", "content": system_message})
+
+    # Add user message with file
+    content = [
+        {"type": "text", "text": prompt},
+        {"type": "image_url", "image_url": f"data:{file_type};base64,{encoded_file}"},
+    ]
+
+    messages.append({"role": "user", "content": content})
+
+    # Use the raw query function with prepared messages
+    return await aquery_llm_text(messages=messages, model=model, **kwargs)
+
+
 class ValidationResponse(BaseModel):
     """Response from is_this_a_good_that validation."""
 
     reason: str | None = None
     is_good: bool
     suggestion: str | None = None
-
 
 
 def is_this_a_good_that(
@@ -106,6 +171,7 @@ def is_this_a_good_that(
     from calmlib.llm import (
         query_llm_structured,
     )
+
     prompt = f'I need a good {target} for the following text:\n"""\n{source}\n""".\n\n'
     if candidate:
         prompt += f"Candidate: {candidate}."
@@ -150,6 +216,7 @@ def generate_title(
     from calmlib.llm import (
         query_llm_structured,
     )
+
     if max_length is None:
         max_length = random.randint(2, 6)
     extra = extra_instructions if extra_instructions else ""
@@ -165,12 +232,12 @@ async def agenerate_title(
     prompt: str,
     model: str = DEFAULT_MODEL,
     max_length=3,
-    extra_instructions: Optional[str] = None,
+    extra_instructions: str | None = None,
 ):
-
     from calmlib.llm import (
         aquery_llm_structured,
     )
+
     extra = extra_instructions if extra_instructions else ""
     return await aquery_llm_structured(
         prompt=prompt,
@@ -180,21 +247,23 @@ async def agenerate_title(
     )
 
 
-# secretary_prompt_path = (
-#     get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
-# )
-# secretary_prompt = secretary_prompt_path.read_text()
-#
-#
-# def format_text(text: str, model: str = DEFAULT_MODEL) -> str:
-#     from calmlib.llm import (
-#         query_llm_text,
-#     )
-#     return query_llm_text(text, system_message=secretary_prompt, model=model)
-#
-#
-# async def aformat_text(text: str, model: str = DEFAULT_MODEL) -> str:
-#     from calmlib.llm import (
-#         aquery_llm_text,
-#     )
-#     return await aquery_llm_text(text, system_message=secretary_prompt, model=model)
+secretary_prompt_path = (
+    get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
+)
+secretary_prompt = secretary_prompt_path.read_text()
+
+
+def format_text(text: str, model: str = DEFAULT_MODEL) -> str:
+    from calmlib.llm import (
+        query_llm_text,
+    )
+
+    return query_llm_text(text, system_message=secretary_prompt, model=model)
+
+
+async def aformat_text(text: str, model: str = DEFAULT_MODEL) -> str:
+    from calmlib.llm import (
+        aquery_llm_text,
+    )
+
+    return await aquery_llm_text(text, system_message=secretary_prompt, model=model)
