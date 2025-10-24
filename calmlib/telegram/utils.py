@@ -1,16 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
-
-from telethon import TelegramClient
-from telethon.types import (
-    Dialog,
-    InputPeerChannel,
-    InputPeerChannelFromMessage,
-    InputPeerChat,
-    InputPeerEmpty,
-    InputPeerSelf,
-    InputPeerUser,
-)
+from typing import TYPE_CHECKING, Optional, Union
 
 from calmlib.telegram.telethon_client import get_telethon_client
 
@@ -22,21 +11,32 @@ from .models import (
     TelegramUserChat,
 )
 
-InputPeer = Union[
-    InputPeerUser,
-    InputPeerChannel,
-    InputPeerChannelFromMessage,
-    InputPeerChat,
-    InputPeerSelf,
-    InputPeerEmpty,
-]
-
 if TYPE_CHECKING:
+    from telethon import TelegramClient
+    from telethon.types import (
+        Dialog,
+        InputPeerChannel,
+        InputPeerChannelFromMessage,
+        InputPeerChat,
+        InputPeerEmpty,
+        InputPeerSelf,
+        InputPeerUser,
+    )
+
+    InputPeer = Union[  # noqa: UP007
+        InputPeerUser,
+        InputPeerChannel,
+        InputPeerChannelFromMessage,
+        InputPeerChat,
+        InputPeerSelf,
+        InputPeerEmpty,
+    ]
+
     from calmlib.telegram.telegram_cache import TelegramCache
 
 
 async def get_chat_id(
-    username: str, telethon_client: TelegramClient | None = None
+    username: str, telethon_client: Optional["TelegramClient"] = None
 ) -> int:
     if telethon_client is None:
         telethon_client = await get_telethon_client()
@@ -60,7 +60,7 @@ async def get_chat_id(
 
 def get_telegram_cache(
     root_path: Path | None = None,
-    telethon_client: TelegramClient | None = None,
+    telethon_client: Optional["TelegramClient"] = None,
     telethon_account: str = "secondary",
     mongo_conn_str: str | None = None,
     db_name: str | None = None,
@@ -79,7 +79,7 @@ def get_telegram_cache(
 
 
 async def get_raw_messages(
-    source: str, telethon_client: TelegramClient | None = None, **kwargs
+    source: str, telethon_client: Optional["TelegramClient"] = None, **kwargs
 ):
     """
     source: username of chat_id
@@ -90,42 +90,42 @@ async def get_raw_messages(
 
 
 async def get_raw_dialogs(
-    telethon_client: TelegramClient | None = None,
-) -> list[Dialog]:
+    telethon_client: Optional["TelegramClient"] = None,
+) -> list["Dialog"]:
     telegram_cache = get_telegram_cache(telethon_client=telethon_client)
     return await telegram_cache.get_raw_dialogs()
 
 
 async def get_chats(
-    telethon_client: TelegramClient | None = None, **kwargs
+    telethon_client: Optional["TelegramClient"] = None, **kwargs
 ) -> list[TelegramChat]:
     telegram_cache = get_telegram_cache(telethon_client=telethon_client)
     return await telegram_cache.get_chats(**kwargs)
 
 
 async def get_group_chats(
-    telethon_client: TelegramClient | None = None, **kwargs
+    telethon_client: Optional["TelegramClient"] = None, **kwargs
 ) -> list[TelegramGroupChat]:
     telegram_cache = get_telegram_cache(telethon_client=telethon_client)
     return await telegram_cache.get_group_chats(**kwargs)
 
 
 async def get_channels(
-    telethon_client: TelegramClient | None = None, **kwargs
+    telethon_client: Optional["TelegramClient"] = None, **kwargs
 ) -> list[TelegramChannel]:
     telegram_cache = get_telegram_cache(telethon_client=telethon_client)
     return await telegram_cache.get_channels(**kwargs)
 
 
 async def get_users_chats(
-    telethon_client: TelegramClient | None = None, **kwargs
+    telethon_client: Optional["TelegramClient"] = None, **kwargs
 ) -> list[TelegramUserChat]:
     telegram_cache = get_telegram_cache(telethon_client=telethon_client)
     return await telegram_cache.get_users(**kwargs)
 
 
 async def get_folders(
-    telethon_client: TelegramClient | None = None, **kwargs
+    telethon_client: Optional["TelegramClient"] = None, **kwargs
 ) -> list[TelegramFolder]:
     telegram_cache = get_telegram_cache(telethon_client=telethon_client)
     return await telegram_cache.get_folders(**kwargs)

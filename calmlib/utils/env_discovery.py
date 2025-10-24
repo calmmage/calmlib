@@ -5,7 +5,6 @@ import traceback
 from pathlib import Path
 from typing import Optional
 
-import keyring
 from dotenv import dotenv_values, load_dotenv
 from loguru import logger
 
@@ -41,6 +40,7 @@ def _load_from_encrypted_file(key: str) -> Optional[str]:
     master_password = os.getenv("CALMMAGE_ENV_PASSWORD")
     if not master_password:
         try:
+            import keyring
             master_password = keyring.get_password("calmmage", "CALMMAGE_ENV_PASSWORD")
         except Exception:
             return None
@@ -82,6 +82,7 @@ def find_env_key(key: str, default: Optional[str] = None) -> Optional[str]:
 
     # Step 2: Check macOS Keychain (for secure storage)
     try:
+        import keyring
         keychain_value = keyring.get_password("calmmage", key)
         if keychain_value is not None:
             return keychain_value

@@ -25,8 +25,8 @@ class BulkGenerationConfig:
 
     model: str | None = None  # Auto-select if None
     size: str = "1024x1024"
-    quality: str = "standard"
-    delay_between_requests: float = 1.0
+    quality: str | None = None  # Only for models that support it (OpenAI)
+    max_concurrent: int = 5  # Max concurrent requests
     max_retries: int = 3
     output_dir: Path | None = None
     save_images: bool = True
@@ -83,12 +83,20 @@ class BulkImageGenerator:
 
         try:
             # Generate image
-            response = await generate_image(
-                prompt=prompt,
-                model=self.config.model,
-                size=self.config.size,
-                quality=self.config.quality,
-            )
+            kwargs = {
+                "prompt": prompt,
+                "model": self.config.model,
+                "size": self.config.size,
+            }
+
+            # Only pass quality for models that support it (not Gemini)
+            if self.config.quality is not None:
+                resolved = resolve_model(self.config.model)
+                # Skip quality for Gemini models
+                if "gemini" not in resolved.lower():
+                    kwargs["quality"] = self.config.quality
+
+            response = await generate_image(**kwargs)
 
             duration = time.time() - start_time
 
@@ -146,7 +154,7 @@ class BulkImageGenerator:
         progress_callback: Callable[[int, int, GenerationResult], None] | None = None,
     ) -> list[GenerationResult]:
         """
-        Generate multiple images in batch.
+        Generate multiple images in batch with concurrent requests.
 
         Args:
             prompts: List of (prompt, output_filename) tuples
@@ -156,24 +164,43 @@ class BulkImageGenerator:
             List of GenerationResult objects
         """
         total = len(prompts)
-        results = []
 
         logger.info(f"Starting batch generation: {total} images")
+        logger.info(f"Max concurrent: {self.config.max_concurrent}")
         logger.info(f"Estimated cost: ${self.estimate_cost(total):.2f}")
 
-        for i, (prompt, filename) in enumerate(prompts, 1):
-            logger.info(f"[{i}/{total}] Generating: {filename}")
+        # Semaphore for rate limiting
+        semaphore = asyncio.Semaphore(self.config.max_concurrent)
 
-            result = await self.generate_one(prompt, filename)
-            results.append(result)
+        # Counter for progress
+        completed = 0
 
-            # Progress callback
-            if progress_callback:
-                progress_callback(i, total, result)
+        async def generate_with_limit(prompt: str, filename: str, idx: int) -> GenerationResult:
+            nonlocal completed
+            async with semaphore:
+                result = await self.generate_one(prompt, filename)
+                completed += 1
 
-            # Rate limiting
-            if i < total:
-                await asyncio.sleep(self.config.delay_between_requests)
+                # Progress callback
+                if progress_callback:
+                    progress_callback(completed, total, result)
+
+                return result
+
+        # Create all tasks
+        tasks = [
+            generate_with_limit(prompt, filename, i)
+            for i, (prompt, filename) in enumerate(prompts)
+        ]
+
+        # Run concurrently with tqdm if available
+        try:
+            from tqdm.asyncio import tqdm
+            results = await tqdm.gather(*tasks, desc="Generating images")
+        except ImportError:
+            # Fallback without tqdm
+            logger.warning("tqdm not installed, progress bar disabled")
+            results = await asyncio.gather(*tasks)
 
         # Summary
         successful = sum(1 for r in results if r.success)

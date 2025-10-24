@@ -23,7 +23,7 @@ from .service_bot import (
     get_updates,
     send_message,
 )
-from .telegram_cache import TelegramCache
+from .telegram_cache import TelegramCache, get_telegram_cache_context
 from .utils import (
     get_channels,
     get_chat_id,
@@ -46,6 +46,7 @@ __all__ = [
     "check_bot_tokens",
     # cache
     "TelegramCache",
+    "get_telegram_cache_context",
     # models
     "TelegramChat",
     "TelegramGroupChat",

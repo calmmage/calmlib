@@ -10,7 +10,6 @@ import asyncio
 import os
 import time
 from pathlib import Path
-from typing import Optional
 
 from async_lru import alru_cache
 from loguru import logger
@@ -35,8 +34,8 @@ async def authenticate_telethon_client(
     api_hash: str,
     phone: str,
     session_name: str,
-    session_dir: Optional[Path] = None,
-    password_env_key: Optional[str] = None,
+    session_dir: Path | None = None,
+    password_env_key: str | None = None,
     lock_timeout_sec: float = 120.0,
     lock_poll_sec: float = 0.5,
 ) -> TelegramClient:
@@ -295,11 +294,11 @@ async def get_telethon_client_secondary() -> TelegramClient:
 
 async def get_telethon_client_for_user(
     user_id: int,
-    api_id: Optional[int] = None,
-    api_hash: Optional[str] = None,
-    phone: Optional[str] = None,
-    session_dir: Optional[Path] = None,
-    password_env_key: Optional[str] = None,
+    api_id: int | None = None,
+    api_hash: str | None = None,
+    phone: str | None = None,
+    session_dir: Path | None = None,
+    password_env_key: str | None = None,
 ) -> TelegramClient:
     """
     Get authenticated Telethon client for a specific user ID.
@@ -436,6 +435,53 @@ async def main():
 
     except Exception as e:
         console.print(f"[red]✗ Failed to get secondary client:[/red] {e}")
+
+
+class TelethonClientContext:
+    """
+    Context manager for telethon clients that ensures proper cleanup.
+
+    Usage:
+        async with get_telethon_client_context("secondary") as client:
+            me = await client.get_me()
+            # Client will be automatically disconnected when exiting
+    """
+    def __init__(self, account: str = "primary"):
+        self.account = account
+        self.client: TelegramClient | None = None
+
+    async def __aenter__(self) -> TelegramClient:
+        """Connect and return the client."""
+        self.client = await get_telethon_client(self.account)
+        return self.client
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Disconnect the client."""
+        if self.client and self.client.is_connected():
+            await self.client.disconnect()
+        return False  # Don't suppress exceptions
+
+
+def get_telethon_client_context(account: str = "primary") -> TelethonClientContext:
+    """
+    Get a context manager for a telethon client.
+
+    This is the recommended way to use telethon clients when you want to ensure
+    proper cleanup of connections. The client will be automatically disconnected
+    when exiting the context.
+
+    Args:
+        account: 'primary' or 'secondary'
+
+    Returns:
+        Context manager that yields an authenticated TelegramClient
+
+    Example:
+        async with get_telethon_client_context("secondary") as client:
+            me = await client.get_me()
+            dialogs = await client.get_dialogs()
+    """
+    return TelethonClientContext(account)
 
 
 if __name__ == "__main__":
