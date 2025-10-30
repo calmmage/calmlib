@@ -9,8 +9,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from src.utils import get_resources_dir
-
 # todo: create (find and use?) more sophisticated default model picker
 # check which models are available for each provider, pick the latest one
 # do a cheap / middle / expensive options
@@ -247,23 +245,28 @@ async def agenerate_title(
     )
 
 
-secretary_prompt_path = (
-    get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
-)
-secretary_prompt = secretary_prompt_path.read_text()
-
 
 def format_text(text: str, model: str = DEFAULT_MODEL) -> str:
-    from calmlib.llm import (
-        query_llm_text,
+    from calmlib.llm import query_llm_text
+    from src.utils import get_resources_dir
+    # todo: use new dev_task_tracker formatting prompt and structured output
+    #  - which is nicer for small texts - decide dynamically?
+    secretary_prompt_path = (
+            get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
     )
+    secretary_prompt = secretary_prompt_path.read_text()
 
     return query_llm_text(text, system_message=secretary_prompt, model=model)
 
 
 async def aformat_text(text: str, model: str = DEFAULT_MODEL) -> str:
-    from calmlib.llm import (
-        aquery_llm_text,
+    from calmlib.llm import aquery_llm_text
+    from src.utils import get_resources_dir
+    # todo: use new dev_task_tracker formatting prompt and structured output
+    #  - which is nicer for small texts - decide dynamically?
+    secretary_prompt_path = (
+            get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
     )
+    secretary_prompt = secretary_prompt_path.read_text()
 
     return await aquery_llm_text(text, system_message=secretary_prompt, model=model)
