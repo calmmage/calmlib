@@ -175,7 +175,9 @@ class BulkImageGenerator:
         # Counter for progress
         completed = 0
 
-        async def generate_with_limit(prompt: str, filename: str, idx: int) -> GenerationResult:
+        async def generate_with_limit(
+            prompt: str, filename: str
+        ) -> GenerationResult:
             nonlocal completed
             async with semaphore:
                 result = await self.generate_one(prompt, filename)
@@ -196,6 +198,7 @@ class BulkImageGenerator:
         # Run concurrently with tqdm if available
         try:
             from tqdm.asyncio import tqdm
+
             results = await tqdm.gather(*tasks, desc="Generating images")
         except ImportError:
             # Fallback without tqdm
@@ -221,17 +224,17 @@ async def bulk_generate_images(
     output_dir: Path,
     model: str | None = None,
     size: str = "1024x1024",
-    delay: float = 1.0,
+    max_concurrent: int = 5,
 ) -> list[GenerationResult]:
     """
-    Simple bulk image generation.
+    Simple bulk image generation with concurrent requests.
 
     Args:
         items: List of dicts with 'prompt' and 'filename' keys
         output_dir: Directory to save images
         model: Model to use (auto-selects if None)
         size: Image size (default 1024x1024)
-        delay: Delay between requests in seconds
+        max_concurrent: Max concurrent requests (default 5)
 
     Returns:
         List of GenerationResult objects
@@ -239,7 +242,7 @@ async def bulk_generate_images(
     config = BulkGenerationConfig(
         model=model,
         size=size,
-        delay_between_requests=delay,
+        max_concurrent=max_concurrent,
         output_dir=output_dir,
         save_images=True,
     )
@@ -280,7 +283,7 @@ async def example_usage():
         output_dir=Path("./generated_images"),
         model="nano-banana",  # or None to auto-select
         size="1024x1024",
-        delay=1.0,
+        max_concurrent=5,
     )
 
     # Check results
