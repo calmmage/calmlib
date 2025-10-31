@@ -1,7 +1,11 @@
 import json
-
+from typing import TYPE_CHECKING
 from loguru import logger
-from telethon.tl.types import DialogFilter, DialogFilterChatlist, DialogFilterDefault
+
+from calmlib.telegram.chat_utils import chat_is_channel, chat_is_group
+from calmlib.utils import cleanup_none
+
+# todo: remove hard telethon dependencies
 from telethon.types import (
     Channel,
     ChannelForbidden,
@@ -11,11 +15,6 @@ from telethon.types import (
     User,
     UserEmpty,
 )
-
-from calmlib.telegram.chat_utils import chat_is_channel, chat_is_group
-from calmlib.utils import cleanup_none
-
-# Global type maps for deserialization
 CHAT_ENTITY_CLASSES = {
     "User": User,
     "Chat": Chat,
@@ -24,15 +23,50 @@ CHAT_ENTITY_CLASSES = {
     "ChannelForbidden": ChannelForbidden,
     "UserEmpty": UserEmpty,
 }
-FOLDER_ENTITY_CLASSES = {
-    "DialogFilter": DialogFilter,
-    "DialogFilterChatlist": DialogFilterChatlist,
-    "DialogFilterDefault": DialogFilterDefault,
-}
+if TYPE_CHECKING:
+    from telethon.types import (
+        Channel,
+        ChannelForbidden,
+        Chat,
+        ChatForbidden,
+        Message,
+        User,
+        UserEmpty,
+    )
+    from telethon.tl.types import DialogFilter, DialogFilterChatlist, DialogFilterDefault
+
+def get_chat_entity_class(entity_type: str):
+    from telethon.types import (
+        Channel,
+        ChannelForbidden,
+        Chat,
+        ChatForbidden,
+        Message,
+        User,
+        UserEmpty,
+    )
+    CHAT_ENTITY_CLASSES = {
+        "User": User,
+        "Chat": Chat,
+        "Channel": Channel,
+        "ChatForbidden": ChatForbidden,
+        "ChannelForbidden": ChannelForbidden,
+        "UserEmpty": UserEmpty,
+    }
+    return CHAT_ENTITY_CLASSES[entity_type]
+
+def get_folder_entity_class(entity_type: str):
+    from telethon.tl.types import DialogFilter, DialogFilterChatlist, DialogFilterDefault
+    FOLDER_ENTITY_CLASSES = {
+        "DialogFilter": DialogFilter,
+        "DialogFilterChatlist": DialogFilterChatlist,
+        "DialogFilterDefault": DialogFilterDefault,
+    }
+    return FOLDER_ENTITY_CLASSES[entity_type]
 
 
 class TelegramMessage:
-    def __init__(self, entity: Message):
+    def __init__(self, entity: "Message"):
         self.entity = entity
 
     def to_json(self):
@@ -131,7 +165,7 @@ class TelegramMessage:
 class TelegramChat:
     type: str = "unspecified_chat_type"
 
-    def __init__(self, entity: Chat | Channel | User | ChatForbidden):
+    def __init__(self, entity: "Chat | Channel | User | ChatForbidden"):
         self.entity: Chat | Channel | User | ChatForbidden = entity
         self._migrated_from_chat_id: int | None = None
 
@@ -145,7 +179,7 @@ class TelegramChat:
         return json.dumps({"entity": entity_data, "_": class_name})
 
     @classmethod
-    def create(cls, entity: Chat | Channel | User):
+    def create(cls, entity: "Chat | Channel | User"):
         """Factory method to create the appropriate TelegramChat subclass based on entity type."""
 
         if isinstance(entity, User):
@@ -170,7 +204,7 @@ class TelegramChat:
 
         # Get class name and remove from dict
         entity_class_name = entity_data.pop("_")
-        entity_class = CHAT_ENTITY_CLASSES[entity_class_name]
+        entity_class = get_chat_entity_class(entity_class_name)
 
         # Remove the class name from data (no longer need to assert since factory handles class selection)
         data.pop("_", None)
@@ -188,7 +222,8 @@ class TelegramChat:
             raise NotImplementedError("name is not implemented for TelegramChat")
 
     @property
-    def id(self):
+    def _id(self) -> int:
+        assert self.entity.id is not None
         return self.entity.id
 
     def __repr__(self):
@@ -261,11 +296,9 @@ class TelegramChat:
 
 class TelegramGroupChat(TelegramChat):
     type = "group"
-    entity: (
-        Chat | Channel
-    )  # Can be either Chat (regular group) or Channel (supergroup/megagroup)
+    entity: "Chat | Channel"
 
-    def __init__(self, entity: Chat | Channel):
+    def __init__(self, entity: "Chat | Channel"):
         super().__init__(entity)
 
     @property
@@ -287,9 +320,9 @@ class TelegramGroupChat(TelegramChat):
 
 class TelegramChannel(TelegramChat):
     type = "channel"
-    entity: Channel
+    entity: "Channel"
 
-    def __init__(self, entity: Channel):
+    def __init__(self, entity: "Channel"):
         super().__init__(entity)
 
     @property
@@ -321,9 +354,9 @@ class TelegramChannel(TelegramChat):
 
 class TelegramUserChat(TelegramChat):
     type = "user"
-    entity: User
+    entity: "User"
 
-    def __init__(self, entity: User):
+    def __init__(self, entity: "User"):
         super().__init__(entity)
 
     @property
@@ -354,17 +387,17 @@ class TelegramUserChat(TelegramChat):
 class TelegramBotChat(TelegramUserChat):
     type = "bot"
 
-    def __init__(self, entity: User):
+    def __init__(self, entity: "User"):
         super().__init__(entity)
 
 
 class TelegramFolder:
     def __init__(
         self,
-        entity: DialogFilter,
+        entity: "DialogFilter",
         chats: list["TelegramChat"] | None = None,
     ):
-        self.entity: DialogFilter = entity
+        self.entity: "DialogFilter"    = entity
         self.chats = chats or []
 
     def to_json(self):
@@ -395,7 +428,7 @@ class TelegramFolder:
 
         # Get class name and remove from dict
         class_name = entity_data.pop("_")
-        entity_class = FOLDER_ENTITY_CLASSES[class_name]
+        entity_class = get_folder_entity_class(class_name)
         entity = entity_class(**entity_data)
 
         # Reconstruct chats using factory method
