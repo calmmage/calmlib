@@ -1,4 +1,4 @@
-.PHONY: help build publish-pypi publish-test clean test
+.PHONY: help build publish-pypi publish-test clean test sync
 
 help:
 	@echo "Available targets:"
@@ -7,6 +7,7 @@ help:
 	@echo "  publish-test  - Publish to TestPyPI"
 	@echo "  clean         - Clean build artifacts"
 	@echo "  test          - Run tests"
+	@echo "  sync          - Sync ./calmlib/ to ~/calmmage/calmlib"
 
 build:
 	uv build
@@ -23,3 +24,6 @@ clean:
 
 test:
 	uv run pytest
+
+sync:
+	rsync -av ./calmlib/ ~/calmmage/calmlib/
