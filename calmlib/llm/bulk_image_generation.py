@@ -96,7 +96,7 @@ class BulkImageGenerator:
                 if "gemini" not in resolved.lower():
                     kwargs["quality"] = self.config.quality
 
-            response = await generate_image(**kwargs)
+            image_bytes = await generate_image(**kwargs)
 
             duration = time.time() - start_time
 
@@ -105,17 +105,7 @@ class BulkImageGenerator:
             if self.config.save_images and output_filename:
                 output_path = self.config.output_dir / output_filename
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-
-                # Download and save
-                import requests
-
-                image_url = response.data[0].url
-                img_response = requests.get(image_url, timeout=30)
-                img_response.raise_for_status()
-
-                with open(output_path, "wb") as f:
-                    f.write(img_response.content)
-
+                output_path.write_bytes(image_bytes)
                 logger.info(f"Saved image to {output_path}")
 
             # Calculate cost
@@ -191,7 +181,7 @@ class BulkImageGenerator:
 
         # Create all tasks
         tasks = [
-            generate_with_limit(prompt, filename, i)
+            generate_with_limit(prompt, filename)
             for i, (prompt, filename) in enumerate(prompts)
         ]
 

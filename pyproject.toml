@@ -1,6 +1,6 @@
 [project]
 name = "calmlib"
-version = "2.0.14"
+version = "2.0.15"
 description = "Calmlib"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
@@ -11,6 +11,9 @@ dependencies = [
     "python-dotenv",
     "deprecated>=1.2.17",
     "tqdm",
+    "telethon>=1.41.2", # todo: move to optional extras - rework telegram_cache and other hard imports
+    "keyring>=25.6.0",
+    "cryptography>=46.0.3",
 ]
 
 [[project.authors]]
@@ -26,8 +29,10 @@ extras = [
     "pyperclip",
     "aiolimiter>=1.1",
     "deepl>=1.18",
-    "litellm>=1.67",
+    "litellm>=1.79.0",
     "langfuse",
+    "pydantic>=2.11.10",
+    "pydantic-settings>=2.11.0",
 ]
 test = ["pytest>=6",
     "pytest-mongodb",
