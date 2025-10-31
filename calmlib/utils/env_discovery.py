@@ -43,6 +43,7 @@ def _load_from_encrypted_file(key: str) -> Optional[str]:
             import keyring
             master_password = keyring.get_password("calmmage", "CALMMAGE_ENV_PASSWORD")
         except Exception:
+            logger.debug(f"Failed to get CALMMAGE_ENV_PASSWORD from keychain, error: {traceback.format_exc()}")
             return None
 
     if not master_password:
@@ -79,6 +80,15 @@ def find_env_key(key: str, default: Optional[str] = None) -> Optional[str]:
     value = os.getenv(key)
     if value is not None:
         return value
+    logger.debug(f"Didn't find {key} in environment")
+
+    # Step 1.5: Try with CALMMAGE_ prefix if not found
+    if not key.startswith("CALMMAGE_"):
+        prefixed_key = f"CALMMAGE_{key}"
+        value = os.getenv(prefixed_key)
+        if value is not None:
+            return value
+        logger.debug(f"Didn't find {key} with CALMMAGE_ prefix")
 
     # Step 2: Check macOS Keychain (for secure storage)
     try:
@@ -86,6 +96,12 @@ def find_env_key(key: str, default: Optional[str] = None) -> Optional[str]:
         keychain_value = keyring.get_password("calmmage", key)
         if keychain_value is not None:
             return keychain_value
+        # Try prefixed version
+        if not key.startswith("CALMMAGE_"):
+            keychain_value = keyring.get_password("calmmage", f"CALMMAGE_{key}")
+            if keychain_value is not None:
+                return keychain_value
+            logger.debug(f"Didn't find CALMMAGE_{key} in keychain")
     except Exception:
         # Keyring not available or other error, continue to .env files
         logger.debug(f"Didn't find {key} in keychain")
@@ -94,20 +110,40 @@ def find_env_key(key: str, default: Optional[str] = None) -> Optional[str]:
     encrypted_value = _load_from_encrypted_file(key)
     if encrypted_value is not None:
         return encrypted_value
+    logger.debug(f"Didn't find {key} in encrypted file")
+
+    if not key.startswith("CALMMAGE_"):
+        prefixed_key = f"CALMMAGE_{key}"
+        encrypted_value = _load_from_encrypted_file(prefixed_key)
+        if encrypted_value is not None:
+            return encrypted_value
+        logger.debug(f"Didn't find CALMMAGE_{key} in encrypted file")
 
     # Step 4: Check ./.env
     if Path(".env").exists():
         env_values = dotenv_values(".env")
         if key in env_values:
             return env_values[key]
-
+        logger.debug(f"Didn't find {key} in ./.env")
+        # Try prefixed version
+        if not key.startswith("CALMMAGE_"):
+            prefixed_key = f"CALMMAGE_{key}"
+            if prefixed_key in env_values:
+                return env_values[prefixed_key]
+            logger.debug(f"Didn't find CALMMAGE_{key} in ./.env")
     # Step 5: Check ~/.env
     env_path = Path.home() / ".env"
     if env_path.exists():
         env_values = dotenv_values(env_path)
         if key in env_values:
             return env_values[key]
-
+        # Try prefixed version
+        if not key.startswith("CALMMAGE_"):
+            prefixed_key = f"CALMMAGE_{key}"
+            if prefixed_key in env_values:
+                return env_values[prefixed_key]
+            logger.debug(f"Didn't find CALMMAGE_{key} in ~/.env")
+        logger.debug(f"Didn't find {key} in ~/.env")
     # If not found, return the default value if provided
     return default
 
