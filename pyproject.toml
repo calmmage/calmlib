@@ -1,6 +1,6 @@
 [project]
 name = "calmlib"
-version = "2.0.16"
+version = "2.0.17"
 description = "Calmlib"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
@@ -12,6 +12,7 @@ dependencies = [
     "deprecated>=1.2.17",
     "tqdm",
     "telethon>=1.41.2", # todo: move to optional extras - rework telegram_cache and other hard imports
+    "async-lru>=2.0.0",
     "keyring>=25.6.0",
     "cryptography>=46.0.3",
 ]
