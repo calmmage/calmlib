@@ -1,3 +1,12 @@
+from .embedding_utils import (
+    DEFAULT_OFFLINE_OPTION,
+    DEFAULT_ONLINE_OPTION,
+    EMBEDDING_DEFAULTS,
+    EmbeddingOption,
+    build_pairwise_similarity,
+    cosine_similarity,
+    get_embeddings,
+)
 from .litellm_wrapper import (
     aquery_llm_raw,
     aquery_llm_structured,
@@ -28,4 +37,11 @@ __all__ = [
     "generate_title",
     "TitleResponse",
     "ValidationResponse",
+    "EmbeddingOption",
+    "DEFAULT_OFFLINE_OPTION",
+    "DEFAULT_ONLINE_OPTION",
+    "EMBEDDING_DEFAULTS",
+    "get_embeddings",
+    "cosine_similarity",
+    "build_pairwise_similarity",
 ]

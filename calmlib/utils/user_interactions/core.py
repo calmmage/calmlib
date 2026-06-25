@@ -8,7 +8,7 @@ from .config import _config
 from .engines import (
     BotspotEngine,
     PythonInputEngine,
-    ServiceTelegramBotEngine,
+    ServiceTelegramHttpEngine,
     TyperEngine,
     UserInteractionEngine,
 )
@@ -27,7 +27,7 @@ def set_engine(engine_type: str, **params: Any) -> None:
         "python": PythonInputEngine,
         "typer": TyperEngine,
         "botspot": BotspotEngine,
-        "telegram_service": ServiceTelegramBotEngine,
+        "telegram_service": ServiceTelegramHttpEngine,
     }
 
     if engine_type not in engine_map:
@@ -45,23 +45,23 @@ def get_engine() -> UserInteractionEngine:
     return _config.get_engine()
 
 
-async def ask_user(question: str, **kwargs: Any) -> str | None:
+async def ask_user(question: str, timeout: float | None = None) -> str | None:
     """
     Ask user a text question and get string response
 
     Args:
         question: Question to ask the user
-        **kwargs: Additional parameters passed to the engine
+        timeout: Optional timeout in seconds
 
     Returns:
         User's text response or None if cancelled/timeout
     """
     engine = get_engine()
-    return await engine.ask_user(question, **kwargs)
+    return await engine.ask_user(question, timeout=timeout)
 
 
 async def ask_user_choice(
-    question: str, choices: list[str] | dict[str, str], **kwargs: Any
+    question: str, choices: list[str] | dict[str, str], timeout: float | None = None
 ) -> str | None:
     """
     Ask user to choose from a list of options
@@ -69,40 +69,47 @@ async def ask_user_choice(
     Args:
         question: Question to ask the user
         choices: List of choice strings or Dict mapping keys to display text
-        **kwargs: Additional parameters passed to the engine
+        timeout: Optional timeout in seconds
 
     Returns:
         Selected choice value or None if cancelled/timeout
     """
     engine = get_engine()
-    return await engine.ask_user_choice(question, choices, **kwargs)
+    return await engine.ask_user_choice(question, choices, timeout=timeout)
 
 
-async def ask_user_confirmation(question: str, **kwargs: Any) -> bool | None:
+async def ask_user_confirmation(
+    question: str, timeout: float | None = None
+) -> bool | None:
     """
     Ask user a yes/no confirmation question
 
     Args:
         question: Question to ask the user
-        **kwargs: Additional parameters passed to the engine
+        timeout: Optional timeout in seconds
 
     Returns:
         True for yes, False for no, None if cancelled/timeout
     """
     engine = get_engine()
-    return await engine.ask_user_confirmation(question, **kwargs)
+    return await engine.ask_user_confirmation(question, timeout=timeout)
 
 
-async def ask_user_raw(question: str, **kwargs: Any) -> Any | None:
+async def ask_user_raw(question: str, timeout: float | None = None) -> Any | None:
     """
     Ask user and return raw response object (engine-dependent)
 
     Args:
         question: Question to ask the user
-        **kwargs: Additional parameters passed to the engine
+        timeout: Optional timeout in seconds
 
     Returns:
         Raw response object (type depends on engine) or None if cancelled/timeout
     """
     engine = get_engine()
-    return await engine.ask_user_raw(question, **kwargs)
+    return await engine.ask_user_raw(question, timeout=timeout)
+
+
+async def notify_user(message: str):
+    engine = get_engine()
+    return await engine.notify_user(message)

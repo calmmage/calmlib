@@ -5,80 +5,163 @@ Engine implementations for user interaction backends
 from abc import ABC, abstractmethod
 from typing import Any
 
+import httpx
+from loguru import logger
+
+from calmlib.utils.env_discovery import find_calmmage_env_key
+
 
 class UserInteractionEngine(ABC):
     """Base class for user interaction engines"""
 
     @abstractmethod
-    async def ask_user(self, question: str, **kwargs) -> str | None:
+    async def ask_user(self, question: str, timeout: float | None = None) -> str | None:
         """Ask user a text question and get string response"""
         raise NotImplementedError
 
     @abstractmethod
     async def ask_user_choice(
-        self, question: str, choices: list[str] | dict[str, str], **kwargs
+        self,
+        question: str,
+        choices: list[str] | dict[str, str],
+        timeout: float | None = None,
     ) -> str | None:
         """Ask user to choose from options"""
         raise NotImplementedError
 
     @abstractmethod
-    async def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
+    async def ask_user_confirmation(
+        self, question: str, timeout: float | None = None
+    ) -> bool | None:
         """Ask user yes/no question and get boolean response"""
         raise NotImplementedError
 
     @abstractmethod
-    async def ask_user_raw(self, question: str, **kwargs) -> Any | None:
+    async def ask_user_raw(
+        self, question: str, timeout: float | None = None
+    ) -> Any | None:
         """Ask user and return raw response object"""
+        raise NotImplementedError
+
+    @abstractmethod
+    async def notify_user(self, message: str):
+        """Notify user with a message"""
         raise NotImplementedError
 
 
 class PythonInputEngine(UserInteractionEngine):
     """Basic Python input() engine"""
 
-    async def ask_user(self, question: str, **kwargs) -> str | None:
+    async def ask_user(self, question: str, timeout: float | None = None) -> str | None:
+        import asyncio
+
+        async def _input():
+            try:
+                loop = asyncio.get_event_loop()
+                return await loop.run_in_executor(
+                    None, lambda: input(f"{question}: ").strip()
+                )
+            except (KeyboardInterrupt, EOFError):
+                return None
+
         try:
-            return input(f"{question}: ").strip()
-        except (KeyboardInterrupt, EOFError):
+            if timeout:
+                return await asyncio.wait_for(_input(), timeout=timeout)
+            else:
+                return await _input()
+        except asyncio.TimeoutError:
+            print(
+                f"\nTimeout after {timeout}s - WARNING: stdin may be polluted, press Enter to clear before next input"
+            )
             return None
 
     async def ask_user_choice(
-        self, question: str, choices: list[str] | dict[str, str], **kwargs
+        self,
+        question: str,
+        choices: list[str] | dict[str, str],
+        timeout: float | None = None,
     ) -> str | None:
+        import asyncio
+
         if isinstance(choices, list):
             choices_dict = {str(i + 1): choice for i, choice in enumerate(choices)}
         else:
             choices_dict = choices
 
-        print(f"\n{question}")
-        for key, value in choices_dict.items():
-            print(f"  {key}) {value}")
-
-        try:
-            response = input("Choice: ").strip()
-            if response in choices_dict:
-                return choices_dict[response] if isinstance(choices, list) else response
-            # Allow direct text input for choice value
+        async def _input():
+            print(f"\n{question}")
             for key, value in choices_dict.items():
-                if response.lower() == value.lower():
-                    return value if isinstance(choices, list) else key
-            return response  # Return raw input if no match
-        except (KeyboardInterrupt, EOFError):
-            return None
+                print(f"  {key}) {value}")
 
-    async def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
+            try:
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None, lambda: input("Choice: ").strip()
+                )
+                if response in choices_dict:
+                    return (
+                        choices_dict[response]
+                        if isinstance(choices, list)
+                        else response
+                    )
+                # Allow direct text input for choice value
+                for key, value in choices_dict.items():
+                    if response.lower() == value.lower():
+                        return value if isinstance(choices, list) else key
+                return response  # Return raw input if no match
+            except (KeyboardInterrupt, EOFError):
+                return None
+
         try:
-            response = input(f"{question} (y/n): ").strip().lower()
-            if response in ["y", "yes", "1", "true"]:
-                return True
-            elif response in ["n", "no", "0", "false"]:
-                return False
-            return None
-        except (KeyboardInterrupt, EOFError):
+            if timeout:
+                return await asyncio.wait_for(_input(), timeout=timeout)
+            else:
+                return await _input()
+        except asyncio.TimeoutError:
+            print(
+                f"\nTimeout after {timeout}s - WARNING: stdin may be polluted, press Enter to clear before next input"
+            )
             return None
 
-    async def ask_user_raw(self, question: str, **kwargs) -> Any | None:
+    async def ask_user_confirmation(
+        self, question: str, timeout: float | None = None
+    ) -> bool | None:
+        import asyncio
+
+        async def _input():
+            try:
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None, lambda: input(f"{question} (y/n): ").strip().lower()
+                )
+                if response in ["y", "yes", "1", "true"]:
+                    return True
+                elif response in ["n", "no", "0", "false"]:
+                    return False
+                return None
+            except (KeyboardInterrupt, EOFError):
+                return None
+
+        try:
+            if timeout:
+                return await asyncio.wait_for(_input(), timeout=timeout)
+            else:
+                return await _input()
+        except asyncio.TimeoutError:
+            print(
+                f"\nTimeout after {timeout}s - WARNING: stdin may be polluted, press Enter to clear before next input"
+            )
+            return None
+
+    async def ask_user_raw(
+        self, question: str, timeout: float | None = None
+    ) -> Any | None:
         # For basic input engine, raw is the same as regular
-        return self.ask_user(question, **kwargs)
+        return await self.ask_user(question, timeout=timeout)
+
+    async def notify_user(self, message: str):
+        """Notify user with a message"""
+        print(message)
 
 
 class TyperEngine(UserInteractionEngine):
@@ -92,35 +175,97 @@ class TyperEngine(UserInteractionEngine):
         self.Prompt = Prompt
         self.Confirm = Confirm
 
-    async def ask_user(self, question: str, **kwargs) -> str | None:
+    async def ask_user(self, question: str, timeout: float | None = None) -> str | None:
+        import asyncio
+
+        async def _input():
+            try:
+                loop = asyncio.get_event_loop()
+                return await loop.run_in_executor(
+                    None, lambda: self.Prompt.ask(question)
+                )
+            except (KeyboardInterrupt, EOFError):
+                return None
+
         try:
-            return self.Prompt.ask(question)
-        except (KeyboardInterrupt, EOFError):
+            if timeout:
+                return await asyncio.wait_for(_input(), timeout=timeout)
+            else:
+                return await _input()
+        except asyncio.TimeoutError:
+            print(
+                f"\nTimeout after {timeout}s - WARNING: stdin may be polluted, press Enter to clear before next input"
+            )
             return None
 
     async def ask_user_choice(
-        self, question: str, choices: list[str] | dict[str, str], **kwargs
+        self,
+        question: str,
+        choices: list[str] | dict[str, str],
+        timeout: float | None = None,
     ) -> str | None:
+        import asyncio
+
         if isinstance(choices, list):
             choices_list = choices
         else:
             choices_list = list(choices.values())
 
-        try:
-            from rich.prompt import Prompt
+        async def _input():
+            try:
+                from rich.prompt import Prompt
 
-            return Prompt.ask(question, choices=choices_list)
-        except (KeyboardInterrupt, EOFError):
+                loop = asyncio.get_event_loop()
+                return await loop.run_in_executor(
+                    None, lambda: Prompt.ask(question, choices=choices_list)
+                )
+            except (KeyboardInterrupt, EOFError):
+                return None
+
+        try:
+            if timeout:
+                return await asyncio.wait_for(_input(), timeout=timeout)
+            else:
+                return await _input()
+        except asyncio.TimeoutError:
+            print(
+                f"\nTimeout after {timeout}s - WARNING: stdin may be polluted, press Enter to clear before next input"
+            )
             return None
 
-    async def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
+    async def ask_user_confirmation(
+        self, question: str, timeout: float | None = None
+    ) -> bool | None:
+        import asyncio
+
+        async def _input():
+            try:
+                loop = asyncio.get_event_loop()
+                return await loop.run_in_executor(
+                    None, lambda: self.Confirm.ask(question)
+                )
+            except (KeyboardInterrupt, EOFError):
+                return None
+
         try:
-            return self.Confirm.ask(question)
-        except (KeyboardInterrupt, EOFError):
+            if timeout:
+                return await asyncio.wait_for(_input(), timeout=timeout)
+            else:
+                return await _input()
+        except asyncio.TimeoutError:
+            print(
+                f"\nTimeout after {timeout}s - WARNING: stdin may be polluted, press Enter to clear before next input"
+            )
             return None
 
-    async def ask_user_raw(self, question: str, **kwargs) -> Any | None:
-        return self.ask_user(question, **kwargs)
+    async def ask_user_raw(
+        self, question: str, timeout: float | None = None
+    ) -> Any | None:
+        return await self.ask_user(question, timeout=timeout)
+
+    async def notify_user(self, message: str):
+        """Notify user with a message"""
+        self.typer.echo(message)
 
 
 class BotspotEngine(UserInteractionEngine):
@@ -143,175 +288,117 @@ class BotspotEngine(UserInteractionEngine):
         except ImportError:
             raise ImportError("botspot is required for BotspotEngine")
 
-    async def _ask_user(self, question: str, **kwargs) -> str | None:
+    async def ask_user(self, question: str, timeout: float | None = None) -> str | None:
         from botspot.user_interactions import ask_user
 
-        return await ask_user(self.chat_id, question, self.state, **kwargs)
+        return await ask_user(self.chat_id, question, self.state, timeout=timeout)
 
     async def ask_user_choice(
-        self, question: str, choices: list[str] | dict[str, str], **kwargs
+        self,
+        question: str,
+        choices: list[str] | dict[str, str],
+        timeout: float | None = None,
     ) -> str | None:
         from botspot.user_interactions import ask_user_choice
 
         return await ask_user_choice(
-            self.chat_id, question, choices, self.state, **kwargs
+            self.chat_id, question, choices, self.state, timeout=timeout
         )
 
-    async def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
+    async def ask_user_confirmation(
+        self, question: str, timeout: float | None = None
+    ) -> bool | None:
         from botspot.user_interactions import ask_user_confirmation
 
-        return await ask_user_confirmation(self.chat_id, question, self.state, **kwargs)
+        return await ask_user_confirmation(
+            self.chat_id, question, self.state, timeout=timeout
+        )
 
-    async def ask_user_raw(self, question: str, **kwargs) -> Any | None:
+    async def ask_user_raw(
+        self, question: str, timeout: float | None = None
+    ) -> Any | None:
         from botspot.user_interactions import ask_user_raw
 
-        return await ask_user_raw(self.chat_id, question, self.state, **kwargs)
+        return await ask_user_raw(self.chat_id, question, self.state, timeout=timeout)
+
+    async def notify_user(self, message: str):
+        from botspot.utils import send_safe
+
+        return await send_safe(self.chat_id, message)
 
 
-class ServiceTelegramBotEngine(UserInteractionEngine):
-    """Service telegram bot engine using calmmage service bot"""
+class ServiceTelegramHttpEngine(UserInteractionEngine):
+    """User interaction engine backed by local FastAPI service."""
 
     def __init__(
-        self, chat_id: int | None = None, use_dev: bool = False, timeout: int = 300
+        self,
+        base_url: str | None = None,
+        chat_id: int | None = None,
+        timeout: int | None = None,
     ):
-        """
-        Initialize telegram service bot engine
-
-        Args:
-            chat_id: Telegram chat ID to send messages to (defaults to CALMMAGE_TELEGRAM_MY_CHAT_ID)
-            use_dev: Use development bot instead of production
-            timeout: Timeout in seconds for waiting for response
-        """
-        import os
-
-        from calmlib.telegram.service_bot import get_dev_bot, get_prod_bot
-
-        # Get chat_id from env if not provided
-        if chat_id is None:
-            chat_id = os.getenv("CALMMAGE_TELEGRAM_MY_CHAT_ID")
-            if chat_id:
-                chat_id = int(chat_id)
-            else:
-                raise ValueError(
-                    "chat_id not provided and CALMMAGE_TELEGRAM_MY_CHAT_ID not found in environment. "
-                    "Run env setup tool or provide chat_id explicitly."
-                )
-
+        if base_url is None:
+            base_url = find_calmmage_env_key(
+                "CALMMAGE_USER_INTERACTIONS_SERVICE_URL",
+                default="http://127.0.0.1:8777",
+            )
+        self.base_url = base_url.rstrip("/")
         self.chat_id = chat_id
         self.timeout = timeout
-        self.bot = get_dev_bot() if use_dev else get_prod_bot()
-        self.loop = None
+        self._client = httpx.AsyncClient(timeout=None)
 
-    def _ensure_loop(self):
-        """Ensure we have an event loop"""
-        import asyncio
-
+    async def _post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
+        url = f"{self.base_url}{path}"
         try:
-            self.loop = asyncio.get_running_loop()
-        except RuntimeError:
-            # No loop running, create one
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
+            res = await self._client.post(url, json=payload)
+            res.raise_for_status()
+            return res.json()
+        except Exception as exc:
+            logger.error(f"ServiceTelegramHttpEngine request failed: {exc}")
+            raise
 
-    async def _send_and_wait(self, text: str, reply_markup=None) -> str | None:
-        """Send message and wait for response"""
-        import asyncio
-
-        # Send the message
-        msg = await self.bot.send_message(self.chat_id, text, reply_markup=reply_markup)
-
-        # Wait for response with timeout
-        start_time = asyncio.get_event_loop().time()
-        last_offset = None
-
-        while (asyncio.get_event_loop().time() - start_time) < self.timeout:
-            updates = await self.bot.get_updates(offset=last_offset, timeout=10)
-
-            for update in updates:
-                last_offset = update.update_id + 1
-
-                # Check for message reply
-                if update.message and update.message.chat.id == self.chat_id:
-                    if (
-                        update.message.reply_to_message
-                        and update.message.reply_to_message.message_id == msg.message_id
-                    ):
-                        return update.message.text
-                    # Also accept any message from the user after our question
-                    elif update.message.date.timestamp() > msg.date.timestamp():
-                        return update.message.text
-
-                # Check for callback query (inline button press)
-                if (
-                    update.callback_query
-                    and update.callback_query.message.chat.id == self.chat_id
-                ):
-                    await self.bot.answer_callback_query(update.callback_query.id)
-                    return update.callback_query.data
-
-            await asyncio.sleep(1)
-
-        return None  # Timeout
-
-    async def ask_user(self, question: str, **kwargs) -> str | None:
-        """Ask user a text question via telegram"""
-        self._ensure_loop()
-
-        async def _ask():
-            return await self._send_and_wait(question)
-
-        if self.loop.is_running():
-            # We're already in an async context
-            import nest_asyncio
-
-            nest_asyncio.apply()
-
-        return self.loop.run_until_complete(_ask())
+    async def ask_user(self, question: str, timeout: float | None = None) -> str | None:
+        payload = {
+            "question": question,
+            "timeout_sec": int(timeout) if timeout else self.timeout,
+            "chat_id": self.chat_id,
+        }
+        data = await self._post("/ask/text", payload)
+        return data.get("response")
 
     async def ask_user_choice(
-        self, question: str, choices: list[str] | dict[str, str], **kwargs
+        self,
+        question: str,
+        choices: list[str] | dict[str, str],
+        timeout: float | None = None,
     ) -> str | None:
-        """Ask user to choose via inline keyboard"""
-        from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
-        self._ensure_loop()
-
-        # Build inline keyboard
-        keyboard = InlineKeyboardMarkup(row_width=1)
-
+        payload: dict[str, Any] = {
+            "question": question,
+            "timeout_sec": int(timeout) if timeout else self.timeout,
+            "chat_id": self.chat_id,
+        }
         if isinstance(choices, list):
-            for choice in choices:
-                keyboard.add(InlineKeyboardButton(text=choice, callback_data=choice))
+            payload["choices"] = choices
         else:
-            for key, value in choices.items():
-                keyboard.add(InlineKeyboardButton(text=value, callback_data=key))
+            payload["choices_map"] = choices
+        data = await self._post("/ask/choice", payload)
+        return data.get("response")
 
-        async def _ask():
-            response = await self._send_and_wait(question, reply_markup=keyboard)
-            # If it's a list, return the value; if dict, return as-is (the key)
-            if isinstance(choices, list):
-                return response
-            else:
-                return response  # Already the key from callback_data
+    async def ask_user_confirmation(
+        self, question: str, timeout: float | None = None
+    ) -> bool | None:
+        payload = {
+            "question": question,
+            "timeout_sec": int(timeout) if timeout else self.timeout,
+            "chat_id": self.chat_id,
+        }
+        data = await self._post("/ask/confirmation", payload)
+        return data.get("response")
 
-        if self.loop.is_running():
-            import nest_asyncio
+    async def ask_user_raw(
+        self, question: str, timeout: float | None = None
+    ) -> Any | None:
+        return await self.ask_user(question, timeout=timeout)
 
-            nest_asyncio.apply()
-
-        return self.loop.run_until_complete(_ask())
-
-    async def ask_user_confirmation(self, question: str, **kwargs) -> bool | None:
-        """Ask yes/no via inline keyboard"""
-        choices = {"yes": "✅ Yes", "no": "❌ No"}
-        response = self.ask_user_choice(question, choices, **kwargs)
-
-        if response == "yes":
-            return True
-        elif response == "no":
-            return False
-        return None
-
-    async def ask_user_raw(self, question: str, **kwargs) -> Any | None:
-        """Return raw text response"""
-        return self.ask_user(question, **kwargs)
+    async def notify_user(self, message: str):
+        payload = {"message": message, "chat_id": self.chat_id}
+        await self._post("/notify", payload)

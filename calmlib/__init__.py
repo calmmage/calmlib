@@ -1,4 +1,5 @@
-from . import audio, llm, logging, telegram, translate, utils
+from . import audio, automation, llm, logging, telegram, translate, utils
+from .automation import JobResult, JobStatus, print_result_table, send_heartbeat
 from .llm import query_llm_structured, query_llm_text
 from .logging import LogFormat, LogMode, setup_logger
 from .utils import (
@@ -19,11 +20,17 @@ from .utils import (
 __all__ = [
     "utils",
     "audio",
+    "automation",
     "llm",
     "logging",
     "translate",
     "user_interactions",
     "telegram",
+    # automation
+    "JobResult",
+    "JobStatus",
+    "print_result_table",
+    "send_heartbeat",
     # llm
     "query_llm_text",
     "query_llm_structured",

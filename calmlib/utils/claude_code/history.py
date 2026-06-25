@@ -92,6 +92,13 @@ def list_projects(include_stats: bool = True) -> list[dict[str, Any]]:
     Returns:
         List of projects with name, path, display_name, sessions
     """
+    import warnings
+
+    warnings.warn(
+        "list_projects() is deprecated, use calmlib.utils.patchbay for session queries",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     projects_dir = get_claude_home() / "projects"
     if not projects_dir.exists():
         return []
@@ -213,6 +220,60 @@ def format_project_tree(tree: dict[str, Any] = None, indent: int = 0) -> str:
     return "\n".join(lines)
 
 
+def _is_system_message(content: str) -> bool:
+    """Check if a message looks like a system/caveat message."""
+    if not isinstance(content, str):
+        return False
+
+    # Common patterns for system messages and command outputs
+    system_patterns = [
+        "caveat:",
+        "<system",
+        "<command",
+        "<local-command",
+        "the messages below were generated",
+        "context for this conversation",
+        "you are claude",
+        "you are an ai assistant",
+    ]
+
+    content_lower = content.lower().strip()
+    return any(pattern in content_lower for pattern in system_patterns)
+
+
+def _is_meaningful_message(content: str) -> bool:
+    """Check if a message is substantial enough to be a summary."""
+    if not isinstance(content, str):
+        return False
+
+    content = content.strip()
+
+    # Too short
+    if len(content) < 10:
+        return False
+
+    # Common filler messages
+    filler_messages = [
+        "ok",
+        "okay",
+        "thanks",
+        "thank you",
+        "yes",
+        "no",
+        "sure",
+        "great",
+        "sounds good",
+        "perfect",
+        "got it",
+        "understood",
+    ]
+
+    if content.lower() in filler_messages:
+        return False
+
+    return True
+
+
 def list_conversations(
     project_name: str, limit: int | None = None, offset: int = 0
 ) -> list[dict[str, Any]]:
@@ -226,12 +287,22 @@ def list_conversations(
     Returns:
         List of conversations sorted by last activity
     """
+    import warnings
+
+    warnings.warn(
+        "list_conversations() is deprecated, use calmlib.utils.patchbay.list_sessions() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     project_dir = get_claude_home() / "projects" / project_name
     if not project_dir.exists():
         return []
 
     sessions = {}
     entries = []
+    # Track user and assistant messages per session for better summary selection
+    session_user_messages = defaultdict(list)
+    session_assistant_messages = defaultdict(list)
 
     # Parse all JSONL files
     for jsonl_file in sorted(project_dir.glob("*.jsonl")):
@@ -260,22 +331,33 @@ def list_conversations(
                     session = sessions[session_id]
                     session["message_count"] += 1
 
+                    # Collect user and assistant messages for better summary generation
+                    message_role = entry.get("message", {}).get("role")
+                    if message_role == "user":
+                        content = entry["message"].get("content", "")
+                        if isinstance(content, str) and content:
+                            session_user_messages[session_id].append(content)
+                    elif message_role == "assistant":
+                        content = entry["message"].get("content", "")
+                        # Extract text from content blocks for assistant messages
+                        if isinstance(content, list):
+                            text_parts = []
+                            for block in content:
+                                if (
+                                    isinstance(block, dict)
+                                    and block.get("type") == "text"
+                                ):
+                                    text_parts.append(block.get("text", ""))
+                            if text_parts:
+                                session_assistant_messages[session_id].append(
+                                    " ".join(text_parts)
+                                )
+                        elif isinstance(content, str) and content:
+                            session_assistant_messages[session_id].append(content)
+
                     # Update summary
                     if entry.get("type") == "summary" and entry.get("summary"):
                         session["summary"] = entry["summary"]
-                    elif (
-                        session["summary"] == "New Session"
-                        and entry.get("message", {}).get("role") == "user"
-                    ):
-                        content = entry["message"].get("content", "")
-                        if (
-                            isinstance(content, str)
-                            and content
-                            and not content.startswith("<command")
-                        ):
-                            session["summary"] = (
-                                content[:50] + "..." if len(content) > 50 else content
-                            )
 
                     # Update timestamp
                     if entry.get("timestamp"):
@@ -287,6 +369,53 @@ def list_conversations(
 
                 except json.JSONDecodeError:
                     continue
+
+    # Populate user/assistant messages for ALL sessions
+    for session_id, session in sessions.items():
+        # Get first 2 meaningful user messages
+        first_user_messages = []
+        if session_id in session_user_messages:
+            user_messages = session_user_messages[session_id]
+            for content in user_messages:
+                if not _is_system_message(content) and _is_meaningful_message(content):
+                    first_user_messages.append(content)
+                    if len(first_user_messages) >= 2:
+                        break
+
+        # Get last meaningful user message
+        last_user_msg = None
+        if session_id in session_user_messages:
+            user_messages = session_user_messages[session_id]
+            for content in reversed(user_messages):
+                if not _is_system_message(content) and _is_meaningful_message(content):
+                    last_user_msg = content
+                    break
+
+        # Get last meaningful assistant message
+        last_assistant_msg = None
+        if session_id in session_assistant_messages:
+            assistant_messages = session_assistant_messages[session_id]
+            for content in reversed(assistant_messages):
+                if _is_meaningful_message(content):
+                    last_assistant_msg = content
+                    break
+
+        # Store all messages (no truncation here)
+        session["first_user_message"] = (
+            first_user_messages[0] if first_user_messages else None
+        )
+        session["second_user_message"] = (
+            first_user_messages[1] if len(first_user_messages) > 1 else None
+        )
+        session["last_user_message"] = last_user_msg
+        session["last_assistant_message"] = last_assistant_msg
+
+        # Generate summary only for sessions without one
+        if session["summary"] == "New Session":
+            if last_user_msg:
+                session["summary"] = last_user_msg
+            elif last_assistant_msg:
+                session["summary"] = last_assistant_msg
 
     # Sort by last activity
     result = sorted(
@@ -310,6 +439,13 @@ def get_conversation_id(project_name: str, search_text: str) -> str | None:
     Returns:
         First matching conversation ID
     """
+    import warnings
+
+    warnings.warn(
+        "get_conversation_id() is deprecated, use calmlib.utils.patchbay.search_sessions() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     conversations = list_conversations(project_name)
 
     for conv in conversations:
@@ -332,6 +468,14 @@ def get_all_messages(
     Returns:
         List of message entries sorted by timestamp
     """
+    import warnings
+
+    warnings.warn(
+        "get_all_messages() is deprecated, use claude-agent-sdk get_session_messages() "
+        "or calmlib.utils.patchbay instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     project_dir = get_claude_home() / "projects" / project_name
     if not project_dir.exists():
         return []
@@ -488,6 +632,13 @@ def find_conversation_by_prefix(prefix: str) -> tuple[str, str, str, str] | None
     Raises:
         ValueError: If prefix matches multiple conversations (ambiguous)
     """
+    import warnings
+
+    warnings.warn(
+        "find_conversation_by_prefix() is deprecated, use calmlib.utils.patchbay.get_session() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     projects = list_projects(include_stats=False)
     matches = []
 

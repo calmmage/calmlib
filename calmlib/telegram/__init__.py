@@ -23,17 +23,26 @@ from .service_bot import (
     get_updates,
     send_message,
 )
-from .telegram_cache import TelegramCache, get_telegram_cache_context
+from .bot_tester import BotTester
+from .telethon_client import (
+    get_telethon_client,
+    get_telethon_client_context,
+    get_telethon_client_primary,
+    get_telethon_client_secondary,
+    get_telethon_client_service,
+)
+from .telegram_cache import TelegramCache
 from .utils import (
     get_channels,
     get_chat_id,
     get_chats,
     get_folders,
     get_group_chats,
+    get_participants,
+    get_participants_for_chats,
     get_raw_dialogs,
     get_raw_messages,
     get_telegram_cache,
-    get_telethon_client,
     get_users_chats,
 )
 
@@ -46,7 +55,6 @@ __all__ = [
     "check_bot_tokens",
     # cache
     "TelegramCache",
-    "get_telegram_cache_context",
     # models
     "TelegramChat",
     "TelegramGroupChat",
@@ -59,12 +67,13 @@ __all__ = [
     "get_chats",
     "get_chat_id",
     "get_group_chats",
+    "get_participants",
+    "get_participants_for_chats",
     "get_users_chats",
     "get_folders",
     "get_channels",
     "get_raw_dialogs",
     "get_raw_messages",
-    "get_telethon_client",
     # chat utils
     "chat_is_bot",
     "chat_is_channel",
@@ -73,4 +82,12 @@ __all__ = [
     "chat_is_broadcast",
     "chat_is_in_folder",
     "get_chat_type",
+    # bot tester
+    "BotTester",
+    # telethon client
+    "get_telethon_client",
+    "get_telethon_client_context",
+    "get_telethon_client_primary",
+    "get_telethon_client_secondary",
+    "get_telethon_client_service",
 ]

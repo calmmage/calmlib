@@ -5,9 +5,9 @@ Provides shared data models and utilities for automated job execution.
 """
 
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from rich.console import Console
 from rich.table import Table
 
@@ -29,7 +29,8 @@ class JobResult(BaseModel):
 
     status: JobStatus
     notes: Optional[str] = None
-    changes: list[str] = []
+    changes: list[str] = Field(default_factory=list)
+    detailed: dict[str, Any] = Field(default_factory=dict)
 
 
 # Emoji mappings for display

@@ -15,6 +15,7 @@ dependencies = [
     "async-lru>=2.0.0",
     "keyring>=25.6.0",
     "cryptography>=46.0.3",
+    "numpy", # required by calmlib.llm.embedding_utils (imported on `import calmlib`)
 ]
 
 [[project.authors]]
@@ -64,3 +65,10 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ['calmlib']
+
+
+[tool.uv]
+# Make `uv sync` install ALL dependency-groups by default.
+# Without this, plain `uv sync` removes packages outside the main + dev groups.
+# To exclude on demand: `uv sync --no-group <name>`.
+default-groups = ["extras", "dev", "test", "docs"]

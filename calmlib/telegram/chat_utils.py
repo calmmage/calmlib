@@ -4,10 +4,10 @@ Based on logic from telegram_downloader data_model.py
 """
 
 
-
 def chat_is_bot(entity):
     """Check if a chat entity is a bot."""
     from telethon.types import User
+
     if isinstance(entity, User):
         return entity.bot
     return False
@@ -16,6 +16,7 @@ def chat_is_bot(entity):
 def chat_is_private(entity):
     """Check if a chat entity is a private chat (user, not bot)."""
     from telethon.types import User
+
     if isinstance(entity, User):
         return not entity.bot
     return False
@@ -24,6 +25,7 @@ def chat_is_private(entity):
 def chat_is_group(entity):
     """Check if a chat entity is a group (including megagroups)."""
     from telethon.types import Channel, Chat
+
     if isinstance(entity, Chat):
         return True
     elif isinstance(entity, Channel):
@@ -35,6 +37,7 @@ def chat_is_group(entity):
 def chat_is_channel(entity):
     """Check if a chat entity is a channel (broadcast channel, not megagroup)."""
     from telethon.types import Channel
+
     if isinstance(entity, Channel):
         # Only broadcast channels, not megagroups
         return not entity.megagroup

@@ -43,61 +43,80 @@ class LLMProviderSettings(BaseSettings):
 # Model name mapping for shortcuts
 # This maps simple names to the provider-specific model names
 MODEL_NAME_SHORTCUTS = {
-    # Anthropic (Claude models)
-    "claude-3.5": "anthropic/claude-3-5-sonnet-20241022",
-    "claude-3.7-max": "anthropic/claude-3-7-sonnet-max",
-    "claude-4-opus": "anthropic/claude-opus-4-20250514",
-    "claude-4-sonnet": "anthropic/claude-sonnet-4-20250514",
-    "claude-4.1-opus": "anthropic/claude-opus-4-1-20250805",
+    # === Anthropic (Claude) ===
+    "claude-4.6-opus": "anthropic/claude-opus-4-6",
+    "claude-4.6-sonnet": "anthropic/claude-sonnet-4-6",
     "claude-4.5-sonnet": "anthropic/claude-sonnet-4-5",
     "claude-4.5-haiku": "anthropic/claude-haiku-4-5",
-    # OpenAI models
-    "gpt-4o": "openai/gpt-4o",
+    "claude-4.1-opus": "anthropic/claude-opus-4-1-20250805",
+    "claude-4-opus": "anthropic/claude-opus-4-20250514",
+    "claude-4-sonnet": "anthropic/claude-sonnet-4-20250514",
+    "claude-3.7": "anthropic/claude-3-7-sonnet",
+    "claude-3.7-max": "anthropic/claude-3-7-sonnet-max",
+    "claude-3.5": "anthropic/claude-3-5-sonnet-20241022",
+    "claude-3.5-sonnet": "anthropic/claude-3-5-sonnet",
+    "claude-3.5-haiku": "anthropic/claude-3-5-haiku",
+    "claude-3-opus": "anthropic/claude-3-opus",
+    # === OpenAI ===
+    "gpt-5.3-codex": "openai/gpt-5.3-codex",
+    "gpt-5.2": "openai/gpt-5.2",
+    "gpt-5.1": "openai/gpt-5.1",
     "gpt-5": "openai/gpt-5",
     "gpt-5-mini": "openai/gpt-5-mini",
     "gpt-5-nano": "openai/gpt-5-nano",
     "gpt-5-chat": "openai/gpt-5-chat",
+    "gpt-4.5": "openai/gpt-4.5-preview",
+    "gpt-4.5-preview": "openai/gpt-4.5-preview",
+    "gpt-4.1": "openai/gpt-4.1",
+    "gpt-4.1-mini": "openai/gpt-4.1-mini",
+    "gpt-4.1-nano": "openai/gpt-4.1-nano",
+    "gpt-4o": "openai/gpt-4o",
+    "gpt-4o-mini": "openai/gpt-4o-mini",
+    "gpt-4-turbo": "openai/gpt-4-turbo-2024-04-09",
+    "gpt-4": "openai/gpt-4",
+    "gpt-3.5": "openai/gpt-3.5-turbo",
+    "o3": "openai/o3",
+    "o3-mini": "openai/o3-mini",
+    "o4-mini": "openai/o4-mini",
     "o1": "openai/o1",
-    # Google models
+    "o1-mini": "openai/o1-mini",
+    "o1-preview": "openai/o1-preview",
+    # === Google (Gemini) ===
+    "gemini-3.1-pro": "google/gemini-3.1-pro-preview",
+    "gemini-3.1-flash-lite": "google/gemini-3.1-flash-lite-preview",
+    "gemini-3-flash": "google/gemini-3-flash-preview",
     "gemini-2.5": "google/gemini-2.5-pro-max",
     "gemini-2.5-max": "google/gemini-2.5-pro-max",
+    "gemini-2.5-exp": "google/gemini-2.5-pro-exp-03-25",
     "gemini-2.0-pro": "google/gemini-2.0-pro-exp",
     "gemini-2.0": "google/gemini-2.0-pro-exp",
-    # xAI models
-    "grok-2": "xai/grok-2-1212",
+    "gemini-2.0-flash": "google/gemini-2.0-flash",
+    "gemini-2.0-flash-exp": "google/gemini-2.0-flash-thinking-exp",
+    "gemini-exp-1206": "google/gemini-exp-1206",
+    # === xAI (Grok) ===
+    "grok-4": "xai/grok-4",
+    "grok-4.1-fast": "xai/grok-4-1-fast-non-reasoning",
     "grok-3": "xai/grok-3-beta",
     "grok-3-fast": "xai/grok-3-fast-beta",
     "grok-3-mini": "xai/grok-3-mini-beta",
-    "grok-4": "xai/grok-4",
-    "gpt-4.5": "openai/gpt-4.5-preview",
-    # Remaining models
-    # Claude models (continued)
-    "claude-3-opus": "anthropic/claude-3-opus",
-    "claude-3.5-haiku": "anthropic/claude-3-5-haiku",
-    "claude-3.5-sonnet": "anthropic/claude-3-5-sonnet",
-    "claude-3.7": "anthropic/claude-3-7-sonnet",
-    # OpenAI models (continued)
-    "gpt-3.5": "openai/gpt-3.5-turbo",
-    "gpt-4": "openai/gpt-4",
-    "gpt-4-turbo": "openai/gpt-4-turbo-2024-04-09",
-    "gpt-4.5-preview": "openai/gpt-4.5-preview",
-    "gpt-4o-mini": "openai/gpt-4o-mini",
-    "o1-mini": "openai/o1-mini",
-    "o1-preview": "openai/o1-preview",
-    "o3-mini": "openai/o3-mini",
-    # Google models (continued)
-    "gemini-2.0-flash": "google/gemini-2.0-flash",
-    "gemini-2.0-flash-exp": "google/gemini-2.0-flash-thinking-exp",
-    "gemini-2.5-exp": "google/gemini-2.5-pro-exp-03-25",
-    "gemini-exp-1206": "google/gemini-exp-1206",
-    # Cursor models
+    "grok-2": "xai/grok-2-1212",
+    # === Mistral ===
+    "mistral-large-3": "mistral/mistral-large-latest",
+    # === DeepSeek ===
+    "deepseek-r2": "deepseek/deepseek-r2",
+    "deepseek-v3.2": "deepseek/deepseek-v3.2",
+    "deepseek-v3": "deepseek/deepseek-v3",
+    # === Third-party (via OpenRouter / litellm) ===
+    "kimi-k2.5": "openrouter/moonshotai/kimi-k2.5",
+    "minimax-m2.5": "openrouter/minimax/minimax-m2.5",
+    "glm-5": "openrouter/z-ai/glm-5",
+    # === Cursor ===
     "cursor-fast": "cursor/cursor-fast",
     "cursor-small": "cursor/cursor-small",
-    # Deepseek models
-    # "deepseek-r1": "deepseek/deepseek-r1",
-    "deepseek-v3": "deepseek/deepseek-v3",
-    # Meta models
-    "llama": "meta/llama",
+    # === Local (Jan) ===
+    # jan-local is resolved dynamically via discover_jan_model()
+    "jan-local": "openai/jan-local",  # placeholder — resolved at query time
+    # === Local (Ollama) ===
     "qwen-7b": "ollama/qwen2.5:7b",
     "qwen-3b": "ollama/qwen2.5:3b",
     "qwen-14b": "ollama/qwen2.5:14b",
@@ -106,6 +125,7 @@ MODEL_NAME_SHORTCUTS = {
     "gemma2-2b": "ollama/gemma2:2b",
     "gemma2-9b": "ollama/gemma2:9b",
     "deepseek-r1": "ollama/deepseek-r1:latest",
+    "llama": "meta/llama",
 }
 
 
@@ -135,6 +155,23 @@ class LLMQueryParams:
 # ---------------------------------------------
 
 
+def _is_connection_error(e: Exception) -> bool:
+    """Check if an exception is a connection/network error (Jan unreachable)."""
+    error_str = str(e).lower()
+    indicators = ["connection refused", "connection error", "connect timeout", "no route to host", "unreachable"]
+    return any(ind in error_str for ind in indicators) or isinstance(e, (ConnectionError, OSError))
+
+
+def _resolve_size_to_model(size: str, model: str | None) -> str | None:
+    """If size is provided and model is not, resolve size to a model name."""
+    if model is not None:
+        return model
+    from .model_picker import ModelSize, get_model_by_size
+
+    resolved_model, _ = get_model_by_size(size)
+    return resolved_model
+
+
 # ---------------------------------------------
 # region LLM Provider Implementation
 # ---------------------------------------------
@@ -151,9 +188,24 @@ class LLMProvider:
 
     def _get_full_model_name(self, model: str) -> str:
         """Convert a model shortcut to its full name for litellm."""
+        from .model_picker import assert_model_provider_enabled
+
+        assert_model_provider_enabled(model)
+        if model == "jan-local":
+            return self._resolve_jan_model()
         if "/" in model:  # Already a full name
             return model
         return MODEL_NAME_SHORTCUTS.get(model, model)
+
+    @staticmethod
+    def _resolve_jan_model() -> str:
+        """Resolve jan-local to actual openai/<model-name> via discovery."""
+        from .model_picker import discover_jan_model
+
+        jan_model = discover_jan_model()
+        if jan_model:
+            return f"openai/{jan_model}"
+        return "openai/jan-local"  # will fail at API call, caught by fallback
 
     def _prepare_messages(self, prompt: str, system_message: str | None = None) -> list:
         """Prepare messages for the LLM request."""
@@ -230,14 +282,37 @@ class LLMProvider:
             **extra_kwargs,
         }
 
+        # Auto-inject api_base for Jan local models (only reachable when
+        # JAN_ENABLED — _get_full_model_name raises otherwise).
+        if model == "jan-local" and "api_base" not in params:
+            from .model_picker import JAN_API_BASE
+
+            params["api_base"] = JAN_API_BASE
+            params.setdefault("api_key", "not-needed")
+
         # Add structured output if needed
         if structured_output_schema:
             params["response_format"] = structured_output_schema
 
         logger.debug(f"Querying LLM with model {full_model_name}")
 
-        # Make the actual API call
-        response = completion(model=full_model_name, messages=messages, **params)
+        # Make the actual API call — with Jan fallback on connection error
+        try:
+            response = completion(model=full_model_name, messages=messages, **params)
+        except Exception as e:
+            if model == "jan-local" and _is_connection_error(e):
+                from .model_picker import SIZE_MODEL_MAP, ModelSize
+
+                _, fallback = SIZE_MODEL_MAP[ModelSize.small]
+                logger.warning(f"Jan connection failed ({e}), falling back to {fallback}")
+                fallback_full = self._get_full_model_name(fallback)
+                params.pop("api_base", None)
+                params.pop("api_key", None)
+                response = completion(
+                    model=fallback_full, messages=messages, **params
+                )
+            else:
+                raise
 
         return response
 
@@ -408,10 +483,15 @@ class LLMProvider:
                 choice = response.choices[0]
                 assert not isinstance(choice, StreamingChoices)
                 content = choice.message.content
-                assert content is not None, "Expected non-None content from LLM response"
+                assert content is not None, (
+                    "Expected non-None content from LLM response"
+                )
 
                 # Parse the response into the Pydantic model
                 result_json = json.loads(content)
+                # unwrap litellm tool-use wrapper if present
+                if "parameter" in result_json and len(result_json) == 1:
+                    result_json = result_json["parameter"]
                 return output_schema(**result_json)
 
             except (ValidationError, json.JSONDecodeError, AssertionError) as e:
@@ -658,11 +738,16 @@ class LLMProvider:
                 assert not isinstance(choice, StreamingChoices)
                 content = choice.message.content
 
-                assert content is not None, "Expected non-None content from LLM response"
+                assert content is not None, (
+                    "Expected non-None content from LLM response"
+                )
 
                 # Parse the response into the Pydantic model
                 result_text = content
                 result_json = json.loads(result_text)
+                # unwrap litellm tool-use wrapper if present
+                if "parameter" in result_json and len(result_json) == 1:
+                    result_json = result_json["parameter"]
                 return output_schema(**result_json)
 
             except (ValidationError, json.JSONDecodeError, AssertionError) as e:
@@ -768,13 +853,20 @@ def query_llm_text(
     *,
     system_message: str | None = None,
     model: str | None = None,
+    size: str | None = None,
     **kwargs: Any,
 ) -> str:
     """
     Query the LLM and return the text response.
 
     This is a convenience function that uses the global LLM provider.
+
+    Args:
+        size: Optional size tier ("small", "med", "big") — resolves to a model.
+              Ignored if model is explicitly set.
     """
+    if size and not model:
+        model = _resolve_size_to_model(size, model)
     provider = get_llm_provider()
     return provider.query_llm_text(
         prompt=prompt, system_message=system_message, model=model, **kwargs
@@ -786,6 +878,7 @@ def query_llm_raw(
     *,
     system_message: str | None = None,
     model: str | None = None,
+    size: str | None = None,
     **kwargs: Any,
 ) -> "ModelResponse":
     """
@@ -794,14 +887,10 @@ def query_llm_raw(
     This is a convenience function that uses the global LLM provider.
 
     Args:
-        prompt: The text prompt to send to the LLM
-        system_message: Optional system message to prepend
-        model: Optional model to use (defaults to provider default)
-        **kwargs: Additional arguments to pass to the LLM provider
-
-    Returns:
-        Raw response from the LLM with full metadata and usage stats
+        size: Optional size tier ("small", "med", "big") — resolves to a model.
     """
+    if size and not model:
+        model = _resolve_size_to_model(size, model)
     provider = get_llm_provider()
     return provider.query_llm_raw(
         prompt=prompt, system_message=system_message, model=model, **kwargs
@@ -814,23 +903,17 @@ def query_llm_structured[T: BaseModel](
     *,
     system_message: str | None = None,
     model: str | None = None,
+    size: str | None = None,
     **kwargs: Any,
 ) -> T:
     """
     Query LLM with structured output.
 
-    This is a convenience function that uses the global LLM provider.
-
     Args:
-        prompt: The text prompt to send to the LLM
-        output_schema: A Pydantic model class defining the structure
-        system_message: Optional system message to prepend
-        model: Optional model to use (defaults to provider default)
-        **kwargs: Additional arguments to pass to the LLM provider
-
-    Returns:
-        An instance of the provided Pydantic model
+        size: Optional size tier ("small", "med", "big") — resolves to a model.
     """
+    if size and not model:
+        model = _resolve_size_to_model(size, model)
     provider = get_llm_provider()
     return provider.query_llm_structured(
         prompt=prompt,
@@ -846,6 +929,7 @@ async def aquery_llm_text(
     *,
     system_message: str | None = None,
     model: str | None = None,
+    size: str | None = None,
     **kwargs: Any,
 ) -> str:
     """
@@ -853,6 +937,8 @@ async def aquery_llm_text(
 
     This is a convenience function that uses the global LLM provider.
     """
+    if size and not model:
+        model = _resolve_size_to_model(size, model)
     provider = get_llm_provider()
     return await provider.aquery_llm_text(
         prompt=prompt, system_message=system_message, model=model, **kwargs
@@ -893,23 +979,12 @@ async def aquery_llm_structured[T: BaseModel](
     *,
     system_message: str | None = None,
     model: str | None = None,
+    size: str | None = None,
     **kwargs: Any,
 ) -> T:
-    """
-    Async query LLM with structured output.
-
-    This is a convenience function that uses the global LLM provider.
-
-    Args:
-        prompt: The text prompt to send to the LLM
-        output_schema: A Pydantic model class defining the structure
-        system_message: Optional system message to prepend
-        model: Optional model to use (defaults to provider default)
-        **kwargs: Additional arguments to pass to the LLM provider
-
-    Returns:
-        An instance of the provided Pydantic model
-    """
+    """Async query LLM with structured output."""
+    if size and not model:
+        model = _resolve_size_to_model(size, model)
     provider = get_llm_provider()
     return await provider.aquery_llm_structured(
         prompt=prompt,
@@ -925,22 +1000,12 @@ async def aquery_llm_raw(
     *,
     system_message: str | None = None,
     model: str | None = None,
+    size: str | None = None,
     **kwargs: Any,
 ) -> "ModelResponse":
-    """
-    Async raw query to the LLM - returns the complete response object.
-
-    This is a convenience function that uses the global LLM provider.
-
-    Args:
-        prompt: The text prompt to send to the LLM
-        system_message: Optional system message to prepend
-        model: Optional model to use (defaults to provider default)
-        **kwargs: Additional arguments to pass to the LLM provider
-
-    Returns:
-        Raw response from the LLM with full metadata and usage stats
-    """
+    """Async raw query to the LLM - returns the complete response object."""
+    if size and not model:
+        model = _resolve_size_to_model(size, model)
     provider = get_llm_provider()
     return await provider.aquery_llm_raw(
         prompt=prompt, system_message=system_message, model=model, **kwargs

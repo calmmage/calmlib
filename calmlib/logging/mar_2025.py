@@ -1,7 +1,6 @@
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Union
 
 from loguru import logger as loguru_logger
 from loguru._logger import Logger
@@ -24,13 +23,13 @@ class LogMode(str, Enum):
 def setup_logger(
     logger: Logger = loguru_logger,
     level: str = "INFO",
-    format: Union[LogFormat, str] = LogFormat.DEFAULT,
+    format: LogFormat | str = LogFormat.DEFAULT,
     mode: LogMode = LogMode.DEV,
     console: bool = True,
-    file: Optional[Union[str, Path]] = None,
+    file: str | Path | None = None,
     jupyter: bool = False,
-    rotation: Optional[str] = None,  # e.g., "1 MB" or "00:00" for daily
-    retention: Optional[str] = None,  # e.g., "7 days"
+    rotation: str | None = None,  # e.g., "1 MB" or "00:00" for daily
+    retention: str | None = None,  # e.g., "7 days"
     colorize: bool = True,
 ) -> Logger:
     """
@@ -116,6 +115,37 @@ def setup_logger_simple(debug: bool = False) -> Logger:
 
     return setup_logger(
         level=level, format=format, mode=LogMode.DEV, console=True, colorize=True
+    )
+
+
+def setup_logging_simple(debug: bool = False) -> Logger:
+    """Alias for setup_logger_simple for backwards compatibility."""
+    return setup_logger_simple(debug=debug)
+
+
+def setup_logging(
+    logger: Logger = loguru_logger,
+    level: str = "INFO",
+    format: LogFormat | str = LogFormat.DEFAULT,
+    mode: LogMode = LogMode.DEV,
+    console: bool = True,
+    file: str | Path | None = None,
+    jupyter: bool = False,
+    rotation: str | None = None,  # e.g., "1 MB" or "00:00" for daily
+    retention: str | None = None,  # e.g., "7 days"
+    colorize: bool = True,
+) -> Logger:
+    return setup_logger(
+        logger,
+        level,
+        format,
+        mode,
+        console,
+        file,
+        jupyter,
+        rotation,
+        retention,
+        colorize,
     )
 
 

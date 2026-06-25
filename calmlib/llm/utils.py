@@ -245,14 +245,14 @@ async def agenerate_title(
     )
 
 
-
 def format_text(text: str, model: str = DEFAULT_MODEL) -> str:
     from calmlib.llm import query_llm_text
     from src.utils import get_resources_dir
+
     # todo: use new dev_task_tracker formatting prompt and structured output
     #  - which is nicer for small texts - decide dynamically?
     secretary_prompt_path = (
-            get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
+        get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
     )
     secretary_prompt = secretary_prompt_path.read_text()
 
@@ -262,10 +262,11 @@ def format_text(text: str, model: str = DEFAULT_MODEL) -> str:
 async def aformat_text(text: str, model: str = DEFAULT_MODEL) -> str:
     from calmlib.llm import aquery_llm_text
     from src.utils import get_resources_dir
+
     # todo: use new dev_task_tracker formatting prompt and structured output
     #  - which is nicer for small texts - decide dynamically?
     secretary_prompt_path = (
-            get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
+        get_resources_dir() / "ai_character_launcher/characters/Secretary.md"
     )
     secretary_prompt = secretary_prompt_path.read_text()
 

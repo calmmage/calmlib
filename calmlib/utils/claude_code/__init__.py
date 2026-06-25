@@ -7,6 +7,7 @@ Access and search Claude Code conversation history stored in ~/.claude
 from .history import (
     build_project_tree,
     extract_project_directory,
+    find_conversation_by_prefix,
     format_project_tree,
     get_all_messages,
     get_claude_home,
@@ -16,7 +17,11 @@ from .history import (
     list_conversations,
     list_projects,
 )
-from .sdk import start_claude_chat
+from .sdk import (
+    CLAUDE_CODE_MODEL_SHORTCUTS,
+    resolve_claude_code_model,
+    start_claude_chat,
+)
 
 __all__ = [
     "list_projects",
@@ -28,6 +33,9 @@ __all__ = [
     "build_project_tree",
     "format_project_tree",
     "extract_project_directory",
+    "find_conversation_by_prefix",
     "get_claude_home",
     "start_claude_chat",
+    "resolve_claude_code_model",
+    "CLAUDE_CODE_MODEL_SHORTCUTS",
 ]
