@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any
 
 from loguru import logger
-from pymongo import AsyncMongoClient
 from telethon.helpers import TotalList
 from telethon.tl import types as tl_types
 from telethon.tl.custom.dialog import Dialog
@@ -123,6 +122,7 @@ class TelegramCache(metaclass=Singleton):
     @property
     def mongo_client(self):
         if not hasattr(self, "_mongo_client"):
+            from pymongo import AsyncMongoClient
             self._mongo_client = AsyncMongoClient(self.mongo_conn_str)
         return self._mongo_client
 

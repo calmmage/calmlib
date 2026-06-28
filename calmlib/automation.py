@@ -8,8 +8,6 @@ from enum import Enum
 from typing import Any, Optional
 
 from pydantic import BaseModel, Field
-from rich.console import Console
-from rich.table import Table
 
 from calmlib.monitoring import send_job_heartbeat
 
@@ -60,6 +58,9 @@ def print_result_table(results: list[tuple[str, JobResult]]) -> None:
     Args:
         results: List of (job_name, JobResult) tuples
     """
+    from rich.console import Console
+    from rich.table import Table
+
     console = Console()
 
     table = Table(title="Job Results")
