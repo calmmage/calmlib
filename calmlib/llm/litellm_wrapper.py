@@ -24,7 +24,7 @@ class LLMProviderSettings(BaseSettings):
     """Settings for the LLM Provider component."""
 
     # enabled: bool = False
-    default_model: str = "claude-4-sonnet"  # Default model to use
+    default_model: str = "claude-sonnet-5"  # Default model to use
     default_temperature: float = 0.7
     default_max_tokens: int = 1000
     default_timeout: int = 30
@@ -44,6 +44,10 @@ class LLMProviderSettings(BaseSettings):
 # This maps simple names to the provider-specific model names
 MODEL_NAME_SHORTCUTS = {
     # === Anthropic (Claude) ===
+    "claude-sonnet-5": "anthropic/claude-sonnet-5",
+    "claude-opus-5": "anthropic/claude-opus-5",
+    "claude-fable-5": "anthropic/claude-fable-5",
+    "claude-fable-5-1": "anthropic/claude-fable-5-1",
     "claude-4.6-opus": "anthropic/claude-opus-4-6",
     "claude-4.6-sonnet": "anthropic/claude-sonnet-4-6",
     "claude-4.5-sonnet": "anthropic/claude-sonnet-4-5",
@@ -58,6 +62,9 @@ MODEL_NAME_SHORTCUTS = {
     "claude-3.5-haiku": "anthropic/claude-3-5-haiku",
     "claude-3-opus": "anthropic/claude-3-opus",
     # === OpenAI ===
+    "gpt-6-astra": "openai/gpt-6-astra",
+    "gpt-6-astra-pro": "openai/gpt-6-astra-pro",
+    "astra": "openai/gpt-6-astra",
     "gpt-5.3-codex": "openai/gpt-5.3-codex",
     "gpt-5.2": "openai/gpt-5.2",
     "gpt-5.1": "openai/gpt-5.1",
@@ -82,6 +89,7 @@ MODEL_NAME_SHORTCUTS = {
     "o1-mini": "openai/o1-mini",
     "o1-preview": "openai/o1-preview",
     # === Google (Gemini) ===
+    "gemini-3.8-flash": "google/gemini-3.8-flash",
     "gemini-3.1-pro": "google/gemini-3.1-pro-preview",
     "gemini-3.1-flash-lite": "google/gemini-3.1-flash-lite-preview",
     "gemini-3-flash": "google/gemini-3-flash-preview",
@@ -94,6 +102,8 @@ MODEL_NAME_SHORTCUTS = {
     "gemini-2.0-flash-exp": "google/gemini-2.0-flash-thinking-exp",
     "gemini-exp-1206": "google/gemini-exp-1206",
     # === xAI (Grok) ===
+    "grok-4.20": "xai/grok-4.20",
+    "grok-4.6": "xai/grok-4.6",
     "grok-4": "xai/grok-4",
     "grok-4.1-fast": "xai/grok-4-1-fast-non-reasoning",
     "grok-3": "xai/grok-3-beta",

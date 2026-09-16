@@ -14,11 +14,14 @@ from tqdm import tqdm
 # Claude Code model shortcuts → full model IDs
 # These match what `claude --model <alias>` accepts
 CLAUDE_CODE_MODEL_SHORTCUTS = {
-    # Current generation (4.6)
-    "opus": "claude-opus-4-6",
-    "sonnet": "claude-sonnet-4-6",
+    # Current generation (5 / Fable 5.1)
+    "opus": "claude-opus-5",
+    "sonnet": "claude-sonnet-5",
+    "fable": "claude-fable-5-1",
     "haiku": "claude-haiku-4-5",
     # Explicit version aliases
+    "opus-5": "claude-opus-5",
+    "sonnet-5": "claude-sonnet-5",
     "opus-4.6": "claude-opus-4-6",
     "sonnet-4.6": "claude-sonnet-4-6",
     "haiku-4.5": "claude-haiku-4-5",
