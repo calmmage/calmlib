@@ -157,6 +157,9 @@ MODEL_TO_PROVIDER = {
     # Deepseek models
     "deepseek-r1": "deepseek",
     "deepseek-v3": "deepseek",
+    "muse-spark": "openrouter",
+    "muse-spark-1.3": "openrouter",
+    "muse-spark-contributor": "openrouter",
     # Jan models (local)
     "jan-local": "jan",
     # Ollama models

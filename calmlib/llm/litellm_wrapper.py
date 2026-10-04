@@ -120,6 +120,9 @@ MODEL_NAME_SHORTCUTS = {
     "kimi-k2.5": "openrouter/moonshotai/kimi-k2.5",
     "minimax-m2.5": "openrouter/minimax/minimax-m2.5",
     "glm-5": "openrouter/z-ai/glm-5",
+    "muse-spark": "openrouter/meta/muse-spark-1.3",
+    "muse-spark-1.3": "openrouter/meta/muse-spark-1.3",
+    "muse-spark-contributor": "openrouter/meta/muse-spark-1.3-contributor",
     # === Cursor ===
     "cursor-fast": "cursor/cursor-fast",
     "cursor-small": "cursor/cursor-small",

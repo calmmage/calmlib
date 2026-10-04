@@ -34,6 +34,30 @@ _SENSITIVE_ARG_MARKERS = (
 )
 _diag_notice_emitted = False
 
+# Keychain generic-password identity (09 Sep 2026 swap).
+# Name/label = CALMMAGE_ENV_PASSWORD, Account = calmmage, Where/service = calmmage.
+# Unmigrated machines still have Account = CALMMAGE_ENV_PASSWORD. Reads accept both.
+_KEYCHAIN_SERVICE = "calmmage"
+_KEYCHAIN_MASTER_ACCOUNT = "calmmage"
+_KEYCHAIN_LEGACY_MASTER_ACCOUNT = "CALMMAGE_ENV_PASSWORD"
+
+
+def _keychain_get_master():
+    import keyring
+
+    return keyring.get_password(
+        _KEYCHAIN_SERVICE, _KEYCHAIN_MASTER_ACCOUNT
+    ) or keyring.get_password(_KEYCHAIN_SERVICE, _KEYCHAIN_LEGACY_MASTER_ACCOUNT)
+
+
+def _keychain_get(key):
+    import keyring
+
+    if key in (_KEYCHAIN_LEGACY_MASTER_ACCOUNT, _KEYCHAIN_MASTER_ACCOUNT):
+        return _keychain_get_master()
+    return keyring.get_password(_KEYCHAIN_SERVICE, key)
+
+
 
 def _env_discovery_diag_log_path() -> Path | None:
     configured = os.getenv(ENV_DISCOVERY_DIAG_LOG_ENV)
@@ -174,7 +198,7 @@ def _load_from_encrypted_file(key: str) -> str | None:
             _keychain_lookup_start(
                 "CALMMAGE_ENV_PASSWORD", "encrypted_file_master_password"
             )
-            master_password = keyring.get_password("calmmage", "CALMMAGE_ENV_PASSWORD")
+            master_password = _keychain_get_master()
             _keychain_lookup_result(
                 "CALMMAGE_ENV_PASSWORD",
                 "encrypted_file_master_password",
@@ -242,7 +266,7 @@ def _find_env_key_exact(key: str, default: str | None = None) -> str | None:
         import keyring
 
         _keychain_lookup_start(key, "direct_key_lookup")
-        keychain_value = keyring.get_password("calmmage", key)
+        keychain_value = _keychain_get(key)
         _keychain_lookup_result(key, "direct_key_lookup", keychain_value)
         if keychain_value is not None:
             return keychain_value
