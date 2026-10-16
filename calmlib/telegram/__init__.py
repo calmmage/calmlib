@@ -24,6 +24,15 @@ from .service_bot import (
     send_message,
 )
 from .bot_tester import BotTester
+from .bot_inventory import (
+    BotActivity,
+    InventoryResult,
+    OwnedBot,
+    collect_inventory,
+    find_bot_dialogs,
+    list_owned_bots,
+    scan_bot_activity,
+)
 from .telethon_client import (
     get_telethon_client,
     get_telethon_client_context,
