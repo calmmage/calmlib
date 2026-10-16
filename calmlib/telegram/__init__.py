@@ -1,3 +1,12 @@
+"""One library for local Telegram: cache, accounts, folders, archive, bots.
+
+Where things live on this machine: ``config.py`` (one TOML file). What is there: ``tgl status``.
+The aiogram side (service bot, bot tester) loads on first use, so ``import calmlib.telegram``
+stays fast for scripts that only read the cache.
+"""
+
+from importlib import import_module
+
 from .chat_utils import (
     chat_is_bot,
     chat_is_broadcast,
@@ -8,6 +17,7 @@ from .chat_utils import (
     get_chat_type,
 )
 from .models import (
+    TelegramBotChat,
     TelegramChannel,
     TelegramChat,
     TelegramFolder,
@@ -15,15 +25,6 @@ from .models import (
     TelegramMessage,
     TelegramUserChat,
 )
-from .service_bot import (
-    check_bot_tokens,
-    get_bot,
-    get_dev_bot,
-    get_prod_bot,
-    get_updates,
-    send_message,
-)
-from .bot_tester import BotTester
 from .bot_inventory import (
     BotActivity,
     InventoryResult,
@@ -33,6 +34,7 @@ from .bot_inventory import (
     list_owned_bots,
     scan_bot_activity,
 )
+from .config import AccountMismatch, AccountNotBound, TelegramConfig, get_config
 from .telethon_client import (
     get_telethon_client,
     get_telethon_client_context,
@@ -55,6 +57,25 @@ from .utils import (
     get_users_chats,
 )
 
+_LAZY = {
+    "check_bot_tokens": "service_bot",
+    "get_bot": "service_bot",
+    "get_dev_bot": "service_bot",
+    "get_prod_bot": "service_bot",
+    "get_updates": "service_bot",
+    "send_message": "service_bot",
+    "BotTester": "bot_tester",
+}
+
+
+def __getattr__(name):
+    if name in _LAZY:
+        value = getattr(import_module(f".{_LAZY[name]}", __name__), name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = [
     "get_prod_bot",
     "get_dev_bot",
@@ -62,12 +83,17 @@ __all__ = [
     "send_message",
     "get_updates",
     "check_bot_tokens",
-    # cache
+    # cache and where it lives
     "TelegramCache",
+    "TelegramConfig",
+    "get_config",
+    "AccountNotBound",
+    "AccountMismatch",
     # models
     "TelegramChat",
     "TelegramGroupChat",
     "TelegramUserChat",
+    "TelegramBotChat",
     "TelegramChannel",
     "TelegramMessage",
     "TelegramFolder",
@@ -93,6 +119,14 @@ __all__ = [
     "get_chat_type",
     # bot tester
     "BotTester",
+    # bot inventory
+    "BotActivity",
+    "InventoryResult",
+    "OwnedBot",
+    "collect_inventory",
+    "find_bot_dialogs",
+    "list_owned_bots",
+    "scan_bot_activity",
     # telethon client
     "get_telethon_client",
     "get_telethon_client_context",
