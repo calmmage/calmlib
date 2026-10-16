@@ -15,6 +15,7 @@ from telethon.types import ChatForbidden
 from tqdm.asyncio import tqdm
 
 from calmlib.telegram.config import AccountMismatch, AccountNotBound, get_config
+from calmlib.telegram.store import collection_name
 from calmlib.telegram.chat_utils import (
     chat_is_bot,
     chat_is_channel,
@@ -204,7 +205,7 @@ class TelegramCache(metaclass=Singleton):
             return
 
         user_id = await self.bind_account()
-        self._messages_collection = self.db[f"messages_user_{user_id}"]
+        self._messages_collection = self.db[collection_name(user_id)]
 
         # Ensure indexes are created once
         if self.mongo_enabled and not self._indexes_ensured:

@@ -18,6 +18,7 @@ Example::
 
     [archive]
     root = "/Volumes/nas/telegram"   # NAS export: <root>/<account>/<chat id>__<title>/messages.jsonl
+    state = "~/data/telegram-export" # the exporter's index: <state>/<account>.sqlite (chats, media)
 
     [bots]
     registry = "~/bots/registry.yaml"
@@ -54,6 +55,7 @@ class TelegramConfig:
     db: str = "telegram_cache"
     files: Path | None = None
     archive: Path | None = None
+    archive_state: Path | None = None
     registry: Path | None = None
 
     def account_id(self, account: str) -> int | None:
@@ -86,13 +88,15 @@ def _load(path: Path | None) -> TelegramConfig:
             raise ValueError(f"{path}: [accounts] {name} must be a positive integer user id")
         accounts[name] = value
     cache = data.get("cache") or {}
+    archive = data.get("archive") or {}
     return TelegramConfig(
         path=path,
         accounts=accounts,
         mongo=cache.get("mongo") or TelegramConfig.mongo,
         db=cache.get("db") or TelegramConfig.db,
         files=_path(cache.get("files")),
-        archive=_path((data.get("archive") or {}).get("root")),
+        archive=_path(archive.get("root")),
+        archive_state=_path(archive.get("state")),
         registry=_path((data.get("bots") or {}).get("registry")),
     )
 

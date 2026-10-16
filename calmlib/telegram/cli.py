@@ -1,7 +1,11 @@
 """tgl: local Telegram on this machine.
 
-    tgl status          what each account has: session, cache, chats, folders, archive, bots
-    tgl status --json   the same for scripts and agents
+    tgl status                  what each account has: session, cache, chats, folders, archive, bots
+    tgl status --json           the same for scripts and agents
+    tgl folders [-a ACCOUNT]    folders as last cached
+    tgl archive [-a ACCOUNT]    archived chats, largest first
+    tgl media CHAT MSG          where a message's file is (archive, earlier download)
+    tgl bots [--status S]       the bot registry
 
 Offline: no Telegram network, no message text. (Named tgl because `tg` is a common alias.)
 """
@@ -27,6 +31,9 @@ def _cell(src: st.Source, now, what: str) -> str:
         named = [n for n in src.names if any(ch.isalnum() for ch in n)]  # skip "-----" dividers
         more = f" +{len(named) - 3}" if len(named) > 3 else ""
         return f"{src.count} · {', '.join(named[:3])}{more} · {when}"
+    if what == "archive" and src.count is not None:
+        saved = next((n.split()[0] for n in src.names if n.endswith(" done")), "0")
+        return f"{src.count:,} msgs · {src.chats:,} chats · {int(saved):,} files · {when}"
     if what == "session":
         warn = f" · [red]{src.note}[/red]" if src.note else ""
         return f"yes · {when}{warn}"
@@ -69,7 +76,53 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     p_status = sub.add_parser("status", help="what each account has here (offline)")
     p_status.add_argument("--json", action="store_true", help="machine-readable output")
+    for name, text in (("folders", "folders as last cached (offline)"), ("archive", "archived chats, largest first")):
+        p = sub.add_parser(name, help=text)
+        p.add_argument("-a", "--account", default="primary")
+        if name == "archive":
+            p.add_argument("-n", "--limit", type=int, default=20)
+    p_media = sub.add_parser("media", help="where a message's file is")
+    p_media.add_argument("chat", type=int)
+    p_media.add_argument("message", type=int)
+    p_media.add_argument("-a", "--account", default="primary")
+    p_bots = sub.add_parser("bots", help="the bot registry")
+    p_bots.add_argument("--status", choices=["free", "busy", "keep", "deleted", "foreign"])
     args = parser.parse_args(argv)
+
+    if args.command == "folders":
+        from calmlib.telegram.folders import cached_folders
+        from calmlib.telegram.store import account_user_id
+
+        for f in cached_folders(account_user_id(args.account)):
+            print(f"{f.id:>3}  {f.emoticon or ' '}  {f.title:30} {f.chats:>4} chats")
+        return 0
+    if args.command == "archive":
+        from calmlib.telegram import archive
+
+        rows = archive.chats(args.account)
+        for c in rows[: args.limit]:
+            print(f"{c.chat_id:>15}  {c.kind:8} {c.messages:>9,}  {'' if c.complete else '(partial) '}{c.title}")
+        print(f"{len(rows):,} chats · {sum(c.messages for c in rows):,} messages")
+        return 0
+    if args.command == "media":
+        from calmlib.telegram import media
+
+        path = media.archived_file(args.account, args.chat, args.message) or media.downloaded_file(
+            args.account, args.chat, args.message)
+        print(path or "not saved here (the archive exporter or `media.get_file(..., client=...)` can fetch it)")
+        return 0 if path else 1
+    if args.command == "bots":
+        from calmlib.telegram.bots import Registry
+
+        reg = Registry.load()
+        for b in sorted(reg.bots, key=lambda b: (b.status, b.username.lower())):
+            if args.status and b.status != args.status:
+                continue
+            who = ", ".join(c.project for c in b.consumers) or "-"
+            print(f"{b.status:8} {b.owner_account:9} {b.handle:36} {who}")
+        print(f"{len(reg.bots)} bots · " + " · ".join(
+            f"{acc} {reg.quota(acc)[0]}/{reg.quota(acc)[1]}" for acc in reg.accounts))
+        return 0
 
     if args.command == "status":
         status = st.collect()

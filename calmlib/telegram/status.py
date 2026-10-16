@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from calmlib.telegram.config import TelegramConfig, get_config
+from calmlib.telegram.store import collection_name
 
 ACCOUNTS = ("primary", "secondary", "service")
 SESSIONS_DIR = Path.home() / ".calmmage" / "telethon_sessions"
@@ -82,7 +83,7 @@ def _mongo_counts(config: TelegramConfig, user_ids: list[int]) -> dict[int, Sour
         db = client[config.db]
         out = {}
         for uid in user_ids:
-            col = db[f"messages_user_{uid}"]
+            col = db[collection_name(uid)]
             count = col.estimated_document_count()
             if not count:
                 out[uid] = Source(note="no messages")
@@ -130,7 +131,15 @@ def _archive(config: TelegramConfig, account: str) -> Source:
         folder = root / account
         if not folder.is_dir():
             return Source(note="no account folder")
-        return Source(ok=True, newest=_mtime(folder))
+        try:  # the exporter's index: counts without touching the NAS
+            from calmlib.telegram import archive
+
+            info = archive.summary(account)
+        except Exception:
+            return Source(ok=True, newest=_mtime(folder))
+        last = dt.datetime.fromisoformat(info["last_run"]) if info["last_run"] else _mtime(folder)
+        return Source(ok=True, count=info["messages"], chats=info["chats"], newest=last,
+                      names=[f"{n} {s}" for s, n in sorted(info["media"].items())])
 
     try:
         return _timeout(3, look)
@@ -187,7 +196,7 @@ def collect(now: dt.datetime | None = None) -> Status:
         if account == "primary" and cache.newest and now - cache.newest > STALE_CACHE:
             warnings.append(f"primary: cache's newest message is {age(cache.newest, now)} old")
         if archive.newest and now - archive.newest > STALE_ARCHIVE:
-            warnings.append(f"{account}: archive last changed {age(archive.newest, now)} ago")
+            warnings.append(f"{account}: last archive export {age(archive.newest, now)} ago")
     if mongo_note:
         warnings.append(f"{mongo_note} at {config.mongo}")
     return Status(config=config, accounts=accounts, bots=_bots(config), warnings=warnings)
