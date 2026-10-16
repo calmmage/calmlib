@@ -14,6 +14,7 @@ from telethon.tl.types.messages import DialogFilters
 from telethon.types import ChatForbidden
 from tqdm.asyncio import tqdm
 
+from calmlib.telegram.config import AccountMismatch, AccountNotBound, get_config
 from calmlib.telegram.chat_utils import (
     chat_is_bot,
     chat_is_channel,
@@ -32,7 +33,7 @@ from calmlib.telegram.models import (
 )
 from calmlib.telegram.telethon_client import get_telethon_client_context
 from calmlib.telegram.utils import get_chat_id
-from calmlib.utils import Singleton, cleanup_none, dict_to_namespace, find_env_key
+from calmlib.utils import Singleton, cleanup_none, dict_to_namespace
 from calmlib.utils.env_discovery import find_calmmage_env_key
 
 # Patched (custom) Telethon message classes by stored "_" type name
@@ -41,6 +42,45 @@ _MESSAGE_CLASSES = {
     "MessageService": MessageService,
     "MessageEmpty": MessageEmpty,
 }
+
+class _BoundClientContext:
+    """The cache's Telethon client. The first open checks who is logged in.
+
+    A cache bound to an account (from the config) refuses a client logged in as anyone
+    else before its first answer is used or anything is written. An unbound cache takes
+    the client's own id.
+    """
+
+    def __init__(self, cache: "TelegramCache", inner):
+        self._cache = cache
+        self._inner = inner
+
+    async def __aenter__(self):
+        client = await self._inner.__aenter__()
+        if self._cache._client_verified:
+            return client
+        try:
+            me = await client.get_me()
+            if me is None:
+                raise AccountNotBound(
+                    f"Telethon account {self._cache.telethon_account!r} is not logged in"
+                )
+            if self._cache._user_id is None:
+                self._cache._user_id = me.id
+            elif me.id != self._cache._user_id:
+                raise AccountMismatch(
+                    f"cache is bound to account {self._cache.telethon_account!r}, "
+                    "but its Telethon session is logged in as another user"
+                )
+            self._cache._client_verified = True
+        except BaseException:
+            await self._inner.__aexit__(None, None, None)
+            raise
+        return client
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return await self._inner.__aexit__(exc_type, exc_val, exc_tb)
+
 
 # Threshold for switching from individual message checks to loading all dialogs
 NEWEST_MESSAGE_CHECK_THRESHOLD = 5
@@ -57,23 +97,26 @@ class TelegramCache(metaclass=Singleton):
         mongo_enabled: bool | None = None,
     ):
         self._root_path = root_path
+        config = get_config()
         if mongo_conn_str is None:
             mongo_conn_str = find_calmmage_env_key(
-                "CALMMAGE_TELEGRAM_CACHE_MONGO_CONN_STR",
-                default="mongodb://localhost:27017",
+                "CALMMAGE_TELEGRAM_CACHE_MONGO_CONN_STR", default=config.mongo
             )
         if db_name is None:
             db_name = find_calmmage_env_key(
-                "CALMMAGE_TELEGRAM_CACHE_MONGO_DB_NAME", default="telegram_cache"
+                "CALMMAGE_TELEGRAM_CACHE_MONGO_DB_NAME", default=config.db
             )
 
         # self._telethon_client = telethon_client
         self.telethon_account = telethon_account
-        self._telethon_client_cm = get_telethon_client_context(account=telethon_account)
+        self._telethon_client_cm = _BoundClientContext(
+            self, get_telethon_client_context(account=telethon_account)
+        )
+        self._client_verified = False
         self.mongo_conn_str = mongo_conn_str
         self.db_name = db_name
         self._dialogs = None
-        self._user_id = None  # Cache user ID for collection naming
+        self._user_id = config.account_id(telethon_account)  # see bind_account()
         self._indexes_ensured = False  # Track if indexes have been created
         self._messages_collection = None  # Cached collection instance
         self._migration_map = None  # {new_channel_id: old_chat_id}
@@ -106,7 +149,11 @@ class TelegramCache(metaclass=Singleton):
         return self._root_path
 
     async def init_root_path(self, client=None):
-        if self._root_path is None:
+        """JSON side cache: <config [cache] files>/<user id>/ (old default: <repo>/data/telegram)."""
+        if self._root_path is not None:
+            return
+        files = get_config().files
+        if files is None:
             try:
                 from src.utils import get_data_dir
             except ModuleNotFoundError:
@@ -114,22 +161,10 @@ class TelegramCache(metaclass=Singleton):
                 def get_data_dir() -> Path:
                     return Path(__file__).resolve().parents[2] / "data"
 
-            if client is None:
-                # Use client context manager for this operation
-                async with self._telethon_client_cm as client:
-                    me = await client.get_me()
-                    assert me is not None
-                    assert isinstance(me, User)
-                    user_id = me.id
-            else:
-                # Client provided, use it directly
-                me = await client.get_me()
-                assert me is not None
-                assert isinstance(me, User)
-                user_id = me.id
-
-            self._root_path = get_data_dir() / "telegram" / str(user_id)
-            self._root_path.mkdir(parents=True, exist_ok=True)
+            files = get_data_dir() / "telegram"
+        user_id = await self.bind_account()
+        self._root_path = files / str(user_id)
+        self._root_path.mkdir(parents=True, exist_ok=True)
 
     @property
     def mongo_client(self):
@@ -142,23 +177,34 @@ class TelegramCache(metaclass=Singleton):
     def db(self):
         return self.mongo_client[self.db_name]
 
+    async def bind_account(self) -> int:
+        """The account's Telegram user id, settled before any collection or file is named.
+
+        From the config's ``[accounts]`` map; otherwise the logged-in client's own answer;
+        otherwise refused (``AccountNotBound``). Never from an environment value: the old
+        ``CALMMAGE_TELEGRAM_USER_ID`` lookup sent a ``secondary`` process into the primary
+        account's collection.
+        """
+        if self._user_id is None:
+            try:
+                async with self._telethon_client_cm:
+                    pass
+            except (AccountNotBound, AccountMismatch):
+                raise
+            except Exception as e:
+                raise AccountNotBound(
+                    f"no user id for Telegram account {self.telethon_account!r}: add it to "
+                    f"[accounts] in the telegram config, or log the account in ({e})"
+                ) from e
+        return self._user_id
+
     async def init_messages_collection(self):
         """Initialize messages collection with user ID in name"""
         if self._messages_collection is not None:
             return
 
-        if self._user_id is None:
-            # step 1: try to get calmmage dev env
-            self._user_id = find_env_key("CALMMAGE_TELEGRAM_USER_ID")
-
-        if self._user_id is None:
-            async with self._telethon_client_cm as client:
-                me = await client.get_me()
-                assert me is not None
-                assert isinstance(me, User)
-                self._user_id = me.id
-
-        self._messages_collection = self.db[f"messages_user_{self._user_id}"]
+        user_id = await self.bind_account()
+        self._messages_collection = self.db[f"messages_user_{user_id}"]
 
         # Ensure indexes are created once
         if self.mongo_enabled and not self._indexes_ensured:
@@ -708,8 +754,9 @@ class TelegramCache(metaclass=Singleton):
             doc: dict
             try:
                 message = self.message_from_dict(doc)
-            except:
-                logger.error(f"Failed to parse message {doc.get('id')}: {doc}")
+            except Exception as e:
+                # id only: the stored document holds the message text
+                logger.error(f"Failed to parse message {doc.get('id')}: {e!r}")
                 raise
             messages.append(message)
 
