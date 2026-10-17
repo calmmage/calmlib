@@ -1,0 +1,7 @@
+{
+  "page_id": "3f9bc5d5-7f7c-81b4-9ba1-c7d7e270ab9e",
+  "url": "https://app.notion.com/p/Telegram-3f9bc5d57f7c81b49ba1c7d7e270ab9e",
+  "method": "exact-title data-source query",
+  "status": "done",
+  "outcome": "PR #14 готов к merge: общий account-bound cache, архив, медиа, папки, bot registry/store и tgl. 41 Telegram-тест и 17 тестов потребителей прошли; чистая установка зависимостей проверена. Follow-up patch для PA project_cache/telegram_folder, p-telegram-bots и telegram-personal: /Users/petrlavrov/calm/.ai-worktrees/calmlib/night-telegram-library/docs/consumer-switch.patch (локальный commit 912a4f0, night/telegram-library). Patch не применён, live PA не менялся. Пётр: merge PR #14. https://github.com/calmmage/calmlib/pull/14"
+}

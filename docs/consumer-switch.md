@@ -53,9 +53,20 @@ PYTHONPATH="$PWD" /Users/petrlavrov/calm/framework/tools/calm-env/.venv/bin/pyth
 - All ten live source SHA256s matched before and after verification.
 
 Logs: [`verification/telegram-pytest.log`](verification/telegram-pytest.log) and
-[`verification/consumer-switch.log`](verification/consumer-switch.log).
+[`verification/consumer-switch.log`](verification/consumer-switch.log), with the final
+strict patch-whitespace check in [`verification/consumer-switch-final.log`](verification/consumer-switch-final.log).
 The broad calmlib suite and live consumer activation were not run; no whole-repository
 green or deployed-consumer claim is made.
+
+## Task report
+
+The authorized `dispatch.py say` and `done` commands returned Telegram message ids **15**
+and **16**. Notion read-back through an exact-title data-source query confirms status `done`
+and the full outcome with the PR link (the direct page GET reset its connection).
+Refreshing the existing Telegram task card returned HTTP 404; `dispatch.py` then sent the
+separate completion message successfully. The old card refresh remains unverified.
+Receipts: `verification/dispatch-say.log`, `verification/dispatch-done.log` and
+`verification/notion-readback.json`. Exact command arguments are in `dispatch-commands.json`.
 
 ## Later application
 

@@ -1,0 +1,7 @@
+{
+  "live_consumer_files_unchanged": 10,
+  "original_worktree": "claude/telegram-library",
+  "original_worktree_clean": true,
+  "patch_commit": "912a4f032a051a6ccae29a4af85babedf81c5152",
+  "branch": "night/telegram-library"
+}
