@@ -1,0 +1,8 @@
+{
+  "baseRefName": "main",
+  "headRefName": "claude/telegram-library",
+  "headRefOid": "5f1eff9a46ab4cdf5f5d53ad1194905e5e12687f",
+  "state": "OPEN",
+  "title": "telegram: one library for local Telegram (account-bound cache, archive, media, folders, bots, tgl)",
+  "url": "https://github.com/calmmage/calmlib/pull/14"
+}

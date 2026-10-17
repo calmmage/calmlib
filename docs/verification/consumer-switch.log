@@ -1,0 +1,24 @@
+$ PYTHONPATH=$PWD /Users/petrlavrov/calm/framework/tools/calm-env/.venv/bin/python -B docs/verify-consumer-switch.py --clean-env
+$ git apply --check /Users/petrlavrov/calm/.ai-worktrees/calmlib/night-telegram-library/docs/consumer-switch.patch
+$ git apply /Users/petrlavrov/calm/.ai-worktrees/calmlib/night-telegram-library/docs/consumer-switch.patch
+patch applicability: OK (10 files, temporary tree)
+$ uv run --directory /var/folders/n7/s_tl33t541gcg19dxy7g29wc0000gn/T/calmlib-consumer-check-gka5wlaz/projects/p-telegram-bots --frozen --no-dev python -B -c from calmlib.telegram import archive, folders, bots, store; from telegram_bots.registry import Registry; print('clean consumer imports: OK')
+Using CPython 3.13.12
+Creating virtual environment at: .venv
+   Building telegram-bots @ file:///private/var/folders/n7/s_tl33t541gcg19dxy7g29wc0000gn/T/calmlib-consumer-check-gka5wlaz/projects/p-telegram-bots
+      Built telegram-bots @ file:///private/var/folders/n7/s_tl33t541gcg19dxy7g29wc0000gn/T/calmlib-consumer-check-gka5wlaz/projects/p-telegram-bots
+Installed 37 packages in 49ms
+clean consumer imports: OK
+$ /Users/petrlavrov/calm/framework/tools/calm-env/.venv/bin/python -m pytest -q -p no:cacheprovider --import-mode=importlib /Users/petrlavrov/calm/projects/p-personal-assistant/test_project_bots.py /Users/petrlavrov/calm/projects/p-telegram-bots/tests
+.................                                                        [100%]
+=============================== warnings summary ===============================
+../../../../../../../Users/petrlavrov/calm/.ai-worktrees/calmlib/night-telegram-library/calmlib/llm/litellm_wrapper.py:23
+  /Users/petrlavrov/calm/.ai-worktrees/calmlib/night-telegram-library/calmlib/llm/litellm_wrapper.py:23: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class LLMProviderSettings(BaseSettings):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+17 passed, 1 warning in 1.68s
+folder adapter, registry round-trip, account-bound bot report, configured contact source: OK
+live consumer SHA256s unchanged: OK
+
+exit_code=0

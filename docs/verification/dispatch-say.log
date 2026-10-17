@@ -1,0 +1,4 @@
+$ python3 /Users/petrlavrov/calm/projects/p-personal-assistant/agent/dispatch.py say --page 3f9bc5d5-7f7c-81b4-9ba1-c7d7e270ab9e 'PR #14 объединяет локальный Telegram: привязанный к аккаунту cache, архив, медиа, папки, bot registry/store и CLI tgl. Повторный прогон: 41 Telegram-тест прошёл (5.68 с). Отдельный consumer-switch.patch для PA, p-telegram-bots и telegram-personal проверен в копиях: ещё 17 тестов прошли; чистая установка зависимостей прошла. Live PA не менялся.' --url https://github.com/calmmage/calmlib/pull/14
+{'message_id': 15}
+
+exit_code=0

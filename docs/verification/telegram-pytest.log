@@ -1,0 +1,11 @@
+$ PYTHONPATH=$PWD PYTHONDONTWRITEBYTECODE=1 /Users/petrlavrov/calm/framework/tools/calm-env/.venv/bin/python -m pytest -q -p no:cacheprovider calmlib/telegram/tests
+.........................................                                [100%]
+=============================== warnings summary ===============================
+calmlib/llm/litellm_wrapper.py:23
+  /Users/petrlavrov/calm/.ai-worktrees/calmlib/night-telegram-library/calmlib/llm/litellm_wrapper.py:23: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class LLMProviderSettings(BaseSettings):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+41 passed, 1 warning in 5.68s
+
+exit_code=0

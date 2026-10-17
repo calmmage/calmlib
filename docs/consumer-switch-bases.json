@@ -1,0 +1,12 @@
+{
+  "projects/p-personal-assistant/project_cache.py": "f487c52f59223b4b555f13acfef913bd84a2af1f237654c468df6ec16cbbe9c4",
+  "projects/p-personal-assistant/telegram_folder.py": "d4e0bfdecaa28c01312e6699be014b83e3a59f208978393f83405014dee2c260",
+  "projects/p-telegram-bots/telegram_bots/registry.py": "949b6bbbe7022d9a55a0f4037e6cc70c7bfc9a7a7c1ef37660f554fe221aa29a",
+  "projects/p-telegram-bots/pyproject.toml": "de855e155309180a4b593314318cecef0c09be551891c44bd2e7b48bfae7ee43",
+  "projects/p-telegram-bots/scripts/bot_index_report.py": "51e4dea5539fb4db92768afe0b3eeb20fd5594fba0d5cf3ed7871d8c3f4e6ef8",
+  "skills/library/ecosystem/telegram-personal/scripts/build_primary_contact_index.py": "8a45dec69d253c259f0668197f98c00b1d366694327b7015c33f34e4c573b4bc",
+  "skills/library/ecosystem/telegram-personal/SKILL.md": "fdc90f6f29bd6d8664b39760cf2814901efce7db9e0e91fcb46a2182763f1d86",
+  "skills/library/ecosystem/telegram-personal/references/gotchas.md": "2d74ab540dc994b2c962ceb0148fa7b247fe497beff71abf4b2b8b5699fcc516",
+  "skills/library/ecosystem/telegram-personal/references/recipes.md": "de0cd8943a5ee98c8ff7e90b3b92427df53ef3745951df816a2c2630c6f450e8",
+  "projects/p-telegram-bots/uv.lock": "2f7564de1238a595a9f322bddd9c4723c1a1ff453971c7330ba5354d58f62627"
+}
