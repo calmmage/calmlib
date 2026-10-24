@@ -18,6 +18,9 @@ dependencies = [
     "numpy", # required by calmlib.llm.embedding_utils (imported on `import calmlib`)
 ]
 
+[project.scripts]
+tgl = "calmlib.telegram.cli:main"
+
 [[project.authors]]
 name = "Reliable Magician"
 email = "petr.b.lavrov@gmail.com"

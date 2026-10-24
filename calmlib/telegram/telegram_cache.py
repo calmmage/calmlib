@@ -8,12 +8,14 @@ from telethon.helpers import TotalList
 from telethon.tl import types as tl_types
 from telethon.tl.custom.dialog import Dialog
 from telethon.tl.functions.messages import GetDialogFiltersRequest
-from telethon.tl.patched import Message
+from telethon.tl.patched import Message, MessageEmpty, MessageService
 from telethon.tl.types import Channel, Chat, User
 from telethon.tl.types.messages import DialogFilters
 from telethon.types import ChatForbidden
 from tqdm.asyncio import tqdm
 
+from calmlib.telegram.config import AccountMismatch, AccountNotBound, get_config
+from calmlib.telegram.store import collection_name
 from calmlib.telegram.chat_utils import (
     chat_is_bot,
     chat_is_channel,
@@ -32,8 +34,54 @@ from calmlib.telegram.models import (
 )
 from calmlib.telegram.telethon_client import get_telethon_client_context
 from calmlib.telegram.utils import get_chat_id
-from calmlib.utils import Singleton, cleanup_none, dict_to_namespace, find_env_key
+from calmlib.utils import Singleton, cleanup_none, dict_to_namespace
 from calmlib.utils.env_discovery import find_calmmage_env_key
+
+# Patched (custom) Telethon message classes by stored "_" type name
+_MESSAGE_CLASSES = {
+    "Message": Message,
+    "MessageService": MessageService,
+    "MessageEmpty": MessageEmpty,
+}
+
+class _BoundClientContext:
+    """The cache's Telethon client. The first open checks who is logged in.
+
+    A cache bound to an account (from the config) refuses a client logged in as anyone
+    else before its first answer is used or anything is written. An unbound cache takes
+    the client's own id.
+    """
+
+    def __init__(self, cache: "TelegramCache", inner):
+        self._cache = cache
+        self._inner = inner
+
+    async def __aenter__(self):
+        client = await self._inner.__aenter__()
+        if self._cache._client_verified:
+            return client
+        try:
+            me = await client.get_me()
+            if me is None:
+                raise AccountNotBound(
+                    f"Telethon account {self._cache.telethon_account!r} is not logged in"
+                )
+            if self._cache._user_id is None:
+                self._cache._user_id = me.id
+            elif me.id != self._cache._user_id:
+                raise AccountMismatch(
+                    f"cache is bound to account {self._cache.telethon_account!r}, "
+                    "but its Telethon session is logged in as another user"
+                )
+            self._cache._client_verified = True
+        except BaseException:
+            await self._inner.__aexit__(None, None, None)
+            raise
+        return client
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return await self._inner.__aexit__(exc_type, exc_val, exc_tb)
+
 
 # Threshold for switching from individual message checks to loading all dialogs
 NEWEST_MESSAGE_CHECK_THRESHOLD = 5
@@ -50,23 +98,26 @@ class TelegramCache(metaclass=Singleton):
         mongo_enabled: bool | None = None,
     ):
         self._root_path = root_path
+        config = get_config()
         if mongo_conn_str is None:
             mongo_conn_str = find_calmmage_env_key(
-                "CALMMAGE_TELEGRAM_CACHE_MONGO_CONN_STR",
-                default="mongodb://localhost:27017",
+                "CALMMAGE_TELEGRAM_CACHE_MONGO_CONN_STR", default=config.mongo
             )
         if db_name is None:
             db_name = find_calmmage_env_key(
-                "CALMMAGE_TELEGRAM_CACHE_MONGO_DB_NAME", default="telegram_cache"
+                "CALMMAGE_TELEGRAM_CACHE_MONGO_DB_NAME", default=config.db
             )
 
         # self._telethon_client = telethon_client
         self.telethon_account = telethon_account
-        self._telethon_client_cm = get_telethon_client_context(account=telethon_account)
+        self._telethon_client_cm = _BoundClientContext(
+            self, get_telethon_client_context(account=telethon_account)
+        )
+        self._client_verified = False
         self.mongo_conn_str = mongo_conn_str
         self.db_name = db_name
         self._dialogs = None
-        self._user_id = None  # Cache user ID for collection naming
+        self._user_id = config.account_id(telethon_account)  # see bind_account()
         self._indexes_ensured = False  # Track if indexes have been created
         self._messages_collection = None  # Cached collection instance
         self._migration_map = None  # {new_channel_id: old_chat_id}
@@ -99,25 +150,22 @@ class TelegramCache(metaclass=Singleton):
         return self._root_path
 
     async def init_root_path(self, client=None):
-        if self._root_path is None:
-            from src.utils import get_data_dir
+        """JSON side cache: <config [cache] files>/<user id>/ (old default: <repo>/data/telegram)."""
+        if self._root_path is not None:
+            return
+        files = get_config().files
+        if files is None:
+            try:
+                from src.utils import get_data_dir
+            except ModuleNotFoundError:
+                # src/ was removed (cb500f41); fall back to the repo data dir.
+                def get_data_dir() -> Path:
+                    return Path(__file__).resolve().parents[2] / "data"
 
-            if client is None:
-                # Use client context manager for this operation
-                async with self._telethon_client_cm as client:
-                    me = await client.get_me()
-                    assert me is not None
-                    assert isinstance(me, User)
-                    user_id = me.id
-            else:
-                # Client provided, use it directly
-                me = await client.get_me()
-                assert me is not None
-                assert isinstance(me, User)
-                user_id = me.id
-
-            self._root_path = get_data_dir() / "telegram" / str(user_id)
-            self._root_path.mkdir(parents=True, exist_ok=True)
+            files = get_data_dir() / "telegram"
+        user_id = await self.bind_account()
+        self._root_path = files / str(user_id)
+        self._root_path.mkdir(parents=True, exist_ok=True)
 
     @property
     def mongo_client(self):
@@ -130,23 +178,34 @@ class TelegramCache(metaclass=Singleton):
     def db(self):
         return self.mongo_client[self.db_name]
 
+    async def bind_account(self) -> int:
+        """The account's Telegram user id, settled before any collection or file is named.
+
+        From the config's ``[accounts]`` map; otherwise the logged-in client's own answer;
+        otherwise refused (``AccountNotBound``). Never from an environment value: the old
+        ``CALMMAGE_TELEGRAM_USER_ID`` lookup sent a ``secondary`` process into the primary
+        account's collection.
+        """
+        if self._user_id is None:
+            try:
+                async with self._telethon_client_cm:
+                    pass
+            except (AccountNotBound, AccountMismatch):
+                raise
+            except Exception as e:
+                raise AccountNotBound(
+                    f"no user id for Telegram account {self.telethon_account!r}: add it to "
+                    f"[accounts] in the telegram config, or log the account in ({e})"
+                ) from e
+        return self._user_id
+
     async def init_messages_collection(self):
         """Initialize messages collection with user ID in name"""
         if self._messages_collection is not None:
             return
 
-        if self._user_id is None:
-            # step 1: try to get calmmage dev env
-            self._user_id = find_env_key("CALMMAGE_TELEGRAM_USER_ID")
-
-        if self._user_id is None:
-            async with self._telethon_client_cm as client:
-                me = await client.get_me()
-                assert me is not None
-                assert isinstance(me, User)
-                self._user_id = me.id
-
-        self._messages_collection = self.db[f"messages_user_{self._user_id}"]
+        user_id = await self.bind_account()
+        self._messages_collection = self.db[collection_name(user_id)]
 
         # Ensure indexes are created once
         if self.mongo_enabled and not self._indexes_ensured:
@@ -565,21 +624,56 @@ class TelegramCache(metaclass=Singleton):
             raise ValueError(f"Unknown peer_id structure: {data}")
 
     @staticmethod
+    def _annotation_accepts(annotation, target: type) -> bool:
+        """True if a constructor annotation is `target` or Optional[target]."""
+        if annotation is target:
+            return True
+        return target in getattr(annotation, "__args__", ())
+
+    @staticmethod
+    def _coerce_json_scalars(tl_class, data: dict) -> dict:
+        """Undo Telethon's to_json() scalar encoding using the constructor signature.
+
+        TLObject.to_json() turns bytes into base64 strings and datetimes into ISO
+        strings. Restore them based on the target class's __init__ annotations.
+        """
+        import base64
+        import inspect
+
+        try:
+            params = inspect.signature(tl_class.__init__).parameters
+        except (TypeError, ValueError):
+            return data
+        for key, value in list(data.items()):
+            param = params.get(key)
+            if param is None or not isinstance(value, str):
+                continue
+            ann = param.annotation
+            if TelegramCache._annotation_accepts(ann, datetime.datetime):
+                try:
+                    data[key] = datetime.datetime.fromisoformat(value)
+                except ValueError:
+                    pass
+            elif TelegramCache._annotation_accepts(ann, bytes):
+                try:
+                    data[key] = base64.b64decode(value)
+                except ValueError:
+                    pass
+        return data
+
+    @staticmethod
     def reconstruct_tl_object(data):
         """
         Recursively reconstruct Telethon TL objects from dict/list structures.
 
         Handles nested dicts that contain a "_" type field indicating the Telethon class.
+        Does not mutate the input.
         """
-        # Base cases
-        if not isinstance(data, (dict, list)):
-            return data
-
         # Handle lists
         if isinstance(data, list):
             return [TelegramCache.reconstruct_tl_object(item) for item in data]
 
-        # Handle dicts
+        # Base case: scalars
         if not isinstance(data, dict):
             return data
 
@@ -587,26 +681,47 @@ class TelegramCache(metaclass=Singleton):
         if "_" not in data:
             return {k: TelegramCache.reconstruct_tl_object(v) for k, v in data.items()}
 
-        # Extract type and create TL object
-        type_name = data.pop("_")
+        type_name = data["_"]
 
         # Recursively reconstruct nested objects
-        reconstructed_data = {}
-        for key, value in data.items():
-            reconstructed_data[key] = TelegramCache.reconstruct_tl_object(value)
+        reconstructed_data = {
+            key: TelegramCache.reconstruct_tl_object(value)
+            for key, value in data.items()
+            if key != "_"
+        }
 
         # Try to get the Telethon class and instantiate it
+        tl_class = getattr(tl_types, type_name, None)
+        if tl_class is None:
+            reconstructed_data["_"] = type_name
+            return reconstructed_data
         try:
-            tl_class = getattr(tl_types, type_name, None)
-            if tl_class is None:
-                # Put the "_" back and return the dict
-                reconstructed_data["_"] = type_name
-                return reconstructed_data
+            reconstructed_data = TelegramCache._coerce_json_scalars(
+                tl_class, reconstructed_data
+            )
             return tl_class(**reconstructed_data)
         except Exception as e:
             logger.debug(f"Failed to reconstruct {type_name}: {e}, returning as dict")
             reconstructed_data["_"] = type_name
             return reconstructed_data
+
+    @staticmethod
+    def message_from_dict(doc: dict) -> Message | MessageService | MessageEmpty:
+        """Rebuild a Telethon Message from a stored `Message.to_json()` dict.
+
+        All nested TL objects are restored (from_id / peer_id stay Peer objects,
+        reply_to, fwd_from, media, replies, entities, action, ...), so the result
+        behaves like a freshly fetched message (m.from_id.user_id, m.chat_id,
+        m.sender_id all work). Storage-only keys (_id, chat_id) are ignored.
+        """
+        message_cls = _MESSAGE_CLASSES.get(doc.get("_"), Message)
+        data = {
+            k: TelegramCache.reconstruct_tl_object(v)
+            for k, v in doc.items()
+            if k not in ("_", "_id", "chat_id")
+        }
+        data = TelegramCache._coerce_json_scalars(message_cls, data)
+        return message_cls(**data)
 
     async def _load_messages_from_mongo(
         self,
@@ -638,32 +753,11 @@ class TelegramCache(metaclass=Singleton):
         messages = []
         async for doc in cursor:
             doc: dict
-            doc.pop("_id")
-            doc.pop("chat_id", None)
-            doc.pop("_")  # message_type
-
-            # Convert nested structures
-            if "from_id" in doc and isinstance(doc["from_id"], dict):
-                doc["from_id"] = self.extract_dialog_id(doc["from_id"])
-            if "peer_id" in doc and isinstance(doc["peer_id"], dict):
-                doc["peer_id"] = self.extract_dialog_id(doc["peer_id"])
-            if "date" in doc and isinstance(doc["date"], str):
-                doc["date"] = datetime.datetime.fromisoformat(doc["date"])
-
-            # Reconstruct TL objects from nested dicts
-            if "reactions" in doc and isinstance(doc["reactions"], dict):
-                doc["reactions"] = self.reconstruct_tl_object(doc["reactions"])
-            if "fwd_from" in doc and isinstance(doc["fwd_from"], dict):
-                doc["fwd_from"] = self.reconstruct_tl_object(doc["fwd_from"])
-            if "media" in doc and isinstance(doc["media"], dict):
-                doc["media"] = self.reconstruct_tl_object(doc["media"])
-            if "reply_to" in doc and isinstance(doc["reply_to"], dict):
-                doc["reply_to"] = self.reconstruct_tl_object(doc["reply_to"])
-
             try:
-                message = Message(**doc)
-            except:
-                logger.error(f"Failed to parse message {doc.get('id')}: {doc}")
+                message = self.message_from_dict(doc)
+            except Exception as e:
+                # id only: the stored document holds the message text
+                logger.error(f"Failed to parse message {doc.get('id')}: {e!r}")
                 raise
             messages.append(message)
 
@@ -693,15 +787,7 @@ class TelegramCache(metaclass=Singleton):
 
         messages = []
         for message_data in data:
-            message_type = message_data.pop("_")
-            if "from_id" in message_data:
-                message_data["from_id"] = message_data["from_id"]["user_id"]
-            if "date" in message_data:
-                message_data["date"] = datetime.datetime.fromisoformat(
-                    message_data["date"]
-                )
-            assert message_type == "Message"
-            message = Message(**message_data)
+            message = self.message_from_dict(message_data)
             messages.append(message)
 
         logger.debug(f"Parsed {len(messages)} messages from cache")
@@ -1357,13 +1443,8 @@ class TelegramCache(metaclass=Singleton):
                 # Refetch the message to get a fresh file_reference
                 if chat_id is None:
                     # Try to extract chat_id from peer_id
-                    peer = message.entity.peer_id
-                    if hasattr(peer, "user_id"):
-                        chat_id = peer.user_id
-                    elif hasattr(peer, "channel_id"):
-                        chat_id = peer.channel_id
-                    elif hasattr(peer, "chat_id"):
-                        chat_id = peer.chat_id
+                    # marked id (-100... for channels), resolvable by get_messages
+                    chat_id = message.entity.chat_id
                 if chat_id is None:
                     return await client.download_media(message.entity, file=dest_dir)
                 fresh = await client.get_messages(chat_id, ids=message.entity.id)
