@@ -33,6 +33,66 @@ DATABASE_LOCK_BACKOFF_BASE_SEC = 1.5
 DATABASE_LOCK_BACKOFF_MAX_SEC = 150.0
 
 
+class _SessionFileLock:
+    """One process owns a persisted session for the whole connection lifetime."""
+
+    def __init__(self, path: Path, timeout: float, poll: float):
+        self.path, self.timeout, self.poll = path, timeout, poll
+        self._fh = None
+
+    async def acquire(self):
+        if self._fh is not None:
+            return
+        fh = self.path.open("a")
+        start = time.monotonic()
+        try:
+            if fcntl is not None:
+                while True:
+                    try:
+                        fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except BlockingIOError:
+                        if time.monotonic() - start >= self.timeout:
+                            raise TimeoutError(f"Timed out waiting for session lock {self.path}")
+                        await asyncio.sleep(self.poll)
+            self._fh = fh
+        except BaseException:
+            fh.close()
+            raise
+
+    def release(self):
+        if self._fh is not None:
+            try:
+                if fcntl is not None:
+                    fcntl.flock(self._fh.fileno(), fcntl.LOCK_UN)
+            finally:
+                self._fh.close()
+                self._fh = None
+
+
+class _SessionTelegramClient(TelegramClient):
+    def __init__(self, *args, session_lock: _SessionFileLock, **kwargs):
+        self._session_file_lock = session_lock
+        # Authentication also owns cleanup of a newly created failed session.
+        self._release_session_lock_on_disconnect = False
+        super().__init__(*args, **kwargs)
+
+    async def connect(self):
+        await self._session_file_lock.acquire()
+        try:
+            return await super().connect()
+        except BaseException:
+            await self.disconnect()
+            raise
+
+    async def _disconnect_coro(self):
+        try:
+            await super()._disconnect_coro()
+        finally:
+            if self._release_session_lock_on_disconnect:
+                self._session_file_lock.release()
+
+
 def _is_database_locked_error(exc: Exception) -> bool:
     message = str(exc).lower()
     return (
@@ -195,44 +255,18 @@ async def _authenticate_telethon_client_once(
 
     session_path = session_dir / session_name
     session_file = session_path.with_suffix(".session")
+
+    # Acquire before even constructing SQLiteSession; release only after disconnect.
+    session_lock = _SessionFileLock(
+        session_path.with_suffix(".session.lock"), lock_timeout_sec, lock_poll_sec
+    )
+    await session_lock.acquire()
     session_file_existed_before_auth = session_file.exists()
-
-    logger.debug(f"Creating TelegramClient with session path: {session_path}")
-    client = TelegramClient(str(session_path), api_id, api_hash)
-    logger.debug(f"TelegramClient object created for session '{session_name}'")
-
-    # Prevent concurrent usage of the same session by multiple processes
-    lock_file = session_path.with_suffix(".session.lock")
-    lock_fh = None
-    lock_acquired = False
-    start = time.monotonic()
     try:
-        lock_fh = lock_file.open("w")
-        if fcntl is not None:
-            while True:
-                try:
-                    fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    lock_acquired = True
-                    break
-                except BlockingIOError:
-                    waited = time.monotonic() - start
-                    if waited >= lock_timeout_sec:
-                        raise TimeoutError(
-                            f"Timed out waiting for session lock {lock_file} after {waited:.1f}s"
-                        )
-                    logger.debug(
-                        f"Session lock busy for {session_name}; waiting ({waited:.1f}s)..."
-                    )
-                    await asyncio.sleep(lock_poll_sec)
-        else:
-            # Best-effort fallback: no proper locking, just create file and proceed
-            lock_acquired = True
-    except Exception as e:
-        if isinstance(e, TimeoutError):
-            raise
-        # If we failed to create/lock for an unexpected reason, proceed without
-        # the advisory lock but warn.
-        logger.warning(f"Could not acquire session lock {lock_file}: {e}")
+        client = _SessionTelegramClient(str(session_path), api_id, api_hash, session_lock=session_lock)
+    except BaseException:
+        session_lock.release()
+        raise
 
     try:
         logger.debug(f"Calling client.connect() for session '{session_name}'")
@@ -245,6 +279,7 @@ async def _authenticate_telethon_client_once(
             logger.debug(
                 f"Client already authorized for session '{session_name}', skipping auth flow"
             )
+            client._release_session_lock_on_disconnect = True
             return client
 
         logger.debug(
@@ -328,11 +363,15 @@ async def _authenticate_telethon_client_once(
         if await client.is_user_authorized():
             logger.info(f"Successfully authorized client for session {session_name}")
             await notify_user("Connected successfully")
+            client._release_session_lock_on_disconnect = True
             return client
 
         raise ValueError(f"Failed to authorize client for session {session_name}")
 
-    except Exception as e:
+    except BaseException as e:
+        # A failed connect can already have running network tasks and an open DB.
+        # Close them before another retry or process is allowed to use the session.
+        await client.disconnect()
         logger.error(f"Failed to authenticate client for session {session_name}: {e}")
         # Only remove files created by this failed auth attempt. A transient
         # prompt timeout or network issue must not destroy a reusable session.
@@ -350,14 +389,8 @@ async def _authenticate_telethon_client_once(
             )
         raise
     finally:
-        # Release session lock
-        try:
-            if lock_acquired and lock_fh is not None and fcntl is not None:
-                fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
-        finally:
-            if lock_fh is not None:
-                lock_fh.close()
-            # Leave the lock file present for visibility; optional removal is noisy
+        if not client._release_session_lock_on_disconnect:
+            session_lock.release()
 
 
 async def get_telethon_client_primary() -> TelegramClient:
@@ -686,7 +719,10 @@ class TelethonClientLeaseManager:
                 return
             self._active_leases -= 1
             if self._active_leases == 0:
-                self._schedule_idle_disconnect()
+                if self.idle_timeout <= 0 and self._client:
+                    await self._client.disconnect()
+                else:
+                    self._schedule_idle_disconnect()
 
     def _cancel_idle_task(self) -> None:
         if self._idle_task is not None:
