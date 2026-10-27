@@ -38,6 +38,11 @@ if TYPE_CHECKING:
 async def get_chat_id(
     username: str, telethon_client: Optional["TelegramClient"] = None
 ) -> int:
+    # These types are used by isinstance below, so TYPE_CHECKING imports are insufficient.
+    from telethon.types import (
+        InputPeerChannel, InputPeerChat, InputPeerEmpty, InputPeerSelf, InputPeerUser,
+    )
+
     async def _resolve(client: "TelegramClient") -> int:
         user = await client.get_input_entity(username)
         if isinstance(user, InputPeerUser):
